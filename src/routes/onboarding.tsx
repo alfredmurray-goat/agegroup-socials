@@ -88,6 +88,7 @@ function OnboardingPage() {
     );
 
   const saveIdentity = async () => {
+    console.log("DBG saveIdentity start", handle, displayName, !!me);
     const cleanHandle = handle.trim().toLowerCase().replace(/^@/, "");
     if (cleanHandle.length < 3) {
       toast.error("handle needs 3+ characters");
