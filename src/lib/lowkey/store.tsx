@@ -114,7 +114,18 @@ interface LowkeyApi {
   ) => Promise<{ ok: boolean; imported?: number; error?: string }>;
 }
 
-const LowkeyContext = createContext<LowkeyApi | null>(null);
+/*
+ * Keep one context identity across Vite Fast Refresh updates. Without this,
+ * an updated route can read a newly-created context while the mounted root is
+ * still providing the previous one, which incorrectly looks like a missing
+ * LowkeyProvider until the whole page is reloaded.
+ */
+const contextRegistry = globalThis as typeof globalThis & {
+  __lowkeyContext?: ReturnType<typeof createContext<LowkeyApi | null>>;
+};
+const LowkeyContext =
+  contextRegistry.__lowkeyContext ?? createContext<LowkeyApi | null>(null);
+contextRegistry.__lowkeyContext = LowkeyContext;
 
 /* ---------- row mappers ---------- */
 
