@@ -54,7 +54,3 @@ async function decode(file: File): Promise<ImageBitmap | HTMLImageElement> {
     URL.revokeObjectURL(url);
   }
 }
-
-function createObjectUrlSafe(file: File) {
-  return URL.createObjectURL(file);
-}
