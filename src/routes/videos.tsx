@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Heart, MessageSquare, Send } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Bookmark, Heart, MessageSquare, Send } from "lucide-react";
 import { BadgeCheck } from "lucide-react";
 import { AppScreen, Poster } from "@/components/lowkey/shell";
 import { useBandPosts, useLowkey } from "@/lib/lowkey/store";
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/videos")({
 
 function VideosPage() {
   const videos = useBandPosts("video");
-  const { state, me, toggleLike, toggleFollow } = useLowkey();
+  const { state, me, toggleLike, toggleFollow, toggleBookmark } = useLowkey();
 
   return (
     <AppScreen>
@@ -55,7 +55,7 @@ function VideosPage() {
 
               <div className="absolute top-8 right-6 flex flex-col items-center gap-5">
                 <button
-                  onClick={() => toggleLike(v.id)}
+                  onClick={() => void toggleLike(v.id)}
                   aria-label="like"
                   className="flex flex-col items-center text-foreground/70"
                 >
@@ -69,17 +69,35 @@ function VideosPage() {
                 <span className="text-foreground/70">
                   <Send className="size-7" />
                 </span>
+                <button
+                  onClick={() => void toggleBookmark(v.id)}
+                  aria-label="save video"
+                  className="text-foreground/70"
+                >
+                  <Bookmark
+                    className={
+                      state.bookmarks.includes(v.id)
+                        ? "size-7 fill-primary text-primary"
+                        : "size-7"
+                    }
+                  />
+                </button>
               </div>
 
               <div className="absolute bottom-7 left-6 right-6">
                 <div className="flex items-center gap-2">
-                  <p className="lowkey flex items-center gap-1 text-sm font-bold">
+                  <Link
+                    {...(author.id === me?.id
+                      ? { to: "/profile" as const }
+                      : { to: "/u/$handle" as const, params: { handle: author.handle } })}
+                    className="lowkey flex items-center gap-1 text-sm font-bold"
+                  >
                     @{author.handle}
                     <BadgeCheck className="size-4 text-primary" />
-                  </p>
+                  </Link>
                   {author.id !== me?.id && (
                     <button
-                      onClick={() => toggleFollow(author.id)}
+                      onClick={() => void toggleFollow(author.id)}
                       className={`lowkey rounded-full px-3 py-1 text-[11px] font-bold ${
                         following
                           ? "bg-card text-muted-foreground"

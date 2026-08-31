@@ -1,6 +1,16 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Flame, House, MessageCircle, Plus, Play, User, Search } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import {
+  Bell,
+  Bookmark,
+  Flame,
+  House,
+  MessageCircle,
+  Plus,
+  Play,
+  User,
+  Search,
+} from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
 import logoAsset from "@/assets/lowkey-logo.png.asset.json";
@@ -10,12 +20,28 @@ export function Avatar({
   label,
   size = 40,
   ring,
+  src,
 }: {
   hue: number;
   label: string;
   size?: number;
   ring?: boolean;
+  src?: string | null;
 }) {
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={`${label} profile picture`}
+        loading="lazy"
+        className={cn(
+          "shrink-0 rounded-full object-cover",
+          ring && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+        )}
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   return (
     <span
       aria-hidden
@@ -123,6 +149,8 @@ export function FeedbackLink({ className }: { className?: string }) {
 }
 
 export function TopBar({ title = "lowkey social" }: { title?: string }) {
+  const { state, me } = useLowkey();
+  const unread = state.notifications.filter((n) => !n.readAt && n.recipientId === me?.id).length;
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
       <Link to="/" className="flex items-center gap-2">
@@ -130,14 +158,81 @@ export function TopBar({ title = "lowkey social" }: { title?: string }) {
         <span className="lowkey text-lg leading-5 font-bold tracking-tight">{title}</span>
         <BetaTag />
       </Link>
-      <Link
-        to="/search"
-        aria-label="search"
-        className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
-      >
-        <Search className="size-5" />
-      </Link>
+      <div className="flex items-center gap-1">
+        <Link
+          to="/saved"
+          aria-label="saved posts"
+          className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
+        >
+          <Bookmark className="size-5" />
+        </Link>
+        <Link
+          to="/notifications"
+          aria-label="notifications"
+          className="relative rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
+        >
+          <Bell className="size-5" />
+          {unread > 0 && (
+            <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
+        </Link>
+        <Link
+          to="/search"
+          aria-label="search"
+          className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
+        >
+          <Search className="size-5" />
+        </Link>
+      </div>
     </header>
+  );
+}
+
+/** gdpr cookie / local-storage notice; nothing non-essential runs before consent */
+export function CookieBanner() {
+  const [choice, setChoice] = useState<string | null>("pending");
+
+  useEffect(() => {
+    setChoice(window.localStorage.getItem("lowkey.cookies"));
+  }, []);
+
+  if (choice !== null) return null;
+
+  const decide = (value: "all" | "essential") => {
+    window.localStorage.setItem("lowkey.cookies", value);
+    setChoice(value);
+  };
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 p-3">
+      <div className="mx-auto flex max-w-lg flex-col gap-3 rounded-3xl border border-border bg-card p-4 shadow-lg">
+        <p className="lowkey text-sm font-bold">cookies, kind of</p>
+        <p className="lowkey text-xs text-muted-foreground">
+          lowkey only stores what it needs to keep you signed in and remember your settings. no ad
+          trackers, no third-party analytics. details in the{" "}
+          <Link to="/privacy" className="font-semibold underline underline-offset-2">
+            privacy notice
+          </Link>
+          .
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => decide("all")}
+            className="lowkey flex-1 rounded-full bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+          >
+            okay
+          </button>
+          <button
+            onClick={() => decide("essential")}
+            className="lowkey flex-1 rounded-full border border-input py-2.5 text-xs font-bold"
+          >
+            essential only
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

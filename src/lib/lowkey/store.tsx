@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import {
@@ -15,6 +16,7 @@ import {
   emptyState,
   type AgeBand,
   type LowkeyState,
+  type Notif,
   type PostKind,
   type Profile,
   type VerificationProvider,
@@ -70,6 +72,10 @@ interface LowkeyApi {
   toggleLike: (postId: string) => Promise<void>;
   addComment: (postId: string, body: string) => Promise<void>;
   toggleFollow: (profileId: string) => Promise<void>;
+  toggleBookmark: (postId: string) => Promise<void>;
+  markNotificationsRead: () => Promise<void>;
+  uploadAvatar: (file: File) => Promise<Result>;
+  uploadMedia: (file: File) => Promise<{ path: string; url: string } | null>;
   startChat: (profileId: string) => Promise<string | null>;
   sendMessage: (conversationId: string, body: string) => Promise<void>;
   markRead: (conversationId: string) => Promise<void>;
@@ -86,6 +92,31 @@ const LowkeyContext = createContext<LowkeyApi | null>(null);
 
 type Row = Record<string, unknown>;
 
+const SIGNED_TTL = 60 * 60 * 24 * 7;
+
+/** storage paths are stored in the db; buckets are private so we sign them for reading */
+async function signPaths(bucket: string, paths: (string | null)[]) {
+  const map = new Map<string, string>();
+  const uniq = [
+    ...new Set(
+      paths.filter(
+        (p): p is string => Boolean(p) && !p!.startsWith("http") && !p!.startsWith("blob"),
+      ),
+    ),
+  ];
+  if (uniq.length === 0) return map;
+  const { data } = await supabase.storage.from(bucket).createSignedUrls(uniq, SIGNED_TTL);
+  for (const d of data ?? []) {
+    if (d.path && d.signedUrl) map.set(d.path, d.signedUrl);
+  }
+  return map;
+}
+
+function resolve(map: Map<string, string>, value: string | null) {
+  if (!value) return null;
+  return map.get(value) ?? value;
+}
+
 function toProfile(r: Row): Profile {
   return {
     id: r['id'] as string,
@@ -93,6 +124,7 @@ function toProfile(r: Row): Profile {
     displayName: r['display_name'] as string,
     bio: (r['bio'] as string) ?? "",
     avatarHue: (r['avatar_hue'] as number) ?? 60,
+    avatarUrl: (r['avatar_url'] as string | null) ?? null,
     ageBand: (r['age_band'] as AgeBand | null) ?? null,
     verificationStatus: (r['verification_status'] as VerificationStatus) ?? "unverified",
     verifiedProvider: (r['verified_provider'] as VerificationProvider | null) ?? null,
@@ -158,6 +190,8 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       memberRes,
       messagesRes,
       usageRes,
+      bookmarksRes,
+      notifsRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("posts").select("*").order("created_at", { ascending: false }),
@@ -168,6 +202,12 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       supabase.from("conversation_members").select("*"),
       supabase.from("messages").select("*").order("created_at", { ascending: true }),
       supabase.from("daily_usage").select("*"),
+      supabase.from("bookmarks").select("*"),
+      supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(60),
     ]);
 
     const members = (memberRes.data ?? []) as Row[];
@@ -178,19 +218,46 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const profiles = ((profilesRes.data ?? []) as Row[]).map(toProfile);
-    if (!profiles.some((p) => p.id === mine.id)) profiles.push(mine);
+    const profileRows = (profilesRes.data ?? []) as Row[];
+    const postRows = (postsRes.data ?? []) as Row[];
+    const [avatarUrls, mediaUrls] = await Promise.all([
+      signPaths(
+        "avatars",
+        profileRows.map((r) => (r['avatar_url'] as string | null) ?? null),
+      ),
+      signPaths(
+        "media",
+        postRows.map((r) => (r['media_url'] as string | null) ?? null),
+      ),
+    ]);
+
+    const profiles = profileRows
+      .map(toProfile)
+      .map((p) => ({ ...p, avatarUrl: resolve(avatarUrls, p.avatarUrl) }));
+    if (!profiles.some((p) => p.id === mine.id)) {
+      profiles.push({ ...mine, avatarUrl: resolve(avatarUrls, mine.avatarUrl) });
+    }
 
     setState({
       currentUserId: mine.id,
       profiles,
-      posts: ((postsRes.data ?? []) as Row[]).map((r) => ({
+      bookmarks: ((bookmarksRes.data ?? []) as Row[]).map((r) => r['post_id'] as string),
+      notifications: ((notifsRes.data ?? []) as Row[]).map((r) => ({
+        id: r['id'] as string,
+        recipientId: r['recipient_id'] as string,
+        actorId: r['actor_id'] as string,
+        kind: r['kind'] as Notif["kind"],
+        postId: (r['post_id'] as string | null) ?? null,
+        readAt: (r['read_at'] as string | null) ?? null,
+        createdAt: r['created_at'] as string,
+      })),
+      posts: postRows.map((r) => ({
         id: r['id'] as string,
         authorId: r['author_id'] as string,
         kind: (r['kind'] as PostKind) ?? "post",
         caption: (r['caption'] as string) ?? "",
         posterHue: (r['poster_hue'] as number) ?? 60,
-        mediaUrl: (r['media_url'] as string | null) ?? null,
+        mediaUrl: resolve(mediaUrls, (r['media_url'] as string | null) ?? null),
         taggedHandle: (r['tagged_handle'] as string | null) ?? null,
         topic: (r['topic'] as string | null) ?? null,
         ageBand: r['age_band'] as AgeBand,
@@ -430,31 +497,77 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     [me, refresh],
   );
 
+  /** notify the other person, unless it's about my own content */
+  const notify = useCallback(
+    async (recipientId: string, kind: Notif["kind"], postId?: string | null) => {
+      const id = meIdRef.current;
+      if (!id || recipientId === id) return;
+      await supabase.from("notifications").insert({
+        recipient_id: recipientId,
+        actor_id: id,
+        kind,
+        post_id: postId ?? null,
+      });
+    },
+    [],
+  );
+
   const toggleLike = useCallback(
     async (postId: string) => {
       const id = meIdRef.current;
       if (!id) return;
       const has = state.likes.some((l) => l.postId === postId && l.profileId === id);
-      if (has) {
-        await supabase.from("post_likes").delete().eq("post_id", postId).eq("profile_id", id);
-      } else {
-        await supabase.from("post_likes").insert({ post_id: postId, profile_id: id });
+      // optimistic so the heart flips instantly
+      setState((s) => ({
+        ...s,
+        likes: has
+          ? s.likes.filter((l) => !(l.postId === postId && l.profileId === id))
+          : [...s.likes, { postId, profileId: id }],
+      }));
+      const { error } = has
+        ? await supabase.from("post_likes").delete().eq("post_id", postId).eq("profile_id", id)
+        : await supabase.from("post_likes").insert({ post_id: postId, profile_id: id });
+      if (error) {
+        await refresh();
+        return;
       }
-      await refresh();
+      if (!has) {
+        const author = state.posts.find((p) => p.id === postId)?.authorId;
+        if (author) await notify(author, "like", postId);
+      }
     },
-    [refresh, state.likes],
+    [refresh, notify, state.likes, state.posts],
   );
 
   const addComment = useCallback(
     async (postId: string, body: string) => {
       const id = meIdRef.current;
       if (!id || !body.trim()) return;
-      await supabase
+      const text = body.trim().toLowerCase();
+      const { data, error } = await supabase
         .from("post_comments")
-        .insert({ post_id: postId, author_id: id, body: body.trim().toLowerCase() });
-      await refresh();
+        .insert({ post_id: postId, author_id: id, body: text })
+        .select("id, created_at")
+        .maybeSingle();
+      if (error || !data) return;
+      const row = data as Row;
+      setState((s) => ({
+        ...s,
+        comments: [
+          ...s.comments,
+          {
+            id: row['id'] as string,
+            postId,
+            authorId: id,
+            body: text,
+            createdAt: row['created_at'] as string,
+          },
+        ],
+      }));
+      const author = state.posts.find((p) => p.id === postId)?.authorId;
+      if (author) await notify(author, "comment", postId);
     },
-    [refresh],
+    [notify, state.posts],
   );
 
   const toggleFollow = useCallback(
@@ -462,19 +575,94 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       const id = meIdRef.current;
       if (!id || id === profileId) return;
       const has = state.follows.some((f) => f.followerId === id && f.followingId === profileId);
-      if (has) {
-        await supabase
-          .from("follows")
-          .delete()
-          .eq("follower_id", id)
-          .eq("following_id", profileId);
-      } else {
-        await supabase.from("follows").insert({ follower_id: id, following_id: profileId });
+      setState((s) => ({
+        ...s,
+        follows: has
+          ? s.follows.filter((f) => !(f.followerId === id && f.followingId === profileId))
+          : [...s.follows, { followerId: id, followingId: profileId }],
+      }));
+      const { error } = has
+        ? await supabase
+            .from("follows")
+            .delete()
+            .eq("follower_id", id)
+            .eq("following_id", profileId)
+        : await supabase.from("follows").insert({ follower_id: id, following_id: profileId });
+      if (error) {
+        await refresh();
+        return;
       }
-      await refresh();
+      if (!has) await notify(profileId, "follow");
     },
-    [refresh, state.follows],
+    [refresh, notify, state.follows],
   );
+
+  const toggleBookmark = useCallback(
+    async (postId: string) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      const has = state.bookmarks.includes(postId);
+      setState((s) => ({
+        ...s,
+        bookmarks: has ? s.bookmarks.filter((b) => b !== postId) : [...s.bookmarks, postId],
+      }));
+      const { error } = has
+        ? await supabase.from("bookmarks").delete().eq("post_id", postId).eq("profile_id", id)
+        : await supabase.from("bookmarks").insert({ post_id: postId, profile_id: id });
+      if (error) await refresh();
+    },
+    [refresh, state.bookmarks],
+  );
+
+  const markNotificationsRead = useCallback(async () => {
+    const id = meIdRef.current;
+    if (!id) return;
+    const now = new Date().toISOString();
+    setState((s) => ({
+      ...s,
+      notifications: s.notifications.map((n) => ({ ...n, readAt: n.readAt ?? now })),
+    }));
+    await supabase
+      .from("notifications")
+      .update({ read_at: now })
+      .eq("recipient_id", id)
+      .is("read_at", null);
+  }, []);
+
+  /* ---------- uploads (private buckets, read through signed urls) ---------- */
+
+  const uploadAvatar = useCallback(
+    async (file: File): Promise<Result> => {
+      const id = meIdRef.current;
+      const { data: auth } = await supabase.auth.getUser();
+      if (!id || !auth.user) return { ok: false, error: "sign in first" };
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const path = `${auth.user.id}/avatar-${Date.now()}.${ext}`;
+      const up = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (up.error) return { ok: false, error: up.error.message.toLowerCase() };
+      const { error } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", id);
+      if (error) return { ok: false, error: error.message.toLowerCase() };
+      await refresh();
+      return { ok: true };
+    },
+    [refresh],
+  );
+
+  const uploadMedia = useCallback(async (file: File) => {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return null;
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+    const path = `${auth.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const up = await supabase.storage
+      .from("media")
+      .upload(path, file, { upsert: false, contentType: file.type });
+    if (up.error) return null;
+    const signed = await supabase.storage.from("media").createSignedUrl(path, SIGNED_TTL);
+    return { path, url: signed.data?.signedUrl ?? "" };
+  }, []);
+
 
   const startChat = useCallback(
     async (profileId: string) => {
@@ -617,6 +805,61 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   }, []);
 
+  /* ---------- live notifications ---------- */
+
+  useEffect(() => {
+    const myId = me?.id;
+    if (!myId) return;
+    const channel = supabase
+      .channel(`notifications:${myId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `recipient_id=eq.${myId}`,
+        },
+        (payload) => {
+          const row = payload.new as Row;
+          const notif: Notif = {
+            id: row['id'] as string,
+            recipientId: row['recipient_id'] as string,
+            actorId: row['actor_id'] as string,
+            kind: row['kind'] as Notif["kind"],
+            postId: (row['post_id'] as string | null) ?? null,
+            readAt: null,
+            createdAt: row['created_at'] as string,
+          };
+          setState((s) => ({ ...s, notifications: [notif, ...s.notifications] }));
+          const actor = state.profiles.find((p) => p.id === notif.actorId);
+          const who = actor ? `@${actor.handle}` : "someone";
+          if (notif.kind === "follow") {
+            const alreadyBack = state.follows.some(
+              (f) => f.followerId === myId && f.followingId === notif.actorId,
+            );
+            toast(`${who} followed you`, {
+              description: alreadyBack ? "you follow them too" : "do you want to follow back?",
+              ...(alreadyBack
+                ? {}
+                : {
+                    action: {
+                      label: "follow back",
+                      onClick: () => void toggleFollow(notif.actorId),
+                    },
+                  }),
+            });
+          } else {
+            toast(`${who} ${notif.kind === "like" ? "liked" : "commented on"} your post`);
+          }
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [me?.id, state.profiles, state.follows, toggleFollow]);
+
   const value = useMemo<LowkeyApi>(
     () => ({
       state,
@@ -636,6 +879,10 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       toggleLike,
       addComment,
       toggleFollow,
+      toggleBookmark,
+      markNotificationsRead,
+      uploadAvatar,
+      uploadMedia,
       startChat,
       sendMessage,
       markRead,
@@ -664,6 +911,10 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       toggleLike,
       addComment,
       toggleFollow,
+      toggleBookmark,
+      markNotificationsRead,
+      uploadAvatar,
+      uploadMedia,
       startChat,
       sendMessage,
       markRead,

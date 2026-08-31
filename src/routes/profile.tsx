@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Settings, BadgeCheck } from "lucide-react";
-import { useState } from "react";
+import { Settings, BadgeCheck, Camera, Bookmark } from "lucide-react";
+import { useRef, useState } from "react";
 import { AppScreen, Avatar, Poster, bandLabel } from "@/components/lowkey/shell";
+import { toast } from "sonner";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
 
 export const Route = createFileRoute("/profile")({
@@ -20,9 +21,23 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  const { state, me } = useLowkey();
+  const { state, me, uploadAvatar } = useLowkey();
   const usage = useTodayUsage();
   const [tab, setTab] = useState<"post" | "video">("post");
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const pickAvatar = async (file: File | undefined) => {
+    if (!file) return;
+    if (file.size > 5_000_000) {
+      toast.error("keep it under 5mb");
+      return;
+    }
+    setUploading(true);
+    const res = await uploadAvatar(file);
+    setUploading(false);
+    toast[res.ok ? "success" : "error"](res.ok ? "new profile pic" : (res.error ?? "upload failed"));
+  };
 
   if (!me) return <AppScreen>{null}</AppScreen>;
 
@@ -32,7 +47,13 @@ function ProfilePage() {
 
   return (
     <AppScreen>
-      <div className="flex justify-end px-4 pt-3">
+      <div className="flex justify-end gap-2 px-4 pt-3">
+        <Link
+          to="/saved"
+          className="lowkey flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold"
+        >
+          <Bookmark className="size-3.5" /> saved
+        </Link>
         <Link
           to="/settings"
           aria-label="settings"
@@ -43,7 +64,26 @@ function ProfilePage() {
       </div>
 
       <div className="flex flex-col items-center gap-2 px-4 pt-2 pb-4">
-        <Avatar hue={me.avatarHue} label={me.displayName} size={80} />
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="relative rounded-full"
+          aria-label="change profile picture"
+        >
+          <Avatar hue={me.avatarHue} label={me.displayName} src={me.avatarUrl} size={80} />
+          <span className="absolute right-0 bottom-0 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <Camera className="size-4" />
+          </span>
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => void pickAvatar(e.target.files?.[0])}
+        />
+        {uploading && (
+          <p className="lowkey text-xs text-muted-foreground">uploading your picture...</p>
+        )}
         <h1 className="lowkey flex items-center gap-1 text-lg font-bold">
           {me.displayName}
           {me.verificationStatus === "verified" && <BadgeCheck className="size-4 text-primary" />}

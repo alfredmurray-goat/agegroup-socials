@@ -20,3 +20,12 @@
 - [x] long onboarding (identity, interests, vibe, pace, limit, consent)
 - [x] privacy notice route + gdpr export/delete in settings
 - [x] consent logging for face scan / eid
+
+## real-data pass (done)
+- removed all demo/seed profiles + posts from the database; only real accounts remain
+- likes, comments, follows, bookmarks: optimistic ui + real rows
+- clickable handles everywhere -> /u/$handle with follow / follow back / chat
+- notifications table + realtime toast ("@x followed you — follow back?") and /notifications
+- /saved for bookmarks; profile picture upload (private avatars bucket, signed urls)
+- real media uploads for posts/videos (private media bucket, signed urls)
+- gdpr cookie/storage notice, favicon from the logo, sitemap.xml, ai-crawler robots.txt, json-ld (WebApplication + FAQ)
