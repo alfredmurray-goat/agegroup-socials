@@ -148,6 +148,42 @@ export function FeedbackLink({ className }: { className?: string }) {
   );
 }
 
+/** eu legal pages, linked from every screen and from each legal page */
+export function LegalLinks({ className }: { className?: string }) {
+  const links = [
+    { to: "/privacy", label: "privacy" },
+    { to: "/terms", label: "terms" },
+    { to: "/cookies", label: "cookies" },
+  ] as const;
+  return (
+    <nav
+      aria-label="legal"
+      className={cn("flex flex-wrap items-center gap-x-3 gap-y-1", className)}
+    >
+      {links.map((l) => (
+        <Link
+          key={l.to}
+          to={l.to}
+          className="lowkey text-xs font-semibold text-muted-foreground underline underline-offset-2"
+        >
+          {l.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+export function SiteFooter() {
+  return (
+    <footer className="flex flex-col items-center gap-2 border-t border-border px-4 py-6 text-center">
+      <LegalLinks className="justify-center" />
+      <p className="lowkey text-[11px] text-muted-foreground">
+        lowkey social beta · eu hosted · feedback: <FeedbackLink className="text-[11px]" />
+      </p>
+    </footer>
+  );
+}
+
 export function TopBar({ title = "lowkey social" }: { title?: string }) {
   const { state, me } = useLowkey();
   const unread = state.notifications.filter((n) => !n.readAt && n.recipientId === me?.id).length;
