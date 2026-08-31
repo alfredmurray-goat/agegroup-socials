@@ -13,11 +13,18 @@ import {
   KeyRound,
   Ban,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen, bandLabel, BetaTag, FeedbackLink } from "@/components/lowkey/shell";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
-import { INTERESTS, VIBES, type Audience, type ThemePref } from "@/lib/lowkey/types";
+import {
+  INTERESTS,
+  VIBES,
+  type Audience,
+  type ThemePref,
+  type TextScale,
+} from "@/lib/lowkey/types";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -41,6 +48,7 @@ export const Route = createFileRoute("/settings")({
 const limits = [15, 30, 45, 60, 90, 120];
 const audiences: Audience[] = ["everyone", "followers", "nobody"];
 const themes: ThemePref[] = ["system", "light", "dark"];
+const textScales: TextScale[] = ["normal", "large", "larger", "largest"];
 const paces = ["slow", "balanced", "fast"];
 
 function Section({
@@ -340,6 +348,39 @@ function SettingsPage() {
               className="w-full"
             />
           </div>
+        </Section>
+
+        {/* accessibility — low vision */}
+        <Section icon={<Eye className="size-4 text-primary" />} title="accessibility">
+          <div>
+            <p className="lowkey mb-2 text-xs font-semibold text-muted-foreground">text size</p>
+            <Chips
+              options={textScales}
+              value={me.textScale}
+              onPick={(t) => void save({ textScale: t }, "text size updated")}
+            />
+            <p className="lowkey mt-2 text-xs text-muted-foreground">
+              scales every bit of text, buttons and spacing in the app. your phone or browser text
+              size works too.
+            </p>
+          </div>
+          <Toggle
+            label="high contrast"
+            hint="stronger black-on-white text, visible borders, underlined links"
+            value={me.highContrast}
+            onChange={(v) => void save({ highContrast: v }, "contrast updated")}
+          />
+          <Toggle
+            label="bolder text"
+            hint="thicker letters, easier to pick out"
+            value={me.boldText}
+            onChange={(v) => void save({ boldText: v }, "text weight updated")}
+          />
+          <p className="lowkey text-xs text-muted-foreground">
+            lowkey also follows your device's reduce-motion setting, works with screen readers and
+            can be zoomed to 200% without breaking. missing something you need?{" "}
+            <FeedbackLink />
+          </p>
         </Section>
 
         {/* instagram import */}
