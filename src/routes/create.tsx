@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { ImagePlus, Sparkles } from "lucide-react";
+import { Film, ImagePlus, Loader2, Trash2, Type, X } from "lucide-react";
 import { toast } from "sonner";
-import { AppScreen, Poster } from "@/components/lowkey/shell";
+import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
 import { useLowkey } from "@/lib/lowkey/store";
 import type { PostKind } from "@/lib/lowkey/types";
+import { INTERESTS } from "@/lib/lowkey/types";
 
 export const Route = createFileRoute("/create")({
   head: () => ({
@@ -12,44 +13,60 @@ export const Route = createFileRoute("/create")({
       { title: "create — lowkey social" },
       {
         name: "description",
-        content: "drop or upload an image or video, add a caption, post it to your age band.",
+        content: "post a photo, a video or just text to your own age band on lowkey social.",
       },
       { property: "og:title", content: "create — lowkey social" },
-      { property: "og:description", content: "drop or upload, caption it, post it." },
+      { property: "og:description", content: "photo, video or plain text — post it to your band." },
     ],
   }),
   component: CreatePage,
 });
 
-const filters = ["none", "warm", "cool", "faded", "punch"] as const;
-
 function CreatePage() {
-  const { createPost, uploadMedia } = useLowkey();
+  const { createPost, uploadMedia, me } = useLowkey();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [kind, setKind] = useState<PostKind>("post");
+
   const [caption, setCaption] = useState("");
+  const [topic, setTopic] = useState<string | null>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [mediaPath, setMediaPath] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [filter, setFilter] = useState<(typeof filters)[number]>("none");
+  const [mediaKind, setMediaKind] = useState<PostKind | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [posting, setPosting] = useState(false);
+
+  const kind: PostKind = mediaKind ?? "post";
 
   const pick = async (file: File | undefined) => {
     if (!file) return;
+    const isVideo = file.type.startsWith("video");
+    const isImage = file.type.startsWith("image");
+    if (!isVideo && !isImage) {
+      toast.error("images and videos only");
+      return;
+    }
     if (file.size > 50_000_000) {
       toast.error("keep it under 50mb");
       return;
     }
-    setKind(file.type.startsWith("video") ? "video" : "post");
-    setBusy(true);
+    setUploading(true);
     const uploaded = await uploadMedia(file);
-    setBusy(false);
+    setUploading(false);
     if (!uploaded) {
       toast.error("upload failed, try again");
       return;
     }
+    // the type comes from the file itself — never from a toggle, so a photo can
+    // never end up saved as a broken "video"
+    setMediaKind(isVideo ? "video" : "post");
     setMediaPath(uploaded.path);
     setMediaUrl(uploaded.url);
+  };
+
+  const clearMedia = () => {
+    setMediaKind(null);
+    setMediaPath(null);
+    setMediaUrl(null);
   };
 
   const submit = async () => {
@@ -57,15 +74,16 @@ function CreatePage() {
       toast.error("add a caption or some media");
       return;
     }
-    setBusy(true);
+    setPosting(true);
     const id = await createPost({
       kind,
       caption: caption.trim() || "no caption",
       mediaUrl: mediaPath,
+      topic,
     });
-    setBusy(false);
+    setPosting(false);
     if (!id) {
-      toast.error("verify your age first");
+      toast.error("couldn't post — verify your age first");
       return;
     }
     toast.success("posted");
@@ -74,37 +92,73 @@ function CreatePage() {
 
   return (
     <AppScreen title="create">
-      <div className="flex flex-col gap-4 px-4 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="lowkey text-xl font-bold">create</h1>
-          <button
-            onClick={() => setFilter(filters[(filters.indexOf(filter) + 1) % filters.length]!)}
-            className="lowkey flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold"
-          >
-            <Sparkles className="size-3.5" /> filter: {filter}
-          </button>
+      <div className="flex flex-col gap-5 px-4 py-5">
+        <header>
+          <h1 className="lowkey text-2xl font-extrabold">create</h1>
+          <p className="lowkey mt-1 text-xs text-muted-foreground">
+            goes out to your band only ({me?.ageBand === "under_18" ? "under 18" : "18+"})
+          </p>
+        </header>
+
+        {/* what you're posting, decided by what you attach */}
+        <div className="flex items-center gap-2">
+          {[
+            { k: "text", label: "text", icon: Type, active: !mediaKind },
+            { k: "photo", label: "photo", icon: ImagePlus, active: mediaKind === "post" },
+            { k: "video", label: "video", icon: Film, active: mediaKind === "video" },
+          ].map(({ k, label, icon: Icon, active }) => (
+            <span
+              key={k}
+              className={`lowkey flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              <Icon className="size-3.5" /> {label}
+            </span>
+          ))}
         </div>
 
-        <button
-          onClick={() => inputRef.current?.click()}
-          className="flex w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card px-6 py-14"
-        >
-          {mediaUrl ? (
-            kind === "video" ? (
-              <video src={mediaUrl} className="max-h-64 rounded-2xl" muted playsInline />
+        {/* media */}
+        {mediaUrl ? (
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-card">
+            {mediaKind === "video" ? (
+              <video src={mediaUrl} className="max-h-80 w-full object-contain" controls playsInline />
             ) : (
-              <img src={mediaUrl} alt="your upload" className="max-h-64 rounded-2xl" />
-            )
-          ) : (
-            <>
-              <ImagePlus className="size-8 text-muted-foreground" />
-              <span className="lowkey text-sm font-semibold">drop or upload image/video</span>
-              <span className="lowkey text-xs text-muted-foreground">
-                {busy ? "uploading..." : "stored in the eu, only your band can see it"}
-              </span>
-            </>
-          )}
-        </button>
+              <img src={mediaUrl} alt="your upload" className="max-h-80 w-full object-contain" />
+            )}
+            <button
+              onClick={clearMedia}
+              aria-label="remove media"
+              className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-background/90 text-foreground"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+            className="flex w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card px-6 py-12"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="size-7 animate-spin text-muted-foreground" />
+                <span className="lowkey text-sm font-semibold">uploading...</span>
+              </>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <ImagePlus className="size-7 text-muted-foreground" />
+                  <Film className="size-7 text-muted-foreground" />
+                </div>
+                <span className="lowkey text-sm font-semibold">add a photo or video</span>
+                <span className="lowkey text-xs text-muted-foreground">
+                  optional · stored privately in the eu, only your band can see it
+                </span>
+              </>
+            )}
+          </button>
+        )}
         <input
           ref={inputRef}
           type="file"
@@ -113,29 +167,61 @@ function CreatePage() {
           onChange={(e) => void pick(e.target.files?.[0])}
         />
 
-        <textarea
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          maxLength={280}
-          rows={3}
-          placeholder="text"
-          className="lowkey w-full resize-none rounded-3xl border border-border bg-card px-4 py-3 text-sm outline-none"
-        />
-
-        <div className="flex gap-2">
-          {(["post", "video"] as PostKind[]).map((k) => (
-            <button
-              key={k}
-              onClick={() => setKind(k)}
-              className={`lowkey flex-1 rounded-full py-2.5 text-sm font-semibold ${
-                kind === k ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {k}
-            </button>
-          ))}
+        {/* caption */}
+        <div className="rounded-3xl border border-border bg-card p-4">
+          <div className="flex gap-3">
+            <Avatar
+              hue={me?.avatarHue ?? 60}
+              label={me?.displayName ?? "me"}
+              src={me?.avatarUrl ?? null}
+              size={34}
+            />
+            <textarea
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              maxLength={280}
+              rows={4}
+              placeholder="say it lowkey. no caps, no grammar, no pressure"
+              className="lowkey min-w-0 flex-1 resize-none bg-transparent text-sm outline-none"
+            />
+          </div>
+          <p className="lowkey mt-2 text-right text-[11px] text-muted-foreground">
+            {caption.length}/280
+          </p>
         </div>
 
+        {/* topic */}
+        <div>
+          <p className="lowkey mb-2 text-xs font-semibold text-muted-foreground">
+            topic {topic && <span className="text-foreground">· {topic}</span>}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {INTERESTS.slice(0, 12).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTopic(topic === t ? null : t)}
+                className={`lowkey rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  topic === t
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+            {topic && (
+              <button
+                onClick={() => setTopic(null)}
+                aria-label="clear topic"
+                className="lowkey flex items-center gap-1 rounded-full border border-input px-3 py-1.5 text-xs font-semibold"
+              >
+                <X className="size-3" /> clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* text-only preview */}
         {!mediaUrl && caption.trim() && (
           <div>
             <p className="lowkey mb-2 text-xs font-semibold text-muted-foreground">preview</p>
@@ -145,10 +231,10 @@ function CreatePage() {
 
         <button
           onClick={() => void submit()}
-          disabled={busy}
-          className="lowkey rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground disabled:opacity-60"
+          disabled={posting || uploading}
+          className="lowkey rounded-full bg-primary py-4 text-sm font-bold text-primary-foreground disabled:opacity-60"
         >
-          {busy ? "working..." : "post it"}
+          {posting ? "posting..." : kind === "video" ? "post video" : "post it"}
         </button>
       </div>
     </AppScreen>
