@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatsRouteImport } from './routes/chats'
+import { Route as CreateRouteImport } from './routes/create'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
 
@@ -30,6 +31,11 @@ const ChatsRoute = ChatsRouteImport.update({
   path: '/chats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chats': typeof ChatsRoute
+  '/create': typeof CreateRoute
   '/verify': typeof VerifyRoute
   '/chat/$id': typeof ChatIdRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chats': typeof ChatsRoute
+  '/create': typeof CreateRoute
   '/verify': typeof VerifyRoute
   '/chat/$id': typeof ChatIdRoute
 }
@@ -60,21 +68,24 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chats': typeof ChatsRoute
+  '/create': typeof CreateRoute
   '/verify': typeof VerifyRoute
   '/chat/$id': typeof ChatIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/chats' | '/verify' | '/chat/$id'
+  fullPaths: '/' | '/auth' | '/chats' | '/create' | '/verify' | '/chat/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chats' | '/verify' | '/chat/$id'
-  id: '__root__' | '/' | '/auth' | '/chats' | '/verify' | '/chat/$id'
+  to: '/' | '/auth' | '/chats' | '/create' | '/verify' | '/chat/$id'
+  id:
+    '__root__' | '/' | '/auth' | '/chats' | '/create' | '/verify' | '/chat/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   ChatsRoute: typeof ChatsRoute
+  CreateRoute: typeof CreateRoute
   VerifyRoute: typeof VerifyRoute
   ChatIdRoute: typeof ChatIdRoute
 }
@@ -102,6 +113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify': {
       id: '/verify'
       path: '/verify'
@@ -123,6 +141,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   ChatsRoute: ChatsRoute,
+  CreateRoute: CreateRoute,
   VerifyRoute: VerifyRoute,
   ChatIdRoute: ChatIdRoute,
 }
