@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { parseInstagramExport } from "./instagram";
+import { prepareImage } from "./image";
 import {
   dayKey,
   emptyState,
@@ -671,10 +672,13 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
   /* ---------- uploads (private buckets, read through signed urls) ---------- */
 
   const uploadAvatar = useCallback(
-    async (file: File): Promise<Result> => {
+    async (raw: File): Promise<Result> => {
       const id = meIdRef.current;
       const { data: auth } = await supabase.auth.getUser();
       if (!id || !auth.user) return { ok: false, error: "sign in first" };
+      // phone photos are big and often heic, so re-encode to a small jpeg first
+      const file = await prepareImage(raw);
+      if (file.size > 15_000_000) return { ok: false, error: "that photo is too big" };
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const path = `${auth.user.id}/avatar-${Date.now()}.${ext}`;
       const up = await supabase.storage
@@ -689,9 +693,10 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     [refresh],
   );
 
-  const uploadMedia = useCallback(async (file: File) => {
+  const uploadMedia = useCallback(async (raw: File) => {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return null;
+    const file = raw.type.startsWith("video/") ? raw : await prepareImage(raw);
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
     const path = `${auth.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const up = await supabase.storage

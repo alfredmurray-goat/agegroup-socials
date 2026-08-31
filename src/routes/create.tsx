@@ -162,7 +162,7 @@ function CreatePage() {
         <input
           ref={inputRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*,video/*,.heic,.heif"
           className="hidden"
           onChange={(e) => void pick(e.target.files?.[0])}
         />
