@@ -1017,6 +1017,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       refresh,
       exportMyData,
       deleteMyAccount,
+      toggleBlock,
+      changeEmail,
+      changePassword,
+      signOutEverywhere,
+      importFromInstagram,
     }),
     [
       state,
@@ -1049,6 +1054,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       refresh,
       exportMyData,
       deleteMyAccount,
+      toggleBlock,
+      changeEmail,
+      changePassword,
+      signOutEverywhere,
+      importFromInstagram,
     ],
   );
 
