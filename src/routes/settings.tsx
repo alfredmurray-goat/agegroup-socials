@@ -166,6 +166,8 @@ function SettingsPage() {
     signOutEverywhere,
     importFromInstagram,
   } = useLowkey();
+  const [readAloud, setReadAloudState] = useState(() => readAloudEnabled());
+  const [speechRate, setSpeechRate] = useState<SpeechRate>(() => readAloudRate());
   const usage = useTodayUsage();
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
