@@ -9,7 +9,7 @@ export type VerificationProvider =
   | "altid"
   | "eudi_wallet";
 
-/** mirrors the planned `profiles` table */
+/** mirrors the `profiles` table */
 export interface Profile {
   id: string;
   handle: string;
@@ -21,11 +21,18 @@ export interface Profile {
   verifiedProvider: VerificationProvider | null;
   dailyLimitMinutes: number;
   isDemo: boolean;
+  interests: string[];
+  vibe: string | null;
+  pronouns: string | null;
+  city: string | null;
+  contentPace: string;
+  quietHours: boolean;
+  onboardedAt: string | null;
 }
 
 export type PostKind = "post" | "video";
 
-/** mirrors the planned `posts` table; ageBand is stamped from the author */
+/** mirrors the `posts` table; ageBand is stamped from the author */
 export interface Post {
   id: string;
   authorId: string;
@@ -34,6 +41,7 @@ export interface Post {
   posterHue: number;
   mediaUrl: string | null;
   taggedHandle: string | null;
+  topic: string | null;
   ageBand: AgeBand;
   createdAt: string;
 }
@@ -61,7 +69,7 @@ export interface Message {
   readByMe: boolean;
 }
 
-/** mirrors the planned `streaks` table */
+/** streak lives on the conversation row */
 export interface Streak {
   conversationId: string;
   count: number;
@@ -81,4 +89,38 @@ export interface LowkeyState {
   currentUserId: string | null;
 }
 
+export const emptyState: LowkeyState = {
+  profiles: [],
+  posts: [],
+  comments: [],
+  likes: [],
+  follows: [],
+  conversations: [],
+  messages: [],
+  streaks: [],
+  usageDays: [],
+  currentUserId: null,
+};
+
 export const dayKey = (d: Date = new Date()) => d.toISOString().slice(0, 10);
+
+export const INTERESTS = [
+  "football",
+  "skating",
+  "gaming",
+  "music",
+  "art",
+  "fits",
+  "food",
+  "memes",
+  "gym",
+  "photos",
+  "school stuff",
+  "coding",
+  "films",
+  "pets",
+  "travel",
+  "books",
+] as const;
+
+export const VIBES = ["chill", "chaotic", "creative", "sporty", "quiet"] as const;
