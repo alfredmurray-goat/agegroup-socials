@@ -104,7 +104,6 @@ function FeedCard({ post }: { post: Post }) {
   const comments = state.comments.filter((c) => c.postId === post.id);
   const saved = state.bookmarks.includes(post.id);
   const [openComments, setOpenComments] = useState(false);
-  const [draft, setDraft] = useState("");
 
   if (!author) return null;
 
@@ -141,7 +140,7 @@ function FeedCard({ post }: { post: Post }) {
             <span className="text-[10px] font-semibold">{likes.length}</span>
           </button>
           <button
-            onClick={() => setOpenComments((v) => !v)}
+            onClick={() => setOpenComments(true)}
             aria-label="comments"
             className="flex flex-col items-center text-muted-foreground"
           >
@@ -160,58 +159,29 @@ function FeedCard({ post }: { post: Post }) {
           </button>
         </div>
         <div className="min-w-0 flex-1">
-          <Poster hue={post.posterHue} caption={post.caption} mediaUrl={post.mediaUrl} />
+          {post.mediaUrl ? (
+            <>
+              <Poster hue={post.posterHue} caption={post.caption} mediaUrl={post.mediaUrl} />
+              {/* text + image: the caption belongs under the picture, not swallowed by it */}
+              {post.caption && post.caption !== "no caption" && (
+                <p className="lowkey mt-2 text-sm leading-snug break-words">{post.caption}</p>
+              )}
+            </>
+          ) : (
+            <Poster hue={post.posterHue} caption={post.caption} />
+          )}
+          <button
+            onClick={() => setOpenComments(true)}
+            className="lowkey mt-2 text-xs font-semibold text-muted-foreground"
+          >
+            {comments.length > 0
+              ? `view ${comments.length} comment${comments.length > 1 ? "s" : ""}`
+              : "add a comment"}
+          </button>
         </div>
       </div>
 
-
-      {openComments && (
-        <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-muted p-3">
-          {comments.length === 0 && (
-            <p className="lowkey text-xs text-muted-foreground">no comments yet, go first</p>
-          )}
-          {comments.map((c) => {
-            const ca = state.profiles.find((p) => p.id === c.authorId);
-            return (
-              <p key={c.id} className="lowkey text-xs">
-                {ca ? (
-                  <Link
-                    {...(ca.id === me?.id
-                      ? { to: "/profile" as const }
-                      : { to: "/u/$handle" as const, params: { handle: ca.handle } })}
-                    className="font-semibold"
-                  >
-                    @{ca.handle}
-                  </Link>
-                ) : (
-                  <span className="font-semibold">someone</span>
-                )}{" "}
-                {c.body}
-              </p>
-            );
-          })}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void addComment(post.id, draft);
-              setDraft("");
-            }}
-            className="flex gap-2"
-          >
-
-            <input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              maxLength={200}
-              placeholder="say something"
-              className="lowkey flex-1 rounded-full bg-background px-3 py-2 text-xs outline-none"
-            />
-            <button className="lowkey rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground">
-              send
-            </button>
-          </form>
-        </div>
-      )}
+      {openComments && <CommentsSheet postId={post.id} onClose={() => setOpenComments(false)} />}
     </article>
   );
 }
