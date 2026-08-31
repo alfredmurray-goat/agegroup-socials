@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookmarks: {
         Row: {
           created_at: string
@@ -368,6 +401,7 @@ export type Database = {
           kind: string
           media_url: string | null
           poster_hue: number
+          source: string
           tagged_handle: string | null
           topic: string | null
         }
@@ -380,6 +414,7 @@ export type Database = {
           kind?: string
           media_url?: string | null
           poster_hue?: number
+          source?: string
           tagged_handle?: string | null
           topic?: string | null
         }
@@ -392,6 +427,7 @@ export type Database = {
           kind?: string
           media_url?: string | null
           poster_hue?: number
+          source?: string
           tagged_handle?: string | null
           topic?: string | null
         }
@@ -408,6 +444,8 @@ export type Database = {
       profiles: {
         Row: {
           age_band: Database["public"]["Enums"]["age_band"] | null
+          allow_comments: string
+          allow_dms: string
           avatar_hue: number
           avatar_url: string | null
           bio: string
@@ -417,12 +455,16 @@ export type Database = {
           daily_limit_minutes: number
           display_name: string
           handle: string
+          hide_from_search: boolean
           id: string
           interests: string[]
           is_demo: boolean
+          is_private: boolean
           onboarded_at: string | null
           pronouns: string | null
           quiet_hours: boolean
+          reduce_motion: boolean
+          theme: string
           user_id: string | null
           verification_status: string
           verified_provider: string | null
@@ -430,6 +472,8 @@ export type Database = {
         }
         Insert: {
           age_band?: Database["public"]["Enums"]["age_band"] | null
+          allow_comments?: string
+          allow_dms?: string
           avatar_hue?: number
           avatar_url?: string | null
           bio?: string
@@ -439,12 +483,16 @@ export type Database = {
           daily_limit_minutes?: number
           display_name: string
           handle: string
+          hide_from_search?: boolean
           id?: string
           interests?: string[]
           is_demo?: boolean
+          is_private?: boolean
           onboarded_at?: string | null
           pronouns?: string | null
           quiet_hours?: boolean
+          reduce_motion?: boolean
+          theme?: string
           user_id?: string | null
           verification_status?: string
           verified_provider?: string | null
@@ -452,6 +500,8 @@ export type Database = {
         }
         Update: {
           age_band?: Database["public"]["Enums"]["age_band"] | null
+          allow_comments?: string
+          allow_dms?: string
           avatar_hue?: number
           avatar_url?: string | null
           bio?: string
@@ -461,12 +511,16 @@ export type Database = {
           daily_limit_minutes?: number
           display_name?: string
           handle?: string
+          hide_from_search?: boolean
           id?: string
           interests?: string[]
           is_demo?: boolean
+          is_private?: boolean
           onboarded_at?: string | null
           pronouns?: string | null
           quiet_hours?: boolean
+          reduce_motion?: boolean
+          theme?: string
           user_id?: string | null
           verification_status?: string
           verified_provider?: string | null
