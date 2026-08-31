@@ -22,6 +22,20 @@
       "when": 1788183972914,
       "tag": "0002_profile_onboarding_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788186266712,
+      "tag": "0003_lowkey_bookmarks_notifications_avatars",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788186294236,
+      "tag": "0004_lowkey_storage_policies",
+      "breakpoints": true
     }
   ]
 }

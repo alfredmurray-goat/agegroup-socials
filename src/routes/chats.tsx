@@ -36,7 +36,12 @@ function ChatsPage() {
               params={{ id: conversation.id }}
               className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted"
             >
-              <Avatar hue={other.avatarHue} label={other.displayName} ring={unread} />
+              <Avatar
+                hue={other.avatarHue}
+                label={other.displayName}
+                src={other.avatarUrl}
+                ring={unread}
+              />
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
                   <span className="lowkey truncate text-sm font-semibold">@{other.handle}</span>

@@ -24,30 +24,46 @@ export const Route = createFileRoute("/create")({
 const filters = ["none", "warm", "cool", "faded", "punch"] as const;
 
 function CreatePage() {
-  const { createPost } = useLowkey();
+  const { createPost, uploadMedia } = useLowkey();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [kind, setKind] = useState<PostKind>("post");
   const [caption, setCaption] = useState("");
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [mediaPath, setMediaPath] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [filter, setFilter] = useState<(typeof filters)[number]>("none");
 
-  const pick = (file: File | undefined) => {
+  const pick = async (file: File | undefined) => {
     if (!file) return;
-    if (file.size > 8_000_000) {
-      toast.error("keep it under 8mb for now");
+    if (file.size > 50_000_000) {
+      toast.error("keep it under 50mb");
       return;
     }
     setKind(file.type.startsWith("video") ? "video" : "post");
-    setMediaUrl(URL.createObjectURL(file));
+    setBusy(true);
+    const uploaded = await uploadMedia(file);
+    setBusy(false);
+    if (!uploaded) {
+      toast.error("upload failed, try again");
+      return;
+    }
+    setMediaPath(uploaded.path);
+    setMediaUrl(uploaded.url);
   };
 
-  const submit = () => {
-    if (!caption.trim() && !mediaUrl) {
+  const submit = async () => {
+    if (!caption.trim() && !mediaPath) {
       toast.error("add a caption or some media");
       return;
     }
-    const id = createPost({ kind, caption: caption.trim() || "no caption", mediaUrl });
+    setBusy(true);
+    const id = await createPost({
+      kind,
+      caption: caption.trim() || "no caption",
+      mediaUrl: mediaPath,
+    });
+    setBusy(false);
     if (!id) {
       toast.error("verify your age first");
       return;
@@ -84,7 +100,7 @@ function CreatePage() {
               <ImagePlus className="size-8 text-muted-foreground" />
               <span className="lowkey text-sm font-semibold">drop or upload image/video</span>
               <span className="lowkey text-xs text-muted-foreground">
-                stays on your device in this preview
+                {busy ? "uploading..." : "stored in the eu, only your band can see it"}
               </span>
             </>
           )}
@@ -94,7 +110,7 @@ function CreatePage() {
           type="file"
           accept="image/*,video/*"
           className="hidden"
-          onChange={(e) => pick(e.target.files?.[0])}
+          onChange={(e) => void pick(e.target.files?.[0])}
         />
 
         <textarea
@@ -128,10 +144,11 @@ function CreatePage() {
         )}
 
         <button
-          onClick={submit}
-          className="lowkey rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground"
+          onClick={() => void submit()}
+          disabled={busy}
+          className="lowkey rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground disabled:opacity-60"
         >
-          post it
+          {busy ? "working..." : "post it"}
         </button>
       </div>
     </AppScreen>

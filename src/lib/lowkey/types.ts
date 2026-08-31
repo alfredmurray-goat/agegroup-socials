@@ -16,6 +16,7 @@ export interface Profile {
   displayName: string;
   bio: string;
   avatarHue: number;
+  avatarUrl: string | null;
   ageBand: AgeBand | null;
   verificationStatus: VerificationStatus;
   verifiedProvider: VerificationProvider | null;
@@ -76,12 +77,26 @@ export interface Streak {
   lastActiveDay: string;
 }
 
+export type NotificationKind = "follow" | "like" | "comment";
+
+export interface Notif {
+  id: string;
+  recipientId: string;
+  actorId: string;
+  kind: NotificationKind;
+  postId: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
 export interface LowkeyState {
   profiles: Profile[];
   posts: Post[];
   comments: Comment[];
   likes: { postId: string; profileId: string }[];
   follows: { followerId: string; followingId: string }[];
+  bookmarks: string[];
+  notifications: Notif[];
   conversations: Conversation[];
   messages: Message[];
   streaks: Streak[];
@@ -95,6 +110,8 @@ export const emptyState: LowkeyState = {
   comments: [],
   likes: [],
   follows: [],
+  bookmarks: [],
+  notifications: [],
   conversations: [],
   messages: [],
   streaks: [],
