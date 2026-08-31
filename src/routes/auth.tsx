@@ -52,7 +52,13 @@ function AuthPage() {
       toast.error(res.error ?? "that didn't work");
       return;
     }
+    if (res.needsEmailConfirm) {
+      toast.success("check your email to confirm, then come back and sign in");
+      setMode("in");
+      return;
+    }
     if (mode === "up") toast.success("account made. let's set you up");
+    void navigate({ to: "/onboarding", replace: true });
   };
 
   const google = async () => {

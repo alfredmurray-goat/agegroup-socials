@@ -21,7 +21,7 @@ import {
   type VerificationStatus,
 } from "./types";
 
-type Result = { ok: boolean; error?: string };
+type Result = { ok: boolean; error?: string; needsEmailConfirm?: boolean };
 
 interface ProfileDraft {
   handle: string;
@@ -269,12 +269,19 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const signUp = useCallback(async (email: string, password: string): Promise<Result> => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: { emailRedirectTo: `${window.location.origin}/onboarding` },
     });
     if (error) return { ok: false, error: error.message.toLowerCase() };
+    // no session means email confirmation is on: sign in explicitly if we can
+    if (!data.session) {
+      const retry = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (retry.error) {
+        return { ok: true, needsEmailConfirm: true };
+      }
+    }
     await refresh();
     return { ok: true };
   }, [refresh]);
