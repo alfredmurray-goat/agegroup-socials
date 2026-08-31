@@ -96,12 +96,10 @@ function roleOf(el: HTMLElement): string | null {
 /** what a screen reader would announce for an element. */
 export function describeElement(el: HTMLElement): string {
   const parts: string[] = [];
+  const labelledBy = el.getAttribute("aria-labelledby");
   const label =
     el.getAttribute("aria-label") ??
-    (el.getAttribute("aria-labelledby")
-      ? (document.getElementById(el.getAttribute("aria-labelledby")!)?.textContent ?? "")
-      : "") ??
-    "";
+    (labelledBy ? (document.getElementById(labelledBy)?.textContent ?? "") : "");
   const own = (el.innerText || el.textContent || "").trim();
   const alt = el.querySelector("img[alt]")?.getAttribute("alt") ?? "";
   const placeholder = (el as HTMLInputElement).placeholder ?? "";
