@@ -3,6 +3,7 @@ import { Flame, House, MessageCircle, Plus, Play, User, Search } from "lucide-re
 import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
+import logoAsset from "@/assets/lowkey-logo.png.asset.json";
 
 export function Avatar({
   hue,
@@ -82,11 +83,52 @@ export function StreakPill({ count }: { count: number }) {
   );
 }
 
+export function LowkeyMark({ size = 32 }: { size?: number }) {
+  return (
+    <img
+      src={logoAsset.url}
+      alt="lowkey social logo"
+      width={size}
+      height={size}
+      className="rounded-xl"
+      style={{ width: size, height: size }}
+    />
+  );
+}
+
+export function BetaTag({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "lowkey rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wide text-primary-foreground",
+        className,
+      )}
+    >
+      beta
+    </span>
+  );
+}
+
+export const FEEDBACK_EMAIL = "alfredcasper1010@gmail.com";
+
+export function FeedbackLink({ className }: { className?: string }) {
+  return (
+    <a
+      href={`mailto:${FEEDBACK_EMAIL}?subject=lowkey social beta feedback`}
+      className={cn("lowkey font-semibold underline underline-offset-2", className)}
+    >
+      {FEEDBACK_EMAIL}
+    </a>
+  );
+}
+
 export function TopBar({ title = "lowkey social" }: { title?: string }) {
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
-      <Link to="/" className="lowkey text-lg leading-5 font-bold tracking-tight">
-        {title}
+      <Link to="/" className="flex items-center gap-2">
+        <LowkeyMark size={28} />
+        <span className="lowkey text-lg leading-5 font-bold tracking-tight">{title}</span>
+        <BetaTag />
       </Link>
       <Link
         to="/search"
