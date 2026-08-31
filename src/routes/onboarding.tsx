@@ -33,6 +33,7 @@ const paces = [
 
 const hues = [48, 60, 96, 160, 200, 250, 290, 330];
 const limitOptions = [15, 30, 45, 60, 90];
+const STEP_KEY = "lowkey.onboarding.step";
 
 function OnboardingPage() {
   const {
@@ -46,7 +47,16 @@ function OnboardingPage() {
   } = useLowkey();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(0);
+  // the step survives remounts (auth state settling can remount this route)
+  const [step, setStep] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    const saved = Number(window.sessionStorage.getItem(STEP_KEY) ?? "0");
+    return Number.isFinite(saved) && saved >= 0 && saved <= 3 ? saved : 0;
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") window.sessionStorage.setItem(STEP_KEY, String(step));
+  }, [step]);
   const [busy, setBusy] = useState(false);
 
   const [handle, setHandle] = useState("");
@@ -72,6 +82,10 @@ function OnboardingPage() {
       void navigate({ to: "/", replace: true });
     }
   }, [me, needsProfile, loading, navigate]);
+
+  useEffect(() => {
+    if (me && step === 0 && me.handle) setStep((prev) => (prev === 0 ? 1 : prev));
+  }, [me, step]);
 
   useEffect(() => {
     if (me && step === 0) {
@@ -145,6 +159,7 @@ function OnboardingPage() {
       toast.error(res.error ?? "couldn't save that");
       return;
     }
+    if (typeof window !== "undefined") window.sessionStorage.removeItem(STEP_KEY);
     void navigate({ to: "/verify" });
   };
 
