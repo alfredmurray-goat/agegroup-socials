@@ -39,3 +39,4 @@
 - settings > accessibility: text size (normal/large/larger/largest, scales whole ui), high contrast mode (light + dark), bolder text
 - prefs saved to the profile and cached locally so they apply instantly on next load
 - always-visible focus rings, skip-to-content link, single main landmark, bigger tap targets, no more 10px text, honours the device reduce-motion setting
+- built-in read-aloud (screen reader): settings > accessibility toggle + speed (slow/normal/fast), announces each screen, reads focused/tapped items, floating play/pause/stop bar, alt+r read page / alt+s stop. web speech api, on-device, per browser

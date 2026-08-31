@@ -17,6 +17,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen, bandLabel, BetaTag, FeedbackLink } from "@/components/lowkey/shell";
+import {
+  readAloudEnabled,
+  readAloudRate,
+  setReadAloud,
+  setReadAloudRate,
+} from "@/components/lowkey/readaloud";
+import { speak, speechSupported, type SpeechRate } from "@/lib/lowkey/speak";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
 import {
   INTERESTS,
@@ -50,6 +57,7 @@ const audiences: Audience[] = ["everyone", "followers", "nobody"];
 const themes: ThemePref[] = ["system", "light", "dark"];
 const textScales: TextScale[] = ["normal", "large", "larger", "largest"];
 const paces = ["slow", "balanced", "fast"];
+const speechRates: SpeechRate[] = ["slow", "normal", "fast"];
 
 function Section({
   icon,
@@ -158,6 +166,8 @@ function SettingsPage() {
     signOutEverywhere,
     importFromInstagram,
   } = useLowkey();
+  const [readAloud, setReadAloudState] = useState(() => readAloudEnabled());
+  const [speechRate, setSpeechRate] = useState<SpeechRate>(() => readAloudRate());
   const usage = useTodayUsage();
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -376,6 +386,41 @@ function SettingsPage() {
             value={me.boldText}
             onChange={(v) => void save({ boldText: v }, "text weight updated")}
           />
+          <div className="rounded-2xl border border-border p-3">
+            <Toggle
+              label="read aloud"
+              hint="built-in screen reader: reads the screen you open, plus anything you tap or focus. runs on your device, nothing is sent anywhere"
+              value={readAloud}
+              onChange={(v) => {
+                if (v && !speechSupported()) {
+                  toast.error("this browser can't do speech");
+                  return;
+                }
+                setReadAloud(v);
+                setReadAloudState(v);
+                toast.success(v ? "read aloud on" : "read aloud off");
+              }}
+            />
+            {readAloud && (
+              <div className="mt-3">
+                <p className="lowkey mb-2 text-xs font-semibold text-muted-foreground">
+                  reading speed
+                </p>
+                <Chips
+                  options={speechRates}
+                  value={speechRate}
+                  onPick={(r) => {
+                    setReadAloudRate(r);
+                    setSpeechRate(r);
+                    speak("this is how fast i'll read", r);
+                  }}
+                />
+                <p className="lowkey mt-2 text-xs text-muted-foreground">
+                  controls float above the tab bar. keyboard: alt + r reads the page, alt + s stops.
+                </p>
+              </div>
+            )}
+          </div>
           <p className="lowkey text-xs text-muted-foreground">
             lowkey also follows your device's reduce-motion setting, works with screen readers and
             can be zoomed to 200% without breaking. missing something you need?{" "}
