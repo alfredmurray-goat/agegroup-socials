@@ -89,8 +89,14 @@ function OnboardingPage() {
 
   const saveIdentity = async () => {
     const cleanHandle = handle.trim().toLowerCase().replace(/^@/, "");
-    if (cleanHandle.length < 3) return toast.error("handle needs 3+ characters");
-    if (!displayName.trim()) return toast.error("give yourself a name");
+    if (cleanHandle.length < 3) {
+      toast.error("handle needs 3+ characters");
+      return;
+    }
+    if (!displayName.trim()) {
+      toast.error("give yourself a name");
+      return;
+    }
     setBusy(true);
     const draft = {
       handle: cleanHandle,
@@ -102,7 +108,10 @@ function OnboardingPage() {
     };
     const res = me ? await updateProfile(draft) : await createProfile(draft);
     setBusy(false);
-    if (!res.ok) return toast.error(res.error ?? "couldn't save that");
+    if (!res.ok) {
+      toast.error(res.error ?? "couldn't save that");
+      return;
+    }
     setStep(1);
   };
 
@@ -116,17 +125,26 @@ function OnboardingPage() {
       dailyLimitMinutes,
     });
     setBusy(false);
-    if (!res.ok) return toast.error(res.error ?? "couldn't save that");
+    if (!res.ok) {
+      toast.error(res.error ?? "couldn't save that");
+      return;
+    }
     setStep(3);
   };
 
   const goVerify = async () => {
-    if (!terms) return toast.error("tick the box first");
+    if (!terms) {
+      toast.error("tick the box first");
+      return;
+    }
     setBusy(true);
     await recordConsent("terms_and_privacy");
     const res = await finishOnboarding();
     setBusy(false);
-    if (!res.ok) return toast.error(res.error ?? "couldn't save that");
+    if (!res.ok) {
+      toast.error(res.error ?? "couldn't save that");
+      return;
+    }
     void navigate({ to: "/verify" });
   };
 
