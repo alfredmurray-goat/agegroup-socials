@@ -135,26 +135,30 @@ function FeedCard({ post }: { post: Post }) {
           <button
             onClick={() => void toggleLike(post.id)}
             aria-label="like"
-            className="flex flex-col items-center text-muted-foreground"
+            className="flex min-h-11 min-w-11 flex-col items-center justify-center text-muted-foreground"
           >
             <Heart className={liked ? "size-6 fill-primary text-primary" : "size-6"} />
-            <span className="text-[10px] font-semibold">{likes.length}</span>
+            <span className="text-xs font-semibold">{likes.length}</span>
           </button>
           <button
             onClick={() => setOpenComments(true)}
             aria-label="comments"
-            className="flex flex-col items-center text-muted-foreground"
+            className="flex min-h-11 min-w-11 flex-col items-center justify-center text-muted-foreground"
           >
             <MessageSquare className="size-6" />
-            <span className="text-[10px] font-semibold">{comments.length}</span>
+            <span className="text-xs font-semibold">{comments.length}</span>
           </button>
-          <Link to="/chats" aria-label="share" className="text-muted-foreground">
+          <Link
+            to="/chats"
+            aria-label="share"
+            className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground"
+          >
             <Send className="size-6" />
           </Link>
           <button
             onClick={() => void toggleBookmark(post.id)}
             aria-label={saved ? "remove bookmark" : "save post"}
-            className="text-muted-foreground"
+            className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground"
           >
             <Bookmark className={saved ? "size-6 fill-primary text-primary" : "size-6"} />
           </button>

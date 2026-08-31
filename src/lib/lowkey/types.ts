@@ -35,10 +35,16 @@ export interface Profile {
   hideFromSearch: boolean;
   theme: ThemePref;
   reduceMotion: boolean;
+  textScale: TextScale;
+  highContrast: boolean;
+  boldText: boolean;
 }
 
 export type Audience = "everyone" | "followers" | "nobody";
 export type ThemePref = "system" | "light" | "dark";
+
+/** low-vision text sizing, applied to the root font size */
+export type TextScale = "normal" | "large" | "larger" | "largest";
 
 export type PostKind = "post" | "video";
 

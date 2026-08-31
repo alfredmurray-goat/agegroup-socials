@@ -126,7 +126,7 @@ export function BetaTag({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "lowkey rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wide text-primary-foreground",
+        "lowkey rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold tracking-wide text-primary-foreground",
         className,
       )}
     >
@@ -305,7 +305,7 @@ export function BottomNav() {
                 >
                   <Icon className="size-5" />
                 </span>
-                <span className="lowkey text-[10px]">{label}</span>
+                <span className="lowkey text-[11px]">{label}</span>
               </Link>
             </li>
           );
@@ -387,7 +387,15 @@ export function AppScreen({
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-background">
       {chrome && <TopBar {...(title ? { title } : {})} />}
-      <main className="flex-1">{children}</main>
+      <a
+        href="#main"
+        className="lowkey sr-only rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
+      >
+        skip to content
+      </a>
+      <main id="main" className="flex-1">
+        {children}
+      </main>
       <div className="pb-24">
         <SiteFooter />
       </div>

@@ -19,6 +19,7 @@ import {
   type AgeBand,
   type Audience,
   type ThemePref,
+  type TextScale,
   type LowkeyState,
   type Notif,
   type PostKind,
@@ -56,6 +57,9 @@ interface OnboardingPrefs {
   hideFromSearch?: boolean;
   theme?: ThemePref;
   reduceMotion?: boolean;
+  textScale?: TextScale;
+  highContrast?: boolean;
+  boldText?: boolean;
 }
 
 export interface ImportProgress {
@@ -167,6 +171,9 @@ function toProfile(r: Row): Profile {
     hideFromSearch: Boolean(r['hide_from_search']),
     theme: (r['theme'] as ThemePref) ?? "system",
     reduceMotion: Boolean(r['reduce_motion']),
+    textScale: (r['text_scale'] as TextScale) ?? "normal",
+    highContrast: Boolean(r['high_contrast']),
+    boldText: Boolean(r['bold_text']),
   };
 }
 
@@ -455,6 +462,9 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         ...(prefs.hideFromSearch !== undefined ? { hide_from_search: prefs.hideFromSearch } : {}),
         ...(prefs.theme ? { theme: prefs.theme } : {}),
         ...(prefs.reduceMotion !== undefined ? { reduce_motion: prefs.reduceMotion } : {}),
+        ...(prefs.textScale ? { text_scale: prefs.textScale } : {}),
+        ...(prefs.highContrast !== undefined ? { high_contrast: prefs.highContrast } : {}),
+        ...(prefs.boldText !== undefined ? { bold_text: prefs.boldText } : {}),
       };
       const { error } = await supabase.from("profiles").update(patch).eq("id", id);
       if (error) return { ok: false, error: error.message.toLowerCase() };
@@ -946,7 +956,21 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       (pref === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
     root.classList.toggle("dark", dark);
     root.classList.toggle("reduce-motion", Boolean(me?.reduceMotion));
-  }, [me?.theme, me?.reduceMotion]);
+
+    // low-vision prefs. cached locally too, so they apply on the very next load
+    // before the profile has finished fetching.
+    const scale = me?.textScale ?? (localStorage.getItem("lowkey.textScale") as TextScale | null) ?? "normal";
+    const contrast = me ? me.highContrast : localStorage.getItem("lowkey.highContrast") === "1";
+    const bold = me ? me.boldText : localStorage.getItem("lowkey.boldText") === "1";
+    for (const s of ["large", "larger", "largest"]) root.classList.toggle(`text-${s}`, scale === s);
+    root.classList.toggle("high-contrast", contrast);
+    root.classList.toggle("bold-text", bold);
+    if (me) {
+      localStorage.setItem("lowkey.textScale", me.textScale);
+      localStorage.setItem("lowkey.highContrast", me.highContrast ? "1" : "0");
+      localStorage.setItem("lowkey.boldText", me.boldText ? "1" : "0");
+    }
+  }, [me?.theme, me?.reduceMotion, me?.textScale, me?.highContrast, me?.boldText, me]);
 
   /* ---------- live notifications ---------- */
 

@@ -34,3 +34,8 @@
 - big settings page: profile, appearance (theme, reduce motion, avatar colour), privacy & safety (private, dm/comment audience, hide from search, blocks), notifications & wellbeing, account & security (email, password, sign out everywhere)
 - real instagram import from the official data export (zip/json) -> posts, captions, media, original dates
 - photo upload fix: heic/no-mime files accepted, images re-encoded to jpeg client-side, avatar bucket 5mb -> 50mb, media 50mb -> 200mb
+
+## low-vision accessibility (done)
+- settings > accessibility: text size (normal/large/larger/largest, scales whole ui), high contrast mode (light + dark), bolder text
+- prefs saved to the profile and cached locally so they apply instantly on next load
+- always-visible focus rings, skip-to-content link, single main landmark, bigger tap targets, no more 10px text, honours the device reduce-motion setting

@@ -158,3 +158,104 @@
   transition-duration: 0.001ms !important;
   scroll-behavior: auto !important;
 }
+
+/* ---------- low-vision support ---------- */
+
+/* text sizing scales every rem-based size in the app at once */
+html.text-large { font-size: 112.5%; }
+html.text-larger { font-size: 125%; }
+html.text-largest { font-size: 140%; }
+
+/* heavier weights for people who need thicker letterforms */
+.bold-text body {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.bold-text .text-muted-foreground {
+  font-weight: 600;
+}
+
+/*
+ * high contrast pushes text to near-black on near-white (and the reverse in
+ * dark mode), darkens secondary text past wcag aaa, and makes borders visible.
+ */
+.high-contrast {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.14 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.14 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.14 0 0);
+  --primary: oklch(0.8 0.16 92);
+  --primary-foreground: oklch(0.14 0 0);
+  --primary-soft: oklch(0.96 0.06 96);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.14 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.32 0 0);
+  --accent: oklch(0.94 0.04 96);
+  --accent-foreground: oklch(0.14 0 0);
+  --destructive: oklch(0.48 0.2 25);
+  --border: oklch(0.42 0 0);
+  --input: oklch(0.32 0 0);
+  --ring: oklch(0.2 0 0);
+}
+
+.high-contrast.dark {
+  --background: oklch(0.09 0 0);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.13 0 0);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.13 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(0.9 0.17 92);
+  --primary-foreground: oklch(0.09 0 0);
+  --primary-soft: oklch(0.28 0.05 92);
+  --secondary: oklch(0.2 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.88 0 0);
+  --accent: oklch(0.26 0.03 92);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.72 0.2 25);
+  --border: oklch(0.78 0 0);
+  --input: oklch(0.82 0 0);
+  --ring: oklch(0.98 0 0);
+}
+
+/* borders and links need to be seen, not guessed at */
+.high-contrast * {
+  border-color: var(--border);
+}
+.high-contrast a,
+.high-contrast [role="link"] {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.high-contrast img,
+.high-contrast video {
+  outline: 2px solid var(--border);
+  outline-offset: -2px;
+}
+
+/* a focus ring you can actually find, everywhere, always */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.high-contrast :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline-width: 4px;
+}
+
+/* respect the operating system's own accessibility switches */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

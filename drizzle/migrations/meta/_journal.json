@@ -43,6 +43,13 @@
       "when": 1788201504493,
       "tag": "0005_settings_privacy_and_import",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788202087071,
+      "tag": "0006_accessibility_prefs",
+      "breakpoints": true
     }
   ]
 }
