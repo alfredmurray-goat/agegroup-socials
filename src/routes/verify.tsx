@@ -280,7 +280,7 @@ function ProviderSheet({
 /* -------------------------------------------------------------------- page */
 
 function VerifyPage() {
-  const { me, verifyAge } = useLowkey();
+  const { me, verifyAge, recordConsent } = useLowkey();
   const navigate = useNavigate();
   const [open, setOpen] = useState<VerificationProvider | null>(null);
 
@@ -294,8 +294,9 @@ function VerifyPage() {
     }
   }, [me, navigate]);
 
-  const finish = (band: AgeBand, provider: VerificationProvider) => {
-    verifyAge(band, provider);
+  const finish = async (band: AgeBand, provider: VerificationProvider) => {
+    await recordConsent(provider === "face_scan" ? "on_device_face_scan" : `eid_${provider}`);
+    await verifyAge(band, provider);
     setOpen(null);
     void navigate({ to: "/", replace: true });
   };
@@ -358,13 +359,13 @@ function VerifyPage() {
       </p>
 
       {open === "face_scan" && (
-        <FaceScanSheet onCancel={() => setOpen(null)} onDone={(band) => finish(band, "face_scan")} />
+        <FaceScanSheet onCancel={() => setOpen(null)} onDone={(band) => void finish(band, "face_scan")} />
       )}
       {open && open !== "face_scan" && (
         <ProviderSheet
           provider={open}
           onCancel={() => setOpen(null)}
-          onDone={(band) => finish(band, open)}
+          onDone={(band) => void finish(band, open)}
         />
       )}
     </div>

@@ -218,19 +218,28 @@ export function AppScreen({
   chrome?: boolean;
   title?: string;
 }) {
-  const { me, addUsageMinute } = useLowkey();
+  const { me, needsProfile, loading, addUsageMinute } = useLowkey();
   const usage = useTodayUsage();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (loading) return;
+    if (needsProfile) {
+      void navigate({ to: "/onboarding", replace: true });
+      return;
+    }
     if (!me) {
       void navigate({ to: "/auth", replace: true });
+      return;
+    }
+    if (!me.onboardedAt) {
+      void navigate({ to: "/onboarding", replace: true });
       return;
     }
     if (me.verificationStatus !== "verified" || !me.ageBand) {
       void navigate({ to: "/verify", replace: true });
     }
-  }, [me, navigate]);
+  }, [me, needsProfile, loading, navigate]);
 
   useEffect(() => {
     if (!me) return;
