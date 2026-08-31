@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart, MessageSquare, Send, Bookmark } from "lucide-react";
 import { useState } from "react";
 import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
+import { CommentsSheet } from "@/components/lowkey/comments";
 import { useBandPosts, useLowkey } from "@/lib/lowkey/store";
 import type { Post } from "@/lib/lowkey/types";
 
