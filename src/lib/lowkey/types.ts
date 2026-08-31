@@ -99,6 +99,8 @@ export interface Notif {
 }
 
 export interface LowkeyState {
+  /** profile ids i have blocked */
+  blocks: string[];
   profiles: Profile[];
   posts: Post[];
   comments: Comment[];
