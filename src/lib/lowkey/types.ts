@@ -29,7 +29,16 @@ export interface Profile {
   contentPace: string;
   quietHours: boolean;
   onboardedAt: string | null;
+  isPrivate: boolean;
+  allowDms: Audience;
+  allowComments: Audience;
+  hideFromSearch: boolean;
+  theme: ThemePref;
+  reduceMotion: boolean;
 }
+
+export type Audience = "everyone" | "followers" | "nobody";
+export type ThemePref = "system" | "light" | "dark";
 
 export type PostKind = "post" | "video";
 
@@ -90,6 +99,8 @@ export interface Notif {
 }
 
 export interface LowkeyState {
+  /** profile ids i have blocked */
+  blocks: string[];
   profiles: Profile[];
   posts: Post[];
   comments: Comment[];
@@ -105,6 +116,7 @@ export interface LowkeyState {
 }
 
 export const emptyState: LowkeyState = {
+  blocks: [],
   profiles: [],
   posts: [],
   comments: [],

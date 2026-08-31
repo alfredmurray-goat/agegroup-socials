@@ -11,10 +11,14 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { parseInstagramExport } from "./instagram";
+import { prepareImage } from "./image";
 import {
   dayKey,
   emptyState,
   type AgeBand,
+  type Audience,
+  type ThemePref,
   type LowkeyState,
   type Notif,
   type PostKind,
@@ -42,9 +46,21 @@ interface OnboardingPrefs {
   dailyLimitMinutes?: number;
   bio?: string;
   displayName?: string;
+  handle?: string;
   avatarHue?: number;
   pronouns?: string | null;
   city?: string | null;
+  isPrivate?: boolean;
+  allowDms?: Audience;
+  allowComments?: Audience;
+  hideFromSearch?: boolean;
+  theme?: ThemePref;
+  reduceMotion?: boolean;
+}
+
+export interface ImportProgress {
+  done: number;
+  total: number;
 }
 
 interface LowkeyApi {
@@ -84,6 +100,14 @@ interface LowkeyApi {
   refresh: () => Promise<void>;
   exportMyData: () => Promise<unknown>;
   deleteMyAccount: () => Promise<Result>;
+  toggleBlock: (profileId: string) => Promise<void>;
+  changeEmail: (email: string) => Promise<Result>;
+  changePassword: (password: string) => Promise<Result>;
+  signOutEverywhere: () => Promise<Result>;
+  importFromInstagram: (
+    file: File,
+    onProgress?: (p: ImportProgress) => void,
+  ) => Promise<{ ok: boolean; imported?: number; error?: string }>;
 }
 
 const LowkeyContext = createContext<LowkeyApi | null>(null);
@@ -137,6 +161,12 @@ function toProfile(r: Row): Profile {
     contentPace: (r['content_pace'] as string) ?? "balanced",
     quietHours: Boolean(r['quiet_hours']),
     onboardedAt: (r['onboarded_at'] as string | null) ?? null,
+    isPrivate: Boolean(r['is_private']),
+    allowDms: (r['allow_dms'] as Audience) ?? "everyone",
+    allowComments: (r['allow_comments'] as Audience) ?? "everyone",
+    hideFromSearch: Boolean(r['hide_from_search']),
+    theme: (r['theme'] as ThemePref) ?? "system",
+    reduceMotion: Boolean(r['reduce_motion']),
   };
 }
 
@@ -192,6 +222,7 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       usageRes,
       bookmarksRes,
       notifsRes,
+      blocksRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("posts").select("*").order("created_at", { ascending: false }),
@@ -208,6 +239,7 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(60),
+      supabase.from("blocks").select("*"),
     ]);
 
     const members = (memberRes.data ?? []) as Row[];
@@ -241,6 +273,7 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     setState({
       currentUserId: mine.id,
       profiles,
+      blocks: ((blocksRes.data ?? []) as Row[]).map((r) => r['blocked_id'] as string),
       bookmarks: ((bookmarksRes.data ?? []) as Row[]).map((r) => r['post_id'] as string),
       notifications: ((notifsRes.data ?? []) as Row[]).map((r) => ({
         id: r['id'] as string,
@@ -415,6 +448,13 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         ...(prefs.avatarHue !== undefined ? { avatar_hue: prefs.avatarHue } : {}),
         ...(prefs.pronouns !== undefined ? { pronouns: prefs.pronouns } : {}),
         ...(prefs.city !== undefined ? { city: prefs.city } : {}),
+        ...(prefs.handle ? { handle: prefs.handle.trim().toLowerCase().replace(/^@/, "") } : {}),
+        ...(prefs.isPrivate !== undefined ? { is_private: prefs.isPrivate } : {}),
+        ...(prefs.allowDms ? { allow_dms: prefs.allowDms } : {}),
+        ...(prefs.allowComments ? { allow_comments: prefs.allowComments } : {}),
+        ...(prefs.hideFromSearch !== undefined ? { hide_from_search: prefs.hideFromSearch } : {}),
+        ...(prefs.theme ? { theme: prefs.theme } : {}),
+        ...(prefs.reduceMotion !== undefined ? { reduce_motion: prefs.reduceMotion } : {}),
       };
       const { error } = await supabase.from("profiles").update(patch).eq("id", id);
       if (error) return { ok: false, error: error.message.toLowerCase() };
@@ -632,10 +672,13 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
   /* ---------- uploads (private buckets, read through signed urls) ---------- */
 
   const uploadAvatar = useCallback(
-    async (file: File): Promise<Result> => {
+    async (raw: File): Promise<Result> => {
       const id = meIdRef.current;
       const { data: auth } = await supabase.auth.getUser();
       if (!id || !auth.user) return { ok: false, error: "sign in first" };
+      // phone photos are big and often heic, so re-encode to a small jpeg first
+      const file = await prepareImage(raw);
+      if (file.size > 15_000_000) return { ok: false, error: "that photo is too big" };
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const path = `${auth.user.id}/avatar-${Date.now()}.${ext}`;
       const up = await supabase.storage
@@ -650,9 +693,10 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     [refresh],
   );
 
-  const uploadMedia = useCallback(async (file: File) => {
+  const uploadMedia = useCallback(async (raw: File) => {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return null;
+    const file = raw.type.startsWith("video/") ? raw : await prepareImage(raw);
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
     const path = `${auth.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const up = await supabase.storage
@@ -805,6 +849,105 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   }, []);
 
+  /* ---------- blocking + account ---------- */
+
+  const toggleBlock = useCallback(
+    async (profileId: string) => {
+      const id = meIdRef.current;
+      if (!id || profileId === id) return;
+      const has = state.blocks.includes(profileId);
+      setState((s) => ({
+        ...s,
+        blocks: has ? s.blocks.filter((b) => b !== profileId) : [...s.blocks, profileId],
+      }));
+      const { error } = has
+        ? await supabase.from("blocks").delete().eq("blocker_id", id).eq("blocked_id", profileId)
+        : await supabase.from("blocks").insert({ blocker_id: id, blocked_id: profileId });
+      if (error) await refresh();
+    },
+    [refresh, state.blocks],
+  );
+
+  const changeEmail = useCallback(async (email: string): Promise<Result> => {
+    const { error } = await supabase.auth.updateUser({ email: email.trim() });
+    if (error) return { ok: false, error: error.message.toLowerCase() };
+    return { ok: true };
+  }, []);
+
+  const changePassword = useCallback(async (password: string): Promise<Result> => {
+    if (password.length < 6) return { ok: false, error: "at least 6 characters" };
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { ok: false, error: error.message.toLowerCase() };
+    return { ok: true };
+  }, []);
+
+  const signOutEverywhere = useCallback(async (): Promise<Result> => {
+    const { error } = await supabase.auth.signOut({ scope: "global" });
+    if (error) return { ok: false, error: error.message.toLowerCase() };
+    setState(emptyState);
+    return { ok: true };
+  }, []);
+
+  /* ---------- instagram data-export import (real posts, no meta app needed) ---------- */
+
+  const importFromInstagram = useCallback(
+    async (file: File, onProgress?: (p: ImportProgress) => void) => {
+      const author = me;
+      if (!author?.ageBand || author.verificationStatus !== "verified") {
+        return { ok: false, error: "verify your age first" };
+      }
+      let items;
+      try {
+        items = await parseInstagramExport(file);
+      } catch {
+        return { ok: false, error: "couldn't read that export file" };
+      }
+      if (items.length === 0) {
+        return { ok: false, error: "no posts found in that export" };
+      }
+
+      let imported = 0;
+      for (const [index, item] of items.entries()) {
+        onProgress?.({ done: index, total: items.length });
+        let mediaPath: string | null = null;
+        if (item.file) {
+          const up = await uploadMedia(item.file);
+          if (!up) continue;
+          mediaPath = up.path;
+        }
+        const { error } = await supabase.from("posts").insert({
+          author_id: author.id,
+          kind: item.kind,
+          caption: item.caption.toLowerCase().slice(0, 2000),
+          media_url: mediaPath,
+          poster_hue: Math.floor(Math.random() * 360),
+          age_band: author.ageBand,
+          created_at: item.createdAt,
+          source: "instagram",
+        });
+        if (!error) imported += 1;
+      }
+      onProgress?.({ done: items.length, total: items.length });
+      await refresh();
+      return imported > 0
+        ? { ok: true, imported }
+        : { ok: false, error: "nothing could be imported" };
+    },
+    [me, refresh, uploadMedia],
+  );
+
+  /* ---------- appearance preferences ---------- */
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const pref = me?.theme ?? "system";
+    const dark =
+      pref === "dark" ||
+      (pref === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    root.classList.toggle("dark", dark);
+    root.classList.toggle("reduce-motion", Boolean(me?.reduceMotion));
+  }, [me?.theme, me?.reduceMotion]);
+
   /* ---------- live notifications ---------- */
 
   useEffect(() => {
@@ -891,6 +1034,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       refresh,
       exportMyData,
       deleteMyAccount,
+      toggleBlock,
+      changeEmail,
+      changePassword,
+      signOutEverywhere,
+      importFromInstagram,
     }),
     [
       state,
@@ -923,6 +1071,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       refresh,
       exportMyData,
       deleteMyAccount,
+      toggleBlock,
+      changeEmail,
+      changePassword,
+      signOutEverywhere,
+      importFromInstagram,
     ],
   );
 

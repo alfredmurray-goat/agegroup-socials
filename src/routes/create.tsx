@@ -39,14 +39,18 @@ function CreatePage() {
 
   const pick = async (file: File | undefined) => {
     if (!file) return;
-    const isVideo = file.type.startsWith("video");
-    const isImage = file.type.startsWith("image");
+    const isVideo = file.type.startsWith("video") || /\.(mp4|mov|m4v|webm)$/i.test(file.name);
+    // some phones hand over an empty mime type for heic photos, so trust the name too
+    const isImage =
+      file.type.startsWith("image") ||
+      /\.(jpe?g|png|webp|gif|heic|heif|avif)$/i.test(file.name) ||
+      (!isVideo && file.type === "");
     if (!isVideo && !isImage) {
       toast.error("images and videos only");
       return;
     }
-    if (file.size > 50_000_000) {
-      toast.error("keep it under 50mb");
+    if (file.size > 200_000_000) {
+      toast.error("keep it under 200mb");
       return;
     }
     setUploading(true);
@@ -162,7 +166,7 @@ function CreatePage() {
         <input
           ref={inputRef}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*,video/*,.heic,.heif"
           className="hidden"
           onChange={(e) => void pick(e.target.files?.[0])}
         />
