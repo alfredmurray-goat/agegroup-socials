@@ -47,8 +47,8 @@ function FeedCard({ post }: { post: Post }) {
         <div className="min-w-0">
           <p className="lowkey truncate text-sm font-semibold">@{author.handle}</p>
           <p className="lowkey text-xs text-muted-foreground">
-            {post.caption}
-            {post.taggedHandle ? ` @${post.taggedHandle}` : ""} · {timeAgo(post.createdAt)}
+            {post.taggedHandle ? `w/ @${post.taggedHandle} · ` : ""}
+            {timeAgo(post.createdAt)}
           </p>
         </div>
       </div>
