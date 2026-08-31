@@ -66,7 +66,7 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
                 <Avatar
                   hue={author?.avatarHue ?? 60}
                   label={author?.displayName ?? "someone"}
-                  src={author?.avatarUrl}
+                  src={author?.avatarUrl ?? null}
                   size={30}
                 />
                 <div className="min-w-0 flex-1">
@@ -98,7 +98,7 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
           }}
           className="flex items-center gap-2 border-t border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
         >
-          <Avatar hue={me?.avatarHue ?? 60} label={me?.displayName ?? "me"} src={me?.avatarUrl} size={30} />
+          <Avatar hue={me?.avatarHue ?? 60} label={me?.displayName ?? "me"} src={me?.avatarUrl ?? null} size={30} />
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
