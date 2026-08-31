@@ -844,6 +844,93 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     return { ok: true };
   }, []);
 
+  /* ---------- blocking + account ---------- */
+
+  const toggleBlock = useCallback(
+    async (profileId: string) => {
+      const id = meIdRef.current;
+      if (!id || profileId === id) return;
+      const has = state.blocks.includes(profileId);
+      setState((s) => ({
+        ...s,
+        blocks: has ? s.blocks.filter((b) => b !== profileId) : [...s.blocks, profileId],
+      }));
+      const { error } = has
+        ? await supabase.from("blocks").delete().eq("blocker_id", id).eq("blocked_id", profileId)
+        : await supabase.from("blocks").insert({ blocker_id: id, blocked_id: profileId });
+      if (error) await refresh();
+    },
+    [refresh, state.blocks],
+  );
+
+  const changeEmail = useCallback(async (email: string): Promise<Result> => {
+    const { error } = await supabase.auth.updateUser({ email: email.trim() });
+    if (error) return { ok: false, error: error.message.toLowerCase() };
+    return { ok: true };
+  }, []);
+
+  const changePassword = useCallback(async (password: string): Promise<Result> => {
+    if (password.length < 6) return { ok: false, error: "at least 6 characters" };
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { ok: false, error: error.message.toLowerCase() };
+    return { ok: true };
+  }, []);
+
+  const signOutEverywhere = useCallback(async (): Promise<Result> => {
+    const { error } = await supabase.auth.signOut({ scope: "global" });
+    if (error) return { ok: false, error: error.message.toLowerCase() };
+    setState(emptyState);
+    return { ok: true };
+  }, []);
+
+  /* ---------- instagram data-export import (real posts, no meta app needed) ---------- */
+
+  const importFromInstagram = useCallback(
+    async (file: File, onProgress?: (p: ImportProgress) => void) => {
+      const author = me;
+      if (!author?.ageBand || author.verificationStatus !== "verified") {
+        return { ok: false, error: "verify your age first" };
+      }
+      let items;
+      try {
+        items = await parseInstagramExport(file);
+      } catch {
+        return { ok: false, error: "couldn't read that export file" };
+      }
+      if (items.length === 0) {
+        return { ok: false, error: "no posts found in that export" };
+      }
+
+      let imported = 0;
+      for (const [index, item] of items.entries()) {
+        onProgress?.({ done: index, total: items.length });
+        let mediaPath: string | null = null;
+        if (item.file) {
+          const up = await uploadMedia(item.file);
+          if (!up) continue;
+          mediaPath = up.path;
+        }
+        const { error } = await supabase.from("posts").insert({
+          author_id: author.id,
+          kind: item.kind,
+          caption: item.caption.toLowerCase().slice(0, 2000),
+          media_url: mediaPath,
+          poster_hue: Math.floor(Math.random() * 360),
+          age_band: author.ageBand,
+          created_at: item.createdAt,
+          source: "instagram",
+        });
+        if (!error) imported += 1;
+      }
+      onProgress?.({ done: items.length, total: items.length });
+      await refresh();
+      return imported > 0
+        ? { ok: true, imported }
+        : { ok: false, error: "nothing could be imported" };
+    },
+    [me, refresh, uploadMedia],
+  );
+
   /* ---------- live notifications ---------- */
 
   useEffect(() => {
