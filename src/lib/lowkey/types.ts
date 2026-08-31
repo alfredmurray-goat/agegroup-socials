@@ -29,7 +29,16 @@ export interface Profile {
   contentPace: string;
   quietHours: boolean;
   onboardedAt: string | null;
+  isPrivate: boolean;
+  allowDms: Audience;
+  allowComments: Audience;
+  hideFromSearch: boolean;
+  theme: ThemePref;
+  reduceMotion: boolean;
 }
+
+export type Audience = "everyone" | "followers" | "nobody";
+export type ThemePref = "system" | "light" | "dark";
 
 export type PostKind = "post" | "video";
 
