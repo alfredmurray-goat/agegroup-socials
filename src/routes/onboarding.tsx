@@ -112,6 +112,7 @@ function OnboardingPage() {
       toast.error(res.error ?? "couldn't save that");
       return;
     }
+    console.log("DBG identity saved, going to step 1");
     setStep(1);
   };
 
