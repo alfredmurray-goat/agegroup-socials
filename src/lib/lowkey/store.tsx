@@ -218,6 +218,7 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(60),
+      supabase.from("blocks").select("*"),
     ]);
 
     const members = (memberRes.data ?? []) as Row[];
