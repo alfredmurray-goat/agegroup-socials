@@ -99,6 +99,14 @@ interface LowkeyApi {
   refresh: () => Promise<void>;
   exportMyData: () => Promise<unknown>;
   deleteMyAccount: () => Promise<Result>;
+  toggleBlock: (profileId: string) => Promise<void>;
+  changeEmail: (email: string) => Promise<Result>;
+  changePassword: (password: string) => Promise<Result>;
+  signOutEverywhere: () => Promise<Result>;
+  importFromInstagram: (
+    file: File,
+    onProgress?: (p: ImportProgress) => void,
+  ) => Promise<{ ok: boolean; imported?: number; error?: string }>;
 }
 
 const LowkeyContext = createContext<LowkeyApi | null>(null);
