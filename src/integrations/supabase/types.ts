@@ -284,6 +284,7 @@ export type Database = {
           media_url: string | null
           poster_hue: number
           tagged_handle: string | null
+          topic: string | null
         }
         Insert: {
           age_band: Database["public"]["Enums"]["age_band"]
@@ -295,6 +296,7 @@ export type Database = {
           media_url?: string | null
           poster_hue?: number
           tagged_handle?: string | null
+          topic?: string | null
         }
         Update: {
           age_band?: Database["public"]["Enums"]["age_band"]
@@ -306,6 +308,7 @@ export type Database = {
           media_url?: string | null
           poster_hue?: number
           tagged_handle?: string | null
+          topic?: string | null
         }
         Relationships: [
           {
@@ -322,43 +325,64 @@ export type Database = {
           age_band: Database["public"]["Enums"]["age_band"] | null
           avatar_hue: number
           bio: string
+          city: string | null
+          content_pace: string
           created_at: string
           daily_limit_minutes: number
           display_name: string
           handle: string
           id: string
+          interests: string[]
           is_demo: boolean
+          onboarded_at: string | null
+          pronouns: string | null
+          quiet_hours: boolean
           user_id: string | null
           verification_status: string
           verified_provider: string | null
+          vibe: string | null
         }
         Insert: {
           age_band?: Database["public"]["Enums"]["age_band"] | null
           avatar_hue?: number
           bio?: string
+          city?: string | null
+          content_pace?: string
           created_at?: string
           daily_limit_minutes?: number
           display_name: string
           handle: string
           id?: string
+          interests?: string[]
           is_demo?: boolean
+          onboarded_at?: string | null
+          pronouns?: string | null
+          quiet_hours?: boolean
           user_id?: string | null
           verification_status?: string
           verified_provider?: string | null
+          vibe?: string | null
         }
         Update: {
           age_band?: Database["public"]["Enums"]["age_band"] | null
           avatar_hue?: number
           bio?: string
+          city?: string | null
+          content_pace?: string
           created_at?: string
           daily_limit_minutes?: number
           display_name?: string
           handle?: string
           id?: string
+          interests?: string[]
           is_demo?: boolean
+          onboarded_at?: string | null
+          pronouns?: string | null
+          quiet_hours?: boolean
           user_id?: string | null
           verification_status?: string
           verified_provider?: string | null
+          vibe?: string | null
         }
         Relationships: []
       }
