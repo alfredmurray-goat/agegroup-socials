@@ -201,6 +201,7 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       usageRes,
       bookmarksRes,
       notifsRes,
+      blocksRes,
     ] = await Promise.all([
       supabase.from("profiles").select("*"),
       supabase.from("posts").select("*").order("created_at", { ascending: false }),
