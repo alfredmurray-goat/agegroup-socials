@@ -45,9 +45,21 @@ interface OnboardingPrefs {
   dailyLimitMinutes?: number;
   bio?: string;
   displayName?: string;
+  handle?: string;
   avatarHue?: number;
   pronouns?: string | null;
   city?: string | null;
+  isPrivate?: boolean;
+  allowDms?: Audience;
+  allowComments?: Audience;
+  hideFromSearch?: boolean;
+  theme?: ThemePref;
+  reduceMotion?: boolean;
+}
+
+export interface ImportProgress {
+  done: number;
+  total: number;
 }
 
 interface LowkeyApi {
