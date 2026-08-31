@@ -14,3 +14,9 @@
 - user wants their own supabase project + api keys instead of the managed cloud backend
 - blocked on me: disconnecting the managed backend is a workspace-admin action (cloud tab -> advanced) and is irreversible; connecting a byo supabase project is done in project settings
 - schema is portable: drizzle/migrations/0000_lowkey_core_schema.sql + 0001_lowkey_demo_content.sql can be run on any supabase project
+- long personalised onboarding: handle/name, avatar colour, age check, interests, vibe, who to follow, streak + daily-limit setup, privacy/consent, done
+
+- [x] supabase-backed store, email + google auth
+- [x] long onboarding (identity, interests, vibe, pace, limit, consent)
+- [x] privacy notice route + gdpr export/delete in settings
+- [x] consent logging for face scan / eid

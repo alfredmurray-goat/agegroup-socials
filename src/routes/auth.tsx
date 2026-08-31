@@ -1,7 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLowkey } from "@/lib/lowkey/store";
+import { BetaTag, FeedbackLink, LowkeyMark } from "@/components/lowkey/shell";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -9,7 +10,8 @@ export const Route = createFileRoute("/auth")({
       { title: "sign in — lowkey social" },
       {
         name: "description",
-        content: "sign in or make a lowkey social account, then verify your age band to start.",
+        content:
+          "sign in or make a lowkey social account, then set up your profile and verify your age band.",
       },
       { property: "og:title", content: "sign in — lowkey social" },
       { property: "og:description", content: "sign in or make a lowkey social account." },
@@ -19,41 +21,63 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { me, signIn, signUp, state } = useLowkey();
+  const { me, needsProfile, signIn, signUp, signInWithGoogle, loading } = useLowkey();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"in" | "up">("up");
-  const [handle, setHandle] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (loading) return;
+    if (needsProfile) {
+      void navigate({ to: "/onboarding", replace: true });
+      return;
+    }
     if (!me) return;
-    void navigate({
-      to: me.verificationStatus === "verified" && me.ageBand ? "/" : "/verify",
-      replace: true,
-    });
-  }, [me, navigate]);
+    if (!me.onboardedAt || me.verificationStatus !== "verified" || !me.ageBand) {
+      void navigate({ to: "/onboarding", replace: true });
+      return;
+    }
+    void navigate({ to: "/", replace: true });
+  }, [me, needsProfile, loading, navigate]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = mode === "in" ? signIn(handle) : signUp(handle, displayName);
-    if (!res.ok) toast.error(res.error ?? "that didn't work");
+    if (busy) return;
+    setBusy(true);
+    const res = mode === "in" ? await signIn(email, password) : await signUp(email, password);
+    setBusy(false);
+    if (!res.ok) {
+      toast.error(res.error ?? "that didn't work");
+      return;
+    }
+    if (mode === "up") toast.success("account made. let's set you up");
   };
 
-  const demos = state.profiles.filter((p) => p.isDemo);
+  const google = async () => {
+    const res = await signInWithGoogle();
+    if (!res.ok) toast.error(res.error ?? "google sign in failed");
+  };
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-8 px-6 py-12">
-      <div>
-        <h1 className="lowkey text-4xl leading-none font-extrabold tracking-tight">
-          lowkey
-          <br />
-          social
-        </h1>
-        <p className="lowkey mt-3 text-sm text-muted-foreground">
-          no caps. chill. no grammar. just because it&apos;s for kids doesn&apos;t mean it&apos;s not
-          fun.
-        </p>
+    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-7 px-6 py-12">
+      <div className="flex items-center gap-3">
+        <LowkeyMark size={44} />
+        <div>
+          <h1 className="lowkey text-3xl leading-none font-extrabold tracking-tight">
+            lowkey social
+          </h1>
+          <div className="mt-1 flex items-center gap-2">
+            <BetaTag />
+            <span className="lowkey text-xs text-muted-foreground">early beta, be nice</span>
+          </div>
+        </div>
       </div>
+
+      <p className="lowkey text-sm text-muted-foreground">
+        no caps. chill. no grammar. under 18s and adults get completely separate feeds and chats.
+      </p>
 
       <div className="flex gap-1 rounded-full bg-muted p-1">
         {(["up", "in"] as const).map((m) => (
@@ -70,61 +94,60 @@ function AuthPage() {
       </div>
 
       <form onSubmit={submit} className="flex flex-col gap-3">
-        <label className="lowkey text-xs font-semibold text-muted-foreground" htmlFor="handle">
-          handle
+        <label className="lowkey text-xs font-semibold text-muted-foreground" htmlFor="email">
+          email
         </label>
-        <div className="flex items-center rounded-2xl border border-input bg-card px-4">
-          <span className="text-muted-foreground">@</span>
-          <input
-            id="handle"
-            value={handle}
-            onChange={(e) => setHandle(e.target.value)}
-            maxLength={20}
-            autoComplete="username"
-            placeholder="alfie"
-            className="lowkey w-full bg-transparent py-3 pl-1 outline-none"
-          />
-        </div>
-
-        {mode === "up" && (
-          <>
-            <label className="lowkey text-xs font-semibold text-muted-foreground" htmlFor="name">
-              display name
-            </label>
-            <input
-              id="name"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              maxLength={40}
-              placeholder="what people call you"
-              className="lowkey rounded-2xl border border-input bg-card px-4 py-3 outline-none"
-            />
-          </>
-        )}
-
+        <input
+          id="email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          placeholder="you@email.com"
+          className="lowkey rounded-2xl border border-input bg-card px-4 py-3 outline-none"
+        />
+        <label className="lowkey text-xs font-semibold text-muted-foreground" htmlFor="password">
+          password
+        </label>
+        <input
+          id="password"
+          type="password"
+          required
+          minLength={6}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete={mode === "up" ? "new-password" : "current-password"}
+          placeholder="at least 6 characters"
+          className="lowkey rounded-2xl border border-input bg-card px-4 py-3 outline-none"
+        />
         <button
           type="submit"
-          className="lowkey mt-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground"
+          disabled={busy}
+          className="lowkey mt-2 rounded-full bg-primary py-3.5 text-sm font-bold text-primary-foreground disabled:opacity-60"
         >
-          {mode === "up" ? "make my account" : "let me in"}
+          {busy ? "one sec…" : mode === "up" ? "make my account" : "let me in"}
         </button>
       </form>
 
-      <div>
-        <p className="lowkey text-xs font-semibold text-muted-foreground">
-          or hop in as a demo account
+      <button
+        onClick={google}
+        className="lowkey rounded-full border border-border bg-card py-3 text-sm font-semibold"
+      >
+        continue with google
+      </button>
+
+      <div className="lowkey space-y-1 text-xs text-muted-foreground">
+        <p>
+          by continuing you agree to our{" "}
+          <Link to="/privacy" className="font-semibold underline underline-offset-2">
+            privacy notice
+          </Link>
+          . data lives in the eu, you can export or delete everything any time.
         </p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {demos.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => signIn(p.handle)}
-              className="lowkey rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium"
-            >
-              @{p.handle} · {p.ageBand === "under_18" ? "under 18" : "18+"}
-            </button>
-          ))}
-        </div>
+        <p>
+          beta feedback: <FeedbackLink />
+        </p>
       </div>
     </div>
   );
