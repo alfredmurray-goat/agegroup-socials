@@ -2,7 +2,12 @@ export type AgeBand = "under_18" | "adult";
 
 export type VerificationStatus = "unverified" | "pending" | "verified";
 
-export type VerificationProvider = "simulated_eid" | "mitid" | "altid" | "eudi_wallet";
+export type VerificationProvider =
+  | "face_scan"
+  | "simulated_eid"
+  | "mitid"
+  | "altid"
+  | "eudi_wallet";
 
 /** mirrors the planned `profiles` table */
 export interface Profile {
