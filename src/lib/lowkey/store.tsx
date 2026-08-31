@@ -137,6 +137,12 @@ function toProfile(r: Row): Profile {
     contentPace: (r['content_pace'] as string) ?? "balanced",
     quietHours: Boolean(r['quiet_hours']),
     onboardedAt: (r['onboarded_at'] as string | null) ?? null,
+    isPrivate: Boolean(r['is_private']),
+    allowDms: (r['allow_dms'] as Audience) ?? "everyone",
+    allowComments: (r['allow_comments'] as Audience) ?? "everyone",
+    hideFromSearch: Boolean(r['hide_from_search']),
+    theme: (r['theme'] as ThemePref) ?? "system",
+    reduceMotion: Boolean(r['reduce_motion']),
   };
 }
 
