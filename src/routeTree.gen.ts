@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as CreateRouteImport } from './routes/create'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
@@ -37,6 +38,11 @@ const CreateRoute = CreateRouteImport.update({
   path: '/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
+  '/profile': typeof ProfileRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
   '/chat/$id': typeof ChatIdRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
+  '/profile': typeof ProfileRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
   '/chat/$id': typeof ChatIdRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
+  '/profile': typeof ProfileRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
   '/chat/$id': typeof ChatIdRoute
@@ -84,15 +93,31 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/chats' | '/create' | '/verify' | '/videos' | '/chat/$id'
+    | '/'
+    | '/auth'
+    | '/chats'
+    | '/create'
+    | '/profile'
+    | '/verify'
+    | '/videos'
+    | '/chat/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chats' | '/create' | '/verify' | '/videos' | '/chat/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/chats'
+    | '/create'
+    | '/profile'
+    | '/verify'
+    | '/videos'
+    | '/chat/$id'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/chats'
     | '/create'
+    | '/profile'
     | '/verify'
     | '/videos'
     | '/chat/$id'
@@ -103,6 +128,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChatsRoute: typeof ChatsRoute
   CreateRoute: typeof CreateRoute
+  ProfileRoute: typeof ProfileRoute
   VerifyRoute: typeof VerifyRoute
   VideosRoute: typeof VideosRoute
   ChatIdRoute: typeof ChatIdRoute
@@ -138,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify': {
       id: '/verify'
       path: '/verify'
@@ -167,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChatsRoute: ChatsRoute,
   CreateRoute: CreateRoute,
+  ProfileRoute: ProfileRoute,
   VerifyRoute: VerifyRoute,
   VideosRoute: VideosRoute,
   ChatIdRoute: ChatIdRoute,
