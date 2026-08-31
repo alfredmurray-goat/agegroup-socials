@@ -3,6 +3,7 @@ import { Flame, House, MessageCircle, Plus, Play, User, Search } from "lucide-re
 import { useEffect, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
+import logoAsset from "@/assets/lowkey-logo.png.asset.json";
 
 export function Avatar({
   hue,
