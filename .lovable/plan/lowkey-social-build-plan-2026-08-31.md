@@ -40,15 +40,16 @@ No ads in v1.
 
 ## Design direction
 
-No-caps, chill, low-contrast. Rounded soft cards, lowercase type throughout, warm off-white light mode and a deep charcoal dark mode, one calm accent colour. Full-height mobile-first layout with a fixed bottom tab bar, built to look right at 390px first.
+No-caps, chill, low-contrast. Rounded soft cards, lowercase type throughout, warm off-white light mode and a deep charcoal dark mode, one calm accent colour. Yellow colour. Full-height mobile-first layout with a fixed bottom tab bar, built to look right at 390px first.
 
 ---
 
 ## Technical notes
 
-**Backend**: Lovable Cloud (Postgres + auth + storage). Enabled as step one.
+**Backend**: supabase (Postgres + auth + storage). Enabled as step one.
 
 **Tables** (all with grants + RLS, policies scoped to `auth.uid()`):
+
 - `profiles` — handle, display name, avatar, bio, `age_band`, `verification_status`, `daily_limit_minutes`
 - `age_verifications` — provider, provider ref, resolved band, timestamp; service-role write only
 - `posts` — author, kind (`post` | `video`), media path, caption, `age_band` denormalised from author
