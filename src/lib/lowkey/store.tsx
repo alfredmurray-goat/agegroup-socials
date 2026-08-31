@@ -19,6 +19,7 @@ import {
   type AgeBand,
   type Audience,
   type ThemePref,
+  type TextScale,
   type LowkeyState,
   type Notif,
   type PostKind,
@@ -56,6 +57,9 @@ interface OnboardingPrefs {
   hideFromSearch?: boolean;
   theme?: ThemePref;
   reduceMotion?: boolean;
+  textScale?: TextScale;
+  highContrast?: boolean;
+  boldText?: boolean;
 }
 
 export interface ImportProgress {
