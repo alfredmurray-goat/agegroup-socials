@@ -330,17 +330,18 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     async (prefs: OnboardingPrefs): Promise<Result> => {
       const id = meIdRef.current;
       if (!id) return { ok: false, error: "no profile yet" };
-      const patch: Row = {};
-      if (prefs.interests) patch['interests'] = prefs.interests;
-      if (prefs.vibe !== undefined) patch['vibe'] = prefs.vibe;
-      if (prefs.contentPace) patch['content_pace'] = prefs.contentPace;
-      if (prefs.quietHours !== undefined) patch['quiet_hours'] = prefs.quietHours;
-      if (prefs.dailyLimitMinutes) patch['daily_limit_minutes'] = prefs.dailyLimitMinutes;
-      if (prefs.bio !== undefined) patch['bio'] = prefs.bio;
-      if (prefs.displayName) patch['display_name'] = prefs.displayName.toLowerCase();
-      if (prefs.avatarHue !== undefined) patch['avatar_hue'] = prefs.avatarHue;
-      if (prefs.pronouns !== undefined) patch['pronouns'] = prefs.pronouns;
-      if (prefs.city !== undefined) patch['city'] = prefs.city;
+      const patch = {
+        ...(prefs.interests ? { interests: prefs.interests } : {}),
+        ...(prefs.vibe !== undefined ? { vibe: prefs.vibe } : {}),
+        ...(prefs.contentPace ? { content_pace: prefs.contentPace } : {}),
+        ...(prefs.quietHours !== undefined ? { quiet_hours: prefs.quietHours } : {}),
+        ...(prefs.dailyLimitMinutes ? { daily_limit_minutes: prefs.dailyLimitMinutes } : {}),
+        ...(prefs.bio !== undefined ? { bio: prefs.bio } : {}),
+        ...(prefs.displayName ? { display_name: prefs.displayName.toLowerCase() } : {}),
+        ...(prefs.avatarHue !== undefined ? { avatar_hue: prefs.avatarHue } : {}),
+        ...(prefs.pronouns !== undefined ? { pronouns: prefs.pronouns } : {}),
+        ...(prefs.city !== undefined ? { city: prefs.city } : {}),
+      };
       const { error } = await supabase.from("profiles").update(patch).eq("id", id);
       if (error) return { ok: false, error: error.message.toLowerCase() };
       await refresh();
