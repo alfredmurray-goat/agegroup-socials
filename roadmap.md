@@ -30,6 +30,7 @@
 - real media uploads for posts/videos (private media bucket, signed urls)
 - gdpr cookie/storage notice, favicon from the logo, sitemap.xml, ai-crawler robots.txt, json-ld (WebApplication + FAQ)
 
-## in progress
-- settings overhaul (profile, appearance, privacy/safety + blocks, wellbeing, account/security) + real instagram data-export import
-- bug: some users report photo uploads failing — investigate storage limits/policies
+## settings + uploads pass (done)
+- big settings page: profile, appearance (theme, reduce motion, avatar colour), privacy & safety (private, dm/comment audience, hide from search, blocks), notifications & wellbeing, account & security (email, password, sign out everywhere)
+- real instagram import from the official data export (zip/json) -> posts, captions, media, original dates
+- photo upload fix: heic/no-mime files accepted, images re-encoded to jpeg client-side, avatar bucket 5mb -> 50mb, media 50mb -> 200mb
