@@ -120,13 +120,12 @@ interface LowkeyApi {
  * still providing the previous one, which incorrectly looks like a missing
  * LowkeyProvider until the whole page is reloaded.
  */
-const LOWKEY_CONTEXT_KEY = Symbol.for("lowkey.social.context");
 const contextRegistry = globalThis as typeof globalThis & {
-  [LOWKEY_CONTEXT_KEY]?: ReturnType<typeof createContext<LowkeyApi | null>>;
+  __lowkeyContext?: ReturnType<typeof createContext<LowkeyApi | null>>;
 };
 const LowkeyContext =
-  contextRegistry[LOWKEY_CONTEXT_KEY] ?? createContext<LowkeyApi | null>(null);
-contextRegistry[LOWKEY_CONTEXT_KEY] = LowkeyContext;
+  contextRegistry.__lowkeyContext ?? createContext<LowkeyApi | null>(null);
+contextRegistry.__lowkeyContext = LowkeyContext;
 
 /* ---------- row mappers ---------- */
 
