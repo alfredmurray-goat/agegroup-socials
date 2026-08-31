@@ -252,6 +252,7 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     setState({
       currentUserId: mine.id,
       profiles,
+      blocks: ((blocksRes.data ?? []) as Row[]).map((r) => r['blocked_id'] as string),
       bookmarks: ((bookmarksRes.data ?? []) as Row[]).map((r) => r['post_id'] as string),
       notifications: ((notifsRes.data ?? []) as Row[]).map((r) => ({
         id: r['id'] as string,
