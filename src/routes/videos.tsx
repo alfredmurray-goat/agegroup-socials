@@ -127,7 +127,7 @@ function VideoCard({
             <span className="flex size-11 items-center justify-center rounded-full bg-background/70">
               <Heart className={liked ? "size-5 fill-primary text-primary" : "size-5"} />
             </span>
-            <span className="text-[10px] font-bold">{likes.length}</span>
+            <span className="text-xs font-bold">{likes.length}</span>
           </button>
           <button
             onClick={onComments}
@@ -137,7 +137,7 @@ function VideoCard({
             <span className="flex size-11 items-center justify-center rounded-full bg-background/70">
               <MessageSquare className="size-5" />
             </span>
-            <span className="text-[10px] font-bold">{comments}</span>
+            <span className="text-xs font-bold">{comments}</span>
           </button>
           <Link to="/chats" aria-label="share" className="text-foreground/80">
             <span className="flex size-11 items-center justify-center rounded-full bg-background/70">

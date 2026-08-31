@@ -126,7 +126,7 @@ export function BetaTag({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "lowkey rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wide text-primary-foreground",
+        "lowkey rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold tracking-wide text-primary-foreground",
         className,
       )}
     >
@@ -305,7 +305,7 @@ export function BottomNav() {
                 >
                   <Icon className="size-5" />
                 </span>
-                <span className="lowkey text-[10px]">{label}</span>
+                <span className="lowkey text-[11px]">{label}</span>
               </Link>
             </li>
           );
