@@ -14,6 +14,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
 import logoAsset from "@/assets/lowkey-logo.png.asset.json";
+import { ReadAloud } from "@/components/lowkey/readaloud";
 
 export function Avatar({
   hue,
@@ -400,6 +401,7 @@ export function AppScreen({
         <SiteFooter />
       </div>
       <BottomNav />
+      <ReadAloud />
     </div>
   );
 }
