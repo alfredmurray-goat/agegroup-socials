@@ -29,8 +29,8 @@ function ProfilePage() {
 
   const pickAvatar = async (file: File | undefined) => {
     if (!file) return;
-    if (file.size > 5_000_000) {
-      toast.error("keep it under 5mb");
+    if (file.size > 50_000_000) {
+      toast.error("keep it under 50mb");
       return;
     }
     setUploading(true);
@@ -77,7 +77,7 @@ function ProfilePage() {
         <input
           ref={fileRef}
           type="file"
-          accept="image/*"
+          accept="image/*,.heic,.heif"
           className="hidden"
           onChange={(e) => void pickAvatar(e.target.files?.[0])}
         />
