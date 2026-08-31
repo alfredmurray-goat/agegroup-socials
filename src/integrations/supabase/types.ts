@@ -449,6 +449,7 @@ export type Database = {
           avatar_hue: number
           avatar_url: string | null
           bio: string
+          bold_text: boolean
           city: string | null
           content_pace: string
           created_at: string
@@ -456,6 +457,7 @@ export type Database = {
           display_name: string
           handle: string
           hide_from_search: boolean
+          high_contrast: boolean
           id: string
           interests: string[]
           is_demo: boolean
@@ -464,6 +466,7 @@ export type Database = {
           pronouns: string | null
           quiet_hours: boolean
           reduce_motion: boolean
+          text_scale: string
           theme: string
           user_id: string | null
           verification_status: string
@@ -477,6 +480,7 @@ export type Database = {
           avatar_hue?: number
           avatar_url?: string | null
           bio?: string
+          bold_text?: boolean
           city?: string | null
           content_pace?: string
           created_at?: string
@@ -484,6 +488,7 @@ export type Database = {
           display_name: string
           handle: string
           hide_from_search?: boolean
+          high_contrast?: boolean
           id?: string
           interests?: string[]
           is_demo?: boolean
@@ -492,6 +497,7 @@ export type Database = {
           pronouns?: string | null
           quiet_hours?: boolean
           reduce_motion?: boolean
+          text_scale?: string
           theme?: string
           user_id?: string | null
           verification_status?: string
@@ -505,6 +511,7 @@ export type Database = {
           avatar_hue?: number
           avatar_url?: string | null
           bio?: string
+          bold_text?: boolean
           city?: string | null
           content_pace?: string
           created_at?: string
@@ -512,6 +519,7 @@ export type Database = {
           display_name?: string
           handle?: string
           hide_from_search?: boolean
+          high_contrast?: boolean
           id?: string
           interests?: string[]
           is_demo?: boolean
@@ -520,6 +528,7 @@ export type Database = {
           pronouns?: string | null
           quiet_hours?: boolean
           reduce_motion?: boolean
+          text_scale?: string
           theme?: string
           user_id?: string | null
           verification_status?: string
