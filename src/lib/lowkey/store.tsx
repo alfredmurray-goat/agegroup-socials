@@ -11,10 +11,13 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { parseInstagramExport } from "./instagram";
 import {
   dayKey,
   emptyState,
   type AgeBand,
+  type Audience,
+  type ThemePref,
   type LowkeyState,
   type Notif,
   type PostKind,
