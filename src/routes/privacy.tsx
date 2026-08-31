@@ -91,6 +91,24 @@ function PrivacyPage() {
         contact and beta feedback: <FeedbackLink />
       </p>
 
+      <section>
+        <h2 className="lowkey text-sm font-bold">the other legal pages</h2>
+        <div className="mt-2 flex flex-col gap-2">
+          <Link
+            to="/terms"
+            className="lowkey rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold"
+          >
+            terms of use →
+          </Link>
+          <Link
+            to="/cookies"
+            className="lowkey rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold"
+          >
+            cookie and storage notice →
+          </Link>
+        </div>
+      </section>
+
       <Link
         to="/settings"
         className="lowkey rounded-full border border-border bg-card py-3 text-center text-sm font-semibold"
