@@ -204,7 +204,7 @@ export function AppScreen({
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-background">
-      {chrome && <TopBar title={title} />}
+      {chrome && <TopBar {...(title ? { title } : {})} />}
       <main className="flex-1 pb-24">{children}</main>
       <BottomNav />
     </div>
