@@ -47,6 +47,11 @@ function OnboardingPage() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
+  useEffect(() => {
+    const w = window as unknown as { __obDbg?: string[] };
+    w.__obDbg = w.__obDbg ?? [];
+    w.__obDbg.push("mount");
+  }, []);
   const [busy, setBusy] = useState(false);
 
   const [handle, setHandle] = useState("");
@@ -88,7 +93,7 @@ function OnboardingPage() {
     );
 
   const saveIdentity = async () => {
-    console.log("DBG saveIdentity start", handle, displayName, !!me);
+    (window as unknown as { __obDbg: string[] }).__obDbg.push(`save start me=${!!me}`);
     const cleanHandle = handle.trim().toLowerCase().replace(/^@/, "");
     if (cleanHandle.length < 3) {
       toast.error("handle needs 3+ characters");
@@ -113,7 +118,7 @@ function OnboardingPage() {
       toast.error(res.error ?? "couldn't save that");
       return;
     }
-    console.log("DBG identity saved, going to step 1");
+    (window as unknown as { __obDbg: string[] }).__obDbg.push("saved ok");
     setStep(1);
   };
 
