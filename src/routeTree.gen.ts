@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -44,6 +45,11 @@ const CreateRoute = CreateRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/create'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/settings'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/create'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/settings'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/create'
     | '/onboarding'
+    | '/privacy'
     | '/profile'
     | '/search'
     | '/settings'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   ChatsRoute: typeof ChatsRoute
   CreateRoute: typeof CreateRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatsRoute: ChatsRoute,
   CreateRoute: CreateRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
