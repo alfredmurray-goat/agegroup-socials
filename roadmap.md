@@ -29,3 +29,7 @@
 - /saved for bookmarks; profile picture upload (private avatars bucket, signed urls)
 - real media uploads for posts/videos (private media bucket, signed urls)
 - gdpr cookie/storage notice, favicon from the logo, sitemap.xml, ai-crawler robots.txt, json-ld (WebApplication + FAQ)
+
+## in progress
+- settings overhaul (profile, appearance, privacy/safety + blocks, wellbeing, account/security) + real instagram data-export import
+- bug: some users report photo uploads failing — investigate storage limits/policies
