@@ -447,6 +447,13 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         ...(prefs.avatarHue !== undefined ? { avatar_hue: prefs.avatarHue } : {}),
         ...(prefs.pronouns !== undefined ? { pronouns: prefs.pronouns } : {}),
         ...(prefs.city !== undefined ? { city: prefs.city } : {}),
+        ...(prefs.handle ? { handle: prefs.handle.trim().toLowerCase().replace(/^@/, "") } : {}),
+        ...(prefs.isPrivate !== undefined ? { is_private: prefs.isPrivate } : {}),
+        ...(prefs.allowDms ? { allow_dms: prefs.allowDms } : {}),
+        ...(prefs.allowComments ? { allow_comments: prefs.allowComments } : {}),
+        ...(prefs.hideFromSearch !== undefined ? { hide_from_search: prefs.hideFromSearch } : {}),
+        ...(prefs.theme ? { theme: prefs.theme } : {}),
+        ...(prefs.reduceMotion !== undefined ? { reduce_motion: prefs.reduceMotion } : {}),
       };
       const { error } = await supabase.from("profiles").update(patch).eq("id", id);
       if (error) return { ok: false, error: error.message.toLowerCase() };
