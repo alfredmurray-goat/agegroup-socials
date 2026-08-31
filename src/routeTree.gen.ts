@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as VideosRouteImport } from './routes/videos'
@@ -44,6 +45,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/chats': typeof ChatsRoute
   '/create': typeof CreateRoute
   '/profile': typeof ProfileRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/create'
     | '/profile'
+    | '/search'
     | '/settings'
     | '/verify'
     | '/videos'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/create'
     | '/profile'
+    | '/search'
     | '/settings'
     | '/verify'
     | '/videos'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/chats'
     | '/create'
     | '/profile'
+    | '/search'
     | '/settings'
     | '/verify'
     | '/videos'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   ChatsRoute: typeof ChatsRoute
   CreateRoute: typeof CreateRoute
   ProfileRoute: typeof ProfileRoute
+  SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   VerifyRoute: typeof VerifyRoute
   VideosRoute: typeof VideosRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChatsRoute: ChatsRoute,
   CreateRoute: CreateRoute,
   ProfileRoute: ProfileRoute,
+  SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   VerifyRoute: VerifyRoute,
   VideosRoute: VideosRoute,
