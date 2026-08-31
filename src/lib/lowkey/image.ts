@@ -43,7 +43,7 @@ async function decode(file: File): Promise<ImageBitmap | HTMLImageElement> {
       // safari can fail on heic here, fall through to the <img> decoder
     }
   }
-  const url = URL createObjectUrlSafe(file);
+  const url = URL.createObjectURL(file);
   try {
     const img = new Image();
     img.decoding = "sync";
