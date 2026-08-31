@@ -931,6 +931,18 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
     [me, refresh, uploadMedia],
   );
 
+  /* ---------- appearance preferences ---------- */
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const pref = me?.theme ?? "system";
+    const dark =
+      pref === "dark" ||
+      (pref === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    root.classList.toggle("dark", dark);
+    root.classList.toggle("reduce-motion", Boolean(me?.reduceMotion));
+  }, [me?.theme, me?.reduceMotion]);
+
   /* ---------- live notifications ---------- */
 
   useEffect(() => {
