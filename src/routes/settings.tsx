@@ -17,6 +17,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen, bandLabel, BetaTag, FeedbackLink } from "@/components/lowkey/shell";
+import {
+  readAloudEnabled,
+  readAloudRate,
+  setReadAloud,
+  setReadAloudRate,
+} from "@/components/lowkey/readaloud";
+import { speak, speechSupported, type SpeechRate } from "@/lib/lowkey/speak";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
 import {
   INTERESTS,
