@@ -11,7 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { LowkeyProvider } from "../lib/lowkey/store";
+import { LowkeyProvider } from "@/lib/lowkey/store";
 import { CookieBanner } from "@/components/lowkey/shell";
 import { Toaster } from "@/components/ui/sonner";
 
