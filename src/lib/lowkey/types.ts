@@ -116,6 +116,7 @@ export interface LowkeyState {
 }
 
 export const emptyState: LowkeyState = {
+  blocks: [],
   profiles: [],
   posts: [],
   comments: [],
