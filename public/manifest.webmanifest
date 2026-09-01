@@ -1,0 +1,29 @@
+{
+  "name": "lowkey social",
+  "short_name": "lowkey",
+  "description": "a chill, no-caps social app with age-verified feeds: under 18 sees under 18, 18+ sees 18+.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf9f3",
+  "theme_color": "#fbf9f3",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

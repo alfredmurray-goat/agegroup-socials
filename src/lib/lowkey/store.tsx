@@ -55,11 +55,16 @@ interface OnboardingPrefs {
   allowDms?: Audience;
   allowComments?: Audience;
   hideFromSearch?: boolean;
-  theme?: ThemePref;
+theme?: ThemePref;
   reduceMotion?: boolean;
   textScale?: TextScale;
   highContrast?: boolean;
   boldText?: boolean;
+  status?: string | null;
+  emailFollows?: boolean;
+  emailLikes?: boolean;
+  emailComments?: boolean;
+  emailDms?: boolean;
 }
 
 export interface ImportProgress {
@@ -72,8 +77,10 @@ interface LowkeyApi {
   me: Profile | null;
   /** true until the first load after auth resolves */
   loading: boolean;
-  /** signed in with the backend but has no profile row yet */
+/** signed in with the backend but has no profile row yet */
   needsProfile: boolean;
+  /** true when the account has the admin role (moderation inbox) */
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<Result>;
   signUp: (email: string, password: string) => Promise<Result>;
   signInWithGoogle: () => Promise<Result>;
@@ -83,8 +90,9 @@ interface LowkeyApi {
   finishOnboarding: () => Promise<Result>;
   verifyAge: (band: AgeBand, provider: VerificationProvider) => Promise<Result>;
   recordConsent: (kind: string) => Promise<void>;
-  createPost: (input: {
+createPost: (input: {
     kind: PostKind;
+    title?: string | null;
     caption: string;
     mediaUrl: string | null;
     topic?: string | null;
@@ -96,8 +104,21 @@ interface LowkeyApi {
   markNotificationsRead: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<Result>;
   uploadMedia: (file: File) => Promise<{ path: string; url: string } | null>;
-  startChat: (profileId: string) => Promise<string | null>;
+startChat: (profileId: string) => Promise<string | null>;
   sendMessage: (conversationId: string, body: string) => Promise<void>;
+  sendPhoto: (conversationId: string, file: File) => Promise<void>;
+  deletePost: (postId: string) => Promise<void>;
+  editPost: (
+    postId: string,
+    patch: { title?: string; caption?: string },
+  ) => Promise<void>;
+  deleteComment: (commentId: string) => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
+  report: (
+    targetType: "post" | "comment" | "profile",
+    targetId: string,
+    reason: string,
+  ) => Promise<void>;
   markRead: (conversationId: string) => Promise<void>;
   setDailyLimit: (minutes: number) => Promise<void>;
   addUsageMinute: () => Promise<void>;
@@ -182,17 +203,23 @@ function toProfile(r: Row): Profile {
     hideFromSearch: Boolean(r['hide_from_search']),
     theme: (r['theme'] as ThemePref) ?? "system",
     reduceMotion: Boolean(r['reduce_motion']),
-    textScale: (r['text_scale'] as TextScale) ?? "normal",
+textScale: (r['text_scale'] as TextScale) ?? "normal",
     highContrast: Boolean(r['high_contrast']),
     boldText: Boolean(r['bold_text']),
+    status: (r['status'] as string | null) ?? null,
+    emailFollows: Boolean(r['email_follows']),
+    emailLikes: Boolean(r['email_likes']),
+    emailComments: Boolean(r['email_comments']),
+    emailDms: Boolean(r['email_dms']),
   };
 }
 
 export function LowkeyProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<LowkeyState>(emptyState);
   const [loading, setLoading] = useState(true);
-  const [authUserId, setAuthUserId] = useState<string | null>(null);
+const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [needsProfile, setNeedsProfile] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const meIdRef = useRef<string | null>(null);
 
   const me = useMemo(
@@ -205,10 +232,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     const { data: auth } = await supabase.auth.getUser();
     const user = auth.user;
-    setAuthUserId(user?.id ?? null);
+setAuthUserId(user?.id ?? null);
     if (!user) {
       setState(emptyState);
       setNeedsProfile(false);
+      setIsAdmin(false);
       setLoading(false);
       return;
     }
@@ -219,13 +247,18 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (!mineRow) {
+if (!mineRow) {
       setState(emptyState);
       setNeedsProfile(true);
       setLoading(false);
       return;
     }
     setNeedsProfile(false);
+    const { data: adminRes } = await supabase.rpc("has_role", {
+      _user_id: user.id,
+      _role: "admin",
+    });
+    setIsAdmin(Boolean(adminRes));
     const mine = toProfile(mineRow as Row);
 
     const [
@@ -268,9 +301,10 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const profileRows = (profilesRes.data ?? []) as Row[];
+const profileRows = (profilesRes.data ?? []) as Row[];
     const postRows = (postsRes.data ?? []) as Row[];
-    const [avatarUrls, mediaUrls] = await Promise.all([
+    const messageRows = (messagesRes.data ?? []) as Row[];
+    const [avatarUrls, mediaUrls, dmUrls] = await Promise.all([
       signPaths(
         "avatars",
         profileRows.map((r) => (r['avatar_url'] as string | null) ?? null),
@@ -278,6 +312,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       signPaths(
         "media",
         postRows.map((r) => (r['media_url'] as string | null) ?? null),
+      ),
+      // photos sent in chats live in the same private media bucket
+      signPaths(
+        "media",
+        messageRows.map((r) => (r['media_path'] as string | null) ?? null),
       ),
     ]);
 
@@ -302,10 +341,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         readAt: (r['read_at'] as string | null) ?? null,
         createdAt: r['created_at'] as string,
       })),
-      posts: postRows.map((r) => ({
+posts: postRows.map((r) => ({
         id: r['id'] as string,
         authorId: r['author_id'] as string,
         kind: (r['kind'] as PostKind) ?? "post",
+        title: (r['title'] as string | null) ?? null,
         caption: (r['caption'] as string) ?? "",
         posterHue: (r['poster_hue'] as number) ?? 60,
         mediaUrl: resolve(mediaUrls, (r['media_url'] as string | null) ?? null),
@@ -340,11 +380,12 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         const conversationId = r['conversation_id'] as string;
         const lastRead = myLastRead.get(conversationId);
         const createdAt = r['created_at'] as string;
-        return {
+return {
           id: r['id'] as string,
           conversationId,
           authorId: r['sender_id'] as string,
           body: r['body'] as string,
+          mediaUrl: resolve(dmUrls, (r['media_path'] as string | null) ?? null),
           createdAt,
           readByMe:
             r['sender_id'] === mine.id || (lastRead ? createdAt <= lastRead : false),
@@ -475,7 +516,12 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         ...(prefs.reduceMotion !== undefined ? { reduce_motion: prefs.reduceMotion } : {}),
         ...(prefs.textScale ? { text_scale: prefs.textScale } : {}),
         ...(prefs.highContrast !== undefined ? { high_contrast: prefs.highContrast } : {}),
-        ...(prefs.boldText !== undefined ? { bold_text: prefs.boldText } : {}),
+...(prefs.boldText !== undefined ? { bold_text: prefs.boldText } : {}),
+        ...(prefs.status !== undefined ? { status: prefs.status } : {}),
+        ...(prefs.emailFollows !== undefined ? { email_follows: prefs.emailFollows } : {}),
+        ...(prefs.emailLikes !== undefined ? { email_likes: prefs.emailLikes } : {}),
+        ...(prefs.emailComments !== undefined ? { email_comments: prefs.emailComments } : {}),
+        ...(prefs.emailDms !== undefined ? { email_dms: prefs.emailDms } : {}),
       };
       const { error } = await supabase.from("profiles").update(patch).eq("id", id);
       if (error) return { ok: false, error: error.message.toLowerCase() };
@@ -529,8 +575,9 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
   /* ---------- content ---------- */
 
   const createPost = useCallback(
-    async (input: {
+async (input: {
       kind: PostKind;
+      title?: string | null;
       caption: string;
       mediaUrl: string | null;
       topic?: string | null;
@@ -542,6 +589,7 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         .insert({
           author_id: author.id,
           kind: input.kind,
+title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
           caption: input.caption.toLowerCase(),
           media_url: input.mediaUrl,
           poster_hue: Math.floor(Math.random() * 360),
@@ -778,9 +826,135 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         .update({ last_read_at: new Date().toISOString() })
         .eq("conversation_id", conversationId)
         .eq("profile_id", id);
-      await refresh();
+await refresh();
     },
     [refresh, state.streaks],
+  );
+
+  const sendPhoto = useCallback(
+    async (conversationId: string, file: File) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      const uploaded = await uploadMedia(file);
+      if (!uploaded) {
+        toast.error("photo upload failed");
+        return;
+      }
+      const { error } = await supabase
+        .from("messages")
+        .insert({ conversation_id: conversationId, sender_id: id, body: "", media_path: uploaded.path });
+      if (error) {
+        toast.error("couldn't send the photo");
+        return;
+      }
+      // a photo counts as a day active for the friend streak too
+      const today = dayKey();
+      const yesterday = dayKey(new Date(Date.now() - 86_400_000));
+      const streak = state.streaks.find((s) => s.conversationId === conversationId);
+      if (!streak || streak.lastActiveDay !== today) {
+        const next = streak && streak.lastActiveDay === yesterday ? streak.count + 1 : 1;
+        await supabase
+          .from("conversations")
+          .update({ streak_count: next, streak_last_day: today })
+          .eq("id", conversationId);
+      }
+      await supabase
+        .from("conversation_members")
+        .update({ last_read_at: new Date().toISOString() })
+        .eq("conversation_id", conversationId)
+        .eq("profile_id", id);
+      await refresh();
+    },
+    [refresh, state.streaks, uploadMedia],
+  );
+
+  /* ---------- moderation: delete, edit, report ---------- */
+
+  const deletePost = useCallback(
+    async (postId: string) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      const post = state.posts.find((p) => p.id === postId);
+      if (!post || post.authorId !== id) return;
+      // remove it everywhere locally so it disappears instantly
+      setState((s) => ({
+        ...s,
+        posts: s.posts.filter((p) => p.id !== postId),
+        comments: s.comments.filter((c) => c.postId !== postId),
+        likes: s.likes.filter((l) => l.postId !== postId),
+        bookmarks: s.bookmarks.filter((b) => b !== postId),
+        notifications: s.notifications.filter((n) => n.postId !== postId),
+      }));
+      await supabase.from("posts").delete().eq("id", postId);
+    },
+    [state.posts],
+  );
+
+  const editPost = useCallback(
+    async (postId: string, patch: { title?: string; caption?: string }) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      const post = state.posts.find((p) => p.id === postId);
+      if (!post || post.authorId !== id) return;
+const db: { title?: string | null; caption?: string } = {};
+      if (patch.title !== undefined)
+        db.title = patch.title.trim() ? patch.title.trim().toLowerCase() : null;
+      if (patch.caption !== undefined)
+        db.caption = patch.caption.trim() ? patch.caption.trim().toLowerCase() : "no caption";
+      if (Object.keys(db).length === 0) return;
+      setState((s) => ({
+        ...s,
+        posts: s.posts.map((p) =>
+          p.id === postId ? { ...p, ...(db.title !== undefined ? { title: db.title } : {}), ...(db.caption !== undefined ? { caption: db.caption } : {}) } : p,
+        ),
+      }));
+      await supabase.from("posts").update(db).eq("id", postId);
+    },
+    [state.posts],
+  );
+
+  const deleteComment = useCallback(async (commentId: string) => {
+    const id = meIdRef.current;
+    if (!id) return;
+const comment = state.comments.find((c) => c.id === commentId);
+    if (!comment) return;
+    // anyone can delete their own; admins can delete anything (via has_role rpc)
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: id,
+      _role: "admin",
+    });
+    if (comment.authorId !== id && !isAdmin) return;
+    setState((s) => ({ ...s, comments: s.comments.filter((c) => c.id !== commentId) }));
+    await supabase.from("post_comments").delete().eq("id", commentId);
+  }, [state.comments, state.profiles]);
+
+  const deleteMessage = useCallback(async (messageId: string) => {
+    const id = meIdRef.current;
+    if (!id) return;
+    const msg = state.messages.find((m) => m.id === messageId);
+    if (!msg || msg.authorId !== id) return;
+    setState((s) => ({ ...s, messages: s.messages.filter((m) => m.id !== messageId) }));
+    await supabase.from("messages").delete().eq("id", messageId);
+  }, [state.messages]);
+
+  const report = useCallback(
+    async (
+      targetType: "post" | "comment" | "profile",
+      targetId: string,
+      reason: string,
+    ) => {
+      const id = meIdRef.current;
+      if (!id || !reason.trim()) return;
+      const { error } = await supabase.from("reports").insert({
+        reporter_id: id,
+        target_type: targetType,
+        target_id: targetId,
+        reason: reason.trim().toLowerCase(),
+      });
+      if (error) toast.error("couldn't send the report");
+      else toast.success("report sent");
+    },
+    [],
   );
 
   const markRead = useCallback(
@@ -1043,7 +1217,8 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       state,
       me,
       loading,
-      needsProfile: needsProfile && Boolean(authUserId),
+needsProfile: needsProfile && Boolean(authUserId),
+      isAdmin,
       signIn,
       signUp,
       signInWithGoogle,
@@ -1061,8 +1236,14 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       markNotificationsRead,
       uploadAvatar,
       uploadMedia,
-      startChat,
+startChat,
       sendMessage,
+      sendPhoto,
+      deletePost,
+      editPost,
+      deleteComment,
+      deleteMessage,
+      report,
       markRead,
       setDailyLimit,
       addUsageMinute,
@@ -1079,7 +1260,8 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       state,
       me,
       loading,
-      needsProfile,
+needsProfile,
+      isAdmin,
       authUserId,
       signIn,
       signUp,
@@ -1099,7 +1281,13 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       uploadAvatar,
       uploadMedia,
       startChat,
-      sendMessage,
+sendMessage,
+      sendPhoto,
+      deletePost,
+      editPost,
+      deleteComment,
+      deleteMessage,
+      report,
       markRead,
       setDailyLimit,
       addUsageMinute,

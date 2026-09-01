@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Settings, BadgeCheck, Camera, Bookmark } from "lucide-react";
+import { Settings, Camera, Bookmark, Pencil } from "lucide-react";
 import { useRef, useState } from "react";
 import { AppScreen, Avatar, Poster, bandLabel } from "@/components/lowkey/shell";
 import { toast } from "sonner";
@@ -21,11 +21,13 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  const { state, me, uploadAvatar } = useLowkey();
+const { state, me, uploadAvatar, updateProfile } = useLowkey();
   const usage = useTodayUsage();
   const [tab, setTab] = useState<"post" | "video">("post");
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [statusDraft, setStatusDraft] = useState("");
 
   const pickAvatar = async (file: File | undefined) => {
     if (!file) return;
@@ -84,11 +86,53 @@ function ProfilePage() {
         {uploading && (
           <p className="lowkey text-xs text-muted-foreground">uploading your picture...</p>
         )}
-        <h1 className="lowkey flex items-center gap-1 text-lg font-bold">
+<h1 className="lowkey flex items-center gap-2 text-lg font-bold">
           {me.displayName}
-          {me.verificationStatus === "verified" && <BadgeCheck className="size-4 text-primary" />}
+          {me.verificationStatus === "verified" && (
+            <span className="lowkey rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">
+              age verified
+            </span>
+          )}
         </h1>
         <p className="lowkey text-xs text-muted-foreground">@{me.handle}</p>
+        {editingStatus ? (
+          <div className="flex w-full max-w-xs items-center gap-2">
+            <input
+              autoFocus
+              value={statusDraft}
+              maxLength={60}
+              onChange={(e) => setStatusDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  void updateProfile({ status: statusDraft.trim() || null });
+                  setEditingStatus(false);
+                }
+              }}
+              placeholder="what are you doing right now?"
+              className="lowkey min-h-11 flex-1 rounded-full border border-input bg-background px-3 text-sm outline-none"
+            />
+            <button
+              onClick={() => {
+                void updateProfile({ status: statusDraft.trim() || null });
+                setEditingStatus(false);
+              }}
+              className="lowkey rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
+            >
+              save
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              setStatusDraft(me.status ?? "");
+              setEditingStatus(true);
+            }}
+            className="lowkey flex min-h-11 items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold text-muted-foreground"
+          >
+            <Pencil className="size-3" />
+            {me.status || "set a status"}
+          </button>
+        )}
         {me.bio && <p className="lowkey text-center text-sm text-muted-foreground">{me.bio}</p>}
         <p className="lowkey text-sm">
           <span className="font-bold">{followers}</span> followers{" "}

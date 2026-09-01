@@ -234,6 +234,7 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          media_path: string | null
           sender_id: string
         }
         Insert: {
@@ -241,6 +242,7 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          media_path?: string | null
           sender_id: string
         }
         Update: {
@@ -248,6 +250,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          media_path?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -403,6 +406,7 @@ export type Database = {
           poster_hue: number
           source: string
           tagged_handle: string | null
+          title: string | null
           topic: string | null
         }
         Insert: {
@@ -416,6 +420,7 @@ export type Database = {
           poster_hue?: number
           source?: string
           tagged_handle?: string | null
+          title?: string | null
           topic?: string | null
         }
         Update: {
@@ -429,6 +434,7 @@ export type Database = {
           poster_hue?: number
           source?: string
           tagged_handle?: string | null
+          title?: string | null
           topic?: string | null
         }
         Relationships: [
@@ -455,6 +461,10 @@ export type Database = {
           created_at: string
           daily_limit_minutes: number
           display_name: string
+          email_comments: boolean
+          email_dms: boolean
+          email_follows: boolean
+          email_likes: boolean
           handle: string
           hide_from_search: boolean
           high_contrast: boolean
@@ -466,6 +476,7 @@ export type Database = {
           pronouns: string | null
           quiet_hours: boolean
           reduce_motion: boolean
+          status: string | null
           text_scale: string
           theme: string
           user_id: string | null
@@ -486,6 +497,10 @@ export type Database = {
           created_at?: string
           daily_limit_minutes?: number
           display_name: string
+          email_comments?: boolean
+          email_dms?: boolean
+          email_follows?: boolean
+          email_likes?: boolean
           handle: string
           hide_from_search?: boolean
           high_contrast?: boolean
@@ -497,6 +512,7 @@ export type Database = {
           pronouns?: string | null
           quiet_hours?: boolean
           reduce_motion?: boolean
+          status?: string | null
           text_scale?: string
           theme?: string
           user_id?: string | null
@@ -517,6 +533,10 @@ export type Database = {
           created_at?: string
           daily_limit_minutes?: number
           display_name?: string
+          email_comments?: boolean
+          email_dms?: boolean
+          email_follows?: boolean
+          email_likes?: boolean
           handle?: string
           hide_from_search?: boolean
           high_contrast?: boolean
@@ -528,12 +548,69 @@ export type Database = {
           pronouns?: string | null
           quiet_hours?: boolean
           reduce_motion?: boolean
+          status?: string | null
           text_scale?: string
           theme?: string
           user_id?: string | null
           verification_status?: string
           verified_provider?: string | null
           vibe?: string | null
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          resolved_at: string | null
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id: string
+          resolved_at?: string | null
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -547,6 +624,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["age_band"]
       }
       current_profile_id: { Args: never; Returns: string }
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_conversation_member: {
         Args: { _conversation_id: string }
         Returns: boolean
@@ -554,6 +632,7 @@ export type Database = {
     }
     Enums: {
       age_band: "under_18" | "adult"
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -682,6 +761,7 @@ export const Constants = {
   public: {
     Enums: {
       age_band: ["under_18", "adult"],
+      app_role: ["admin", "moderator", "user"],
     },
   },
 } as const
