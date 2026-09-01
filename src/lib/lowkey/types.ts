@@ -35,9 +35,15 @@ export interface Profile {
   hideFromSearch: boolean;
   theme: ThemePref;
   reduceMotion: boolean;
-  textScale: TextScale;
+textScale: TextScale;
   highContrast: boolean;
   boldText: boolean;
+  /** "what are you doing right now" — shown on profile pages */
+  status: string | null;
+  emailFollows: boolean;
+  emailLikes: boolean;
+  emailComments: boolean;
+  emailDms: boolean;
 }
 
 export type Audience = "everyone" | "followers" | "nobody";
@@ -53,6 +59,7 @@ export interface Post {
   id: string;
   authorId: string;
   kind: PostKind;
+  title: string | null;
   caption: string;
   posterHue: number;
   mediaUrl: string | null;
@@ -81,6 +88,8 @@ export interface Message {
   conversationId: string;
   authorId: string;
   body: string;
+  /** resolved signed url when the message carries a photo */
+  mediaUrl: string | null;
   createdAt: string;
   readByMe: boolean;
 }
@@ -137,7 +146,12 @@ export const emptyState: LowkeyState = {
   currentUserId: null,
 };
 
-export const dayKey = (d: Date = new Date()) => d.toISOString().slice(0, 10);
+/**
+ * the calendar day in the *user's* local timezone — the daily limit and the
+ * streak must reset at local midnight, not utc midnight.
+ */
+export const dayKey = (d: Date = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 export const INTERESTS = [
   "football",
