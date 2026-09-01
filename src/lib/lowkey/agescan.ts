@@ -9,7 +9,11 @@
  * works with any camera: phone front camera, laptop webcam or usb webcam.
  * there is no face-id / secure-enclave requirement.
  */
-const MODEL_URL = "https://cdn.jsdelivr.net/gh/vladmandic/face-api@1.7.15/model";
+/** models are shipped with the app; the cdn is only a fallback */
+const MODEL_URLS = [
+  "/models",
+  "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model",
+];
 
 export const UNDER_18_MAX = 17;
 export const ADULT_MIN = 21;
@@ -28,10 +32,42 @@ async function getApi(): Promise<FaceApi> {
   if (!apiPromise) {
     apiPromise = (async () => {
       const faceapi = await import("@vladmandic/face-api");
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL);
-      return faceapi;
+
+      // some devices/browsers block webgl (older phones, hardened privacy
+      // settings). without a working backend the scan dies with a confusing
+      // "backend undefined" error, so fall back to plain cpu maths.
+      const tf = faceapi.tf as unknown as {
+        ready: () => Promise<void>;
+        getBackend: () => string | undefined;
+        setBackend: (name: string) => Promise<boolean>;
+      };
+      for (const backend of ["webgl", "cpu"]) {
+        try {
+          const ok = await tf.setBackend(backend);
+          if (!ok) continue;
+          await tf.ready();
+          if (tf.getBackend() === backend) break;
+        } catch {
+          /* try the next backend */
+        }
+      }
+
+      let lastError: unknown = null;
+      for (const url of MODEL_URLS) {
+        try {
+          await faceapi.nets.tinyFaceDetector.loadFromUri(url);
+          await faceapi.nets.ageGenderNet.loadFromUri(url);
+          return faceapi;
+        } catch (err) {
+          lastError = err;
+        }
+      }
+      throw lastError ?? new Error("could not load the age model");
     })();
+    // a failed load must not be cached, otherwise "try again" never works
+    apiPromise.catch(() => {
+      apiPromise = null;
+    });
   }
   return apiPromise;
 }
