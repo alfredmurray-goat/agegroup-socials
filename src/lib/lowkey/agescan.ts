@@ -44,6 +44,10 @@ async function getApi(): Promise<FaceApi> {
       }
       throw lastError ?? new Error("could not load the age model");
     })();
+    // a failed load must not be cached, otherwise "try again" never works
+    apiPromise.catch(() => {
+      apiPromise = null;
+    });
   }
   return apiPromise;
 }
