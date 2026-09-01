@@ -9,7 +9,11 @@
  * works with any camera: phone front camera, laptop webcam or usb webcam.
  * there is no face-id / secure-enclave requirement.
  */
-const MODEL_URL = "https://cdn.jsdelivr.net/gh/vladmandic/face-api@1.7.15/model";
+/** models are shipped with the app; the cdn is only a fallback */
+const MODEL_URLS = [
+  "/models",
+  "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model",
+];
 
 export const UNDER_18_MAX = 17;
 export const ADULT_MIN = 21;
