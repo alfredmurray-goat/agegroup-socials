@@ -3,7 +3,13 @@ import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/r
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+/** /lovable/* routes authenticate themselves; they must never be intercepted. */
+function isLovableRoute(request: Request) {
+  return new URL(request.url).pathname.startsWith("/lovable/");
+}
+
+const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
+  if (isLovableRoute(request)) return next();
   try {
     return await next();
   } catch (error) {
