@@ -5,10 +5,25 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
+  Link,
   Preview,
   Text,
 } from '@react-email/components'
+
+import {
+  code,
+  container,
+  darkModeCss,
+  footer,
+  h1,
+  hr,
+  link,
+  logo,
+  main,
+  text,
+} from './brand'
 
 interface ReauthenticationEmailProps {
   token: string
@@ -16,16 +31,28 @@ interface ReauthenticationEmailProps {
 
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>Your verification code</Preview>
+    <Head>
+      <style>{darkModeCss}</style>
+    </Head>
+    <Preview>your verification code</Preview>
     <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>Confirm reauthentication</Heading>
-        <Text style={text}>Use the code below to confirm your identity:</Text>
-        <Text style={codeStyle}>{token}</Text>
+      <Container className="dm-card" style={container}>
+        <span style={logo}>low key social</span>
+        <Heading className="dm-h1" style={h1}>
+          quick identity check
+        </Heading>
+        <Text className="dm-text" style={text}>
+          type this code in the app to confirm it's really you:
+        </Text>
+        <Text style={code}>{token}</Text>
+        <Hr style={hr} />
         <Text style={footer}>
-          This code will expire shortly. If you didn't request this, you can
-          safely ignore this email.
+          didn't request this? ignore it — the code expires on its own.
+          <br />
+          low key social is in beta — feedback goes to{' '}
+          <Link href="mailto:alfredcasper1010@gmail.com" style={link}>
+            alfredcasper1010@gmail.com
+          </Link>
         </Text>
       </Container>
     </Body>
@@ -33,26 +60,3 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
 )
 
 export default ReauthenticationEmail
-
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const codeStyle = {
-  fontFamily: 'Courier, monospace',
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 30px',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
