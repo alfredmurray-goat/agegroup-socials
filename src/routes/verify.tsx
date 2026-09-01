@@ -81,12 +81,20 @@ function VerifyPage() {
           await videoRef.current.play();
         }
         setCameras(await listCameras());
+      } catch {
+        setPhase("error");
+        setError(
+          "no camera access. allow the camera in your browser, or plug in / pick another webcam below.",
+        );
+        return;
+      }
+      try {
         await preloadAgeModel();
         setPhase("ready");
       } catch {
         setPhase("error");
         setError(
-          "no camera access. allow the camera in your browser, or plug in / pick another webcam below.",
+          "the age model couldn't load. check your connection (or turn off any content blocker) and try again.",
         );
       }
     },
