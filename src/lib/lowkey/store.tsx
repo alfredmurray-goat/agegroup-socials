@@ -325,10 +325,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         readAt: (r['read_at'] as string | null) ?? null,
         createdAt: r['created_at'] as string,
       })),
-      posts: postRows.map((r) => ({
+posts: postRows.map((r) => ({
         id: r['id'] as string,
         authorId: r['author_id'] as string,
         kind: (r['kind'] as PostKind) ?? "post",
+        title: (r['title'] as string | null) ?? null,
         caption: (r['caption'] as string) ?? "",
         posterHue: (r['poster_hue'] as number) ?? 60,
         mediaUrl: resolve(mediaUrls, (r['media_url'] as string | null) ?? null),
@@ -363,11 +364,12 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
         const conversationId = r['conversation_id'] as string;
         const lastRead = myLastRead.get(conversationId);
         const createdAt = r['created_at'] as string;
-        return {
+return {
           id: r['id'] as string,
           conversationId,
           authorId: r['sender_id'] as string,
           body: r['body'] as string,
+          mediaUrl: resolve(dmUrls, (r['media_path'] as string | null) ?? null),
           createdAt,
           readByMe:
             r['sender_id'] === mine.id || (lastRead ? createdAt <= lastRead : false),
