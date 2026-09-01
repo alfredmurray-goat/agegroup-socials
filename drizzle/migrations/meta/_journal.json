@@ -57,6 +57,13 @@
       "when": 1788235919030,
       "tag": "0007_0007_lowkey_moderation_media_email",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788236107440,
+      "tag": "0008_0008_lowkey_admin_moderation",
+      "breakpoints": true
     }
   ]
 }
