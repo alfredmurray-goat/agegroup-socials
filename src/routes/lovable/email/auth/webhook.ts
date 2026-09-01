@@ -63,12 +63,12 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
                 }),
             },
             email_change: {
-              subject: 'Confirm your new email',
+              subject: 'confirm your new email',
               render: (data) =>
                 React.createElement(EmailChangeEmail, {
                   siteName: SITE_NAME,
-                  oldEmail: data.old_email ?? '',
-                  email: data.email,
+                  siteUrl: SITE_URL,
+                  oldEmail: data.old_email ?? data.email ?? '',
                   newEmail: data.new_email ?? '',
                   confirmationUrl: data.url,
                 }),
