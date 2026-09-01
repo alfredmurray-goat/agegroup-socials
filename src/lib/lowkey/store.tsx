@@ -88,8 +88,9 @@ interface LowkeyApi {
   finishOnboarding: () => Promise<Result>;
   verifyAge: (band: AgeBand, provider: VerificationProvider) => Promise<Result>;
   recordConsent: (kind: string) => Promise<void>;
-  createPost: (input: {
+createPost: (input: {
     kind: PostKind;
+    title?: string | null;
     caption: string;
     mediaUrl: string | null;
     topic?: string | null;
