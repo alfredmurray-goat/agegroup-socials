@@ -55,11 +55,16 @@ interface OnboardingPrefs {
   allowDms?: Audience;
   allowComments?: Audience;
   hideFromSearch?: boolean;
-  theme?: ThemePref;
+theme?: ThemePref;
   reduceMotion?: boolean;
   textScale?: TextScale;
   highContrast?: boolean;
   boldText?: boolean;
+  status?: string | null;
+  emailFollows?: boolean;
+  emailLikes?: boolean;
+  emailComments?: boolean;
+  emailDms?: boolean;
 }
 
 export interface ImportProgress {
@@ -96,8 +101,21 @@ interface LowkeyApi {
   markNotificationsRead: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<Result>;
   uploadMedia: (file: File) => Promise<{ path: string; url: string } | null>;
-  startChat: (profileId: string) => Promise<string | null>;
+startChat: (profileId: string) => Promise<string | null>;
   sendMessage: (conversationId: string, body: string) => Promise<void>;
+  sendPhoto: (conversationId: string, file: File) => Promise<void>;
+  deletePost: (postId: string) => Promise<void>;
+  editPost: (
+    postId: string,
+    patch: { title?: string; caption?: string },
+  ) => Promise<void>;
+  deleteComment: (commentId: string) => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
+  report: (
+    targetType: "post" | "comment" | "profile",
+    targetId: string,
+    reason: string,
+  ) => Promise<void>;
   markRead: (conversationId: string) => Promise<void>;
   setDailyLimit: (minutes: number) => Promise<void>;
   addUsageMinute: () => Promise<void>;
@@ -182,9 +200,14 @@ function toProfile(r: Row): Profile {
     hideFromSearch: Boolean(r['hide_from_search']),
     theme: (r['theme'] as ThemePref) ?? "system",
     reduceMotion: Boolean(r['reduce_motion']),
-    textScale: (r['text_scale'] as TextScale) ?? "normal",
+textScale: (r['text_scale'] as TextScale) ?? "normal",
     highContrast: Boolean(r['high_contrast']),
     boldText: Boolean(r['bold_text']),
+    status: (r['status'] as string | null) ?? null,
+    emailFollows: Boolean(r['email_follows']),
+    emailLikes: Boolean(r['email_likes']),
+    emailComments: Boolean(r['email_comments']),
+    emailDms: Boolean(r['email_dms']),
   };
 }
 
