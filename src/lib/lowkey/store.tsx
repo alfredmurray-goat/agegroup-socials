@@ -77,8 +77,10 @@ interface LowkeyApi {
   me: Profile | null;
   /** true until the first load after auth resolves */
   loading: boolean;
-  /** signed in with the backend but has no profile row yet */
+/** signed in with the backend but has no profile row yet */
   needsProfile: boolean;
+  /** true when the account has the admin role (moderation inbox) */
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<Result>;
   signUp: (email: string, password: string) => Promise<Result>;
   signInWithGoogle: () => Promise<Result>;
@@ -215,8 +217,9 @@ textScale: (r['text_scale'] as TextScale) ?? "normal",
 export function LowkeyProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<LowkeyState>(emptyState);
   const [loading, setLoading] = useState(true);
-  const [authUserId, setAuthUserId] = useState<string | null>(null);
+const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [needsProfile, setNeedsProfile] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const meIdRef = useRef<string | null>(null);
 
   const me = useMemo(
@@ -229,10 +232,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     const { data: auth } = await supabase.auth.getUser();
     const user = auth.user;
-    setAuthUserId(user?.id ?? null);
+setAuthUserId(user?.id ?? null);
     if (!user) {
       setState(emptyState);
       setNeedsProfile(false);
+      setIsAdmin(false);
       setLoading(false);
       return;
     }
@@ -243,13 +247,18 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (!mineRow) {
+if (!mineRow) {
       setState(emptyState);
       setNeedsProfile(true);
       setLoading(false);
       return;
     }
     setNeedsProfile(false);
+    const { data: adminRes } = await supabase.rpc("has_role", {
+      _user_id: user.id,
+      _role: "admin",
+    });
+    setIsAdmin(Boolean(adminRes));
     const mine = toProfile(mineRow as Row);
 
     const [
@@ -1208,7 +1217,8 @@ const comment = state.comments.find((c) => c.id === commentId);
       state,
       me,
       loading,
-      needsProfile: needsProfile && Boolean(authUserId),
+needsProfile: needsProfile && Boolean(authUserId),
+      isAdmin,
       signIn,
       signUp,
       signInWithGoogle,
@@ -1250,7 +1260,8 @@ startChat,
       state,
       me,
       loading,
-      needsProfile,
+needsProfile,
+      isAdmin,
       authUserId,
       signIn,
       signUp,
