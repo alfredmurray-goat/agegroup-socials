@@ -506,7 +506,12 @@ return {
         ...(prefs.reduceMotion !== undefined ? { reduce_motion: prefs.reduceMotion } : {}),
         ...(prefs.textScale ? { text_scale: prefs.textScale } : {}),
         ...(prefs.highContrast !== undefined ? { high_contrast: prefs.highContrast } : {}),
-        ...(prefs.boldText !== undefined ? { bold_text: prefs.boldText } : {}),
+...(prefs.boldText !== undefined ? { bold_text: prefs.boldText } : {}),
+        ...(prefs.status !== undefined ? { status: prefs.status } : {}),
+        ...(prefs.emailFollows !== undefined ? { email_follows: prefs.emailFollows } : {}),
+        ...(prefs.emailLikes !== undefined ? { email_likes: prefs.emailLikes } : {}),
+        ...(prefs.emailComments !== undefined ? { email_comments: prefs.emailComments } : {}),
+        ...(prefs.emailDms !== undefined ? { email_dms: prefs.emailDms } : {}),
       };
       const { error } = await supabase.from("profiles").update(patch).eq("id", id);
       if (error) return { ok: false, error: error.message.toLowerCase() };
@@ -560,8 +565,9 @@ return {
   /* ---------- content ---------- */
 
   const createPost = useCallback(
-    async (input: {
+async (input: {
       kind: PostKind;
+      title?: string | null;
       caption: string;
       mediaUrl: string | null;
       topic?: string | null;
@@ -573,6 +579,7 @@ return {
         .insert({
           author_id: author.id,
           kind: input.kind,
+title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
           caption: input.caption.toLowerCase(),
           media_url: input.mediaUrl,
           poster_hue: Math.floor(Math.random() * 360),
