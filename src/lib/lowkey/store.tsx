@@ -816,9 +816,133 @@ title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
         .update({ last_read_at: new Date().toISOString() })
         .eq("conversation_id", conversationId)
         .eq("profile_id", id);
-      await refresh();
+await refresh();
     },
     [refresh, state.streaks],
+  );
+
+  const sendPhoto = useCallback(
+    async (conversationId: string, file: File) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      const uploaded = await uploadMedia(file);
+      if (!uploaded) {
+        toast.error("photo upload failed");
+        return;
+      }
+      const { error } = await supabase
+        .from("messages")
+        .insert({ conversation_id: conversationId, sender_id: id, body: "", media_path: uploaded.path });
+      if (error) {
+        toast.error("couldn't send the photo");
+        return;
+      }
+      // a photo counts as a day active for the friend streak too
+      const today = dayKey();
+      const yesterday = dayKey(new Date(Date.now() - 86_400_000));
+      const streak = state.streaks.find((s) => s.conversationId === conversationId);
+      if (!streak || streak.lastActiveDay !== today) {
+        const next = streak && streak.lastActiveDay === yesterday ? streak.count + 1 : 1;
+        await supabase
+          .from("conversations")
+          .update({ streak_count: next, streak_last_day: today })
+          .eq("id", conversationId);
+      }
+      await supabase
+        .from("conversation_members")
+        .update({ last_read_at: new Date().toISOString() })
+        .eq("conversation_id", conversationId)
+        .eq("profile_id", id);
+      await refresh();
+    },
+    [refresh, state.streaks, uploadMedia],
+  );
+
+  /* ---------- moderation: delete, edit, report ---------- */
+
+  const deletePost = useCallback(
+    async (postId: string) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      const post = state.posts.find((p) => p.id === postId);
+      if (!post || post.authorId !== id) return;
+      // remove it everywhere locally so it disappears instantly
+      setState((s) => ({
+        ...s,
+        posts: s.posts.filter((p) => p.id !== postId),
+        comments: s.comments.filter((c) => c.postId !== postId),
+        likes: s.likes.filter((l) => l.postId !== postId),
+        bookmarks: s.bookmarks.filter((b) => b !== postId),
+        notifications: s.notifications.filter((n) => n.postId !== postId),
+      }));
+      await supabase.from("posts").delete().eq("id", postId);
+    },
+    [state.posts],
+  );
+
+  const editPost = useCallback(
+    async (postId: string, patch: { title?: string; caption?: string }) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      const post = state.posts.find((p) => p.id === postId);
+      if (!post || post.authorId !== id) return;
+      const db: Record<string, string | null> = {};
+      if (patch.title !== undefined)
+        db['title'] = patch.title.trim() ? patch.title.trim().toLowerCase() : null;
+      if (patch.caption !== undefined)
+        db['caption'] = patch.caption.trim() ? patch.caption.trim().toLowerCase() : "no caption";
+      if (Object.keys(db).length === 0) return;
+      setState((s) => ({
+        ...s,
+        posts: s.posts.map((p) =>
+          p.id === postId ? { ...p, ...(db['title'] !== undefined ? { title: db['title'] } : {}), ...(db['caption'] !== undefined ? { caption: db['caption'] } : {}) } : p,
+        ),
+      }));
+      await supabase.from("posts").update(db).eq("id", postId);
+    },
+    [state.posts],
+  );
+
+  const deleteComment = useCallback(async (commentId: string) => {
+    const id = meIdRef.current;
+    if (!id) return;
+    const comment = state.comments.find((c) => c.id === commentId);
+    if (!comment) return;
+    const author = state.profiles.find((p) => p.id === id);
+    // anyone can delete their own; admins can delete anything
+    const isAdmin = author ? await isAdminUser(id) : false;
+    if (comment.authorId !== id && !isAdmin) return;
+    setState((s) => ({ ...s, comments: s.comments.filter((c) => c.id !== commentId) }));
+    await supabase.from("post_comments").delete().eq("id", commentId);
+  }, [state.comments, state.profiles]);
+
+  const deleteMessage = useCallback(async (messageId: string) => {
+    const id = meIdRef.current;
+    if (!id) return;
+    const msg = state.messages.find((m) => m.id === messageId);
+    if (!msg || msg.authorId !== id) return;
+    setState((s) => ({ ...s, messages: s.messages.filter((m) => m.id !== messageId) }));
+    await supabase.from("messages").delete().eq("id", messageId);
+  }, [state.messages]);
+
+  const report = useCallback(
+    async (
+      targetType: "post" | "comment" | "profile",
+      targetId: string,
+      reason: string,
+    ) => {
+      const id = meIdRef.current;
+      if (!id || !reason.trim()) return;
+      const { error } = await supabase.from("reports").insert({
+        reporter_id: id,
+        target_type: targetType,
+        target_id: targetId,
+        reason: reason.trim().toLowerCase(),
+      });
+      if (error) toast.error("couldn't send the report");
+      else toast.success("report sent");
+    },
+    [],
   );
 
   const markRead = useCallback(
@@ -1099,8 +1223,14 @@ title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
       markNotificationsRead,
       uploadAvatar,
       uploadMedia,
-      startChat,
+startChat,
       sendMessage,
+      sendPhoto,
+      deletePost,
+      editPost,
+      deleteComment,
+      deleteMessage,
+      report,
       markRead,
       setDailyLimit,
       addUsageMinute,
