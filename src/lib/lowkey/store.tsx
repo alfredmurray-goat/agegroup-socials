@@ -97,6 +97,7 @@ createPost: (input: {
     mediaUrl: string | null;
     topic?: string | null;
   }) => Promise<string | null>;
+  toggleRepost: (postId: string) => Promise<void>;
   toggleLike: (postId: string) => Promise<void>;
   addComment: (postId: string, body: string) => Promise<void>;
   toggleFollow: (profileId: string) => Promise<void>;
@@ -349,6 +350,7 @@ posts: postRows.map((r) => ({
         caption: (r['caption'] as string) ?? "",
         posterHue: (r['poster_hue'] as number) ?? 60,
         mediaUrl: resolve(mediaUrls, (r['media_url'] as string | null) ?? null),
+        sourcePostId: (r['source_post_id'] as string | null) ?? null,
         taggedHandle: (r['tagged_handle'] as string | null) ?? null,
         topic: (r['topic'] as string | null) ?? null,
         ageBand: r['age_band'] as AgeBand,
@@ -928,6 +930,44 @@ const comment = state.comments.find((c) => c.id === commentId);
     await supabase.from("post_comments").delete().eq("id", commentId);
   }, [state.comments, state.profiles]);
 
+  const toggleRepost = useCallback(
+    async (postId: string) => {
+      const id = meIdRef.current;
+      if (!id) return;
+      // if we've already reposted this, remove our repost
+      const existing = state.posts.find((p) => p.sourcePostId === postId && p.authorId === id);
+      if (existing) {
+        await supabase.from("posts").delete().eq("id", existing.id);
+        await refresh();
+        return;
+      }
+      const author = state.profiles.find((p) => p.id === id);
+      if (!author?.ageBand || author.verificationStatus !== "verified") {
+        toast.error("verify your age first");
+        return;
+      }
+      const { data, error } = await supabase
+        .from("posts")
+        .insert({
+          author_id: id,
+          kind: "repost",
+          caption: "",
+          media_url: null,
+          poster_hue: Math.floor(Math.random() * 360),
+          age_band: author.ageBand,
+          source_post_id: postId,
+        })
+        .select("id")
+        .maybeSingle();
+      if (error || !data) {
+        await refresh();
+        return;
+      }
+      await refresh();
+    },
+    [refresh, state.posts, state.profiles],
+  );
+
   const deleteMessage = useCallback(async (messageId: string) => {
     const id = meIdRef.current;
     if (!id) return;
@@ -1231,6 +1271,7 @@ needsProfile: needsProfile && Boolean(authUserId),
       createPost,
       toggleLike,
       addComment,
+      toggleRepost,
       toggleFollow,
       toggleBookmark,
       markNotificationsRead,
@@ -1340,9 +1381,11 @@ export function useBandPosts(kind?: PostKind) {
 export function useMyConversations() {
   const { state, me } = useLowkey();
   return useMemo(() => {
-    if (!me?.ageBand) return [];
+    if (!me) return [];
+    // show any conversation we're a member of (mutual-follow chats are allowed
+    // even when age bands differ or aren't set)
     return state.conversations
-      .filter((c) => c.memberIds.includes(me.id) && c.ageBand === me.ageBand)
+      .filter((c) => c.memberIds.includes(me.id))
       .map((c) => {
         const otherId = c.memberIds.find((id) => id !== me.id) ?? me.id;
         const other = state.profiles.find((p) => p.id === otherId) ?? me;

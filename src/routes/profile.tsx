@@ -102,19 +102,21 @@ const { state, me, uploadAvatar, updateProfile } = useLowkey();
               value={statusDraft}
               maxLength={60}
               onChange={(e) => setStatusDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  void updateProfile({ status: statusDraft.trim() || null });
-                  setEditingStatus(false);
-                }
-              }}
+              onKeyDown={async (e) => {
+                  if (e.key === "Enter") {
+                    const res = await updateProfile({ status: statusDraft.trim() || null });
+                    setEditingStatus(false);
+                    toast[res.ok ? "success" : "error"](res.ok ? "status saved" : res.error ?? "save failed");
+                  }
+                }}
               placeholder="what are you doing right now?"
               className="lowkey min-h-11 flex-1 rounded-full border border-input bg-background px-3 text-sm outline-none"
             />
             <button
-              onClick={() => {
-                void updateProfile({ status: statusDraft.trim() || null });
+              onClick={async () => {
+                const res = await updateProfile({ status: statusDraft.trim() || null });
                 setEditingStatus(false);
+                toast[res.ok ? "success" : "error"](res.ok ? "status saved" : res.error ?? "save failed");
               }}
               className="lowkey rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"
             >

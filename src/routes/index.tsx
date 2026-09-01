@@ -319,7 +319,7 @@ function FeedCard({ post }: { post: Post }) {
 }
 
 function FeedPage() {
-  const posts = useBandPosts();
+  const posts = useBandPosts('post');
 
   return (
     <AppScreen>

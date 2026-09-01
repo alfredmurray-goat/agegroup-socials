@@ -118,6 +118,26 @@ export async function estimateAgeFromVideo(
     await new Promise((r) => window.setTimeout(r, 140));
   }
 
+  // no detections
+  if (ages.length === 0) return { kind: "no_face" };
+
+  // compute aggregated stats
+  const avgAge = ages.reduce((s, a) => s + a, 0) / ages.length;
+  const avgScore = scores.reduce((s, v) => s + v, 0) / scores.length;
+  const variance = ages.reduce((s, a) => s + Math.pow(a - avgAge, 2), 0) / ages.length;
+  const stddev = Math.sqrt(variance);
+
+  // confidence heuristic: require reasonably high detection confidence and
+  // stable age estimates (low stddev). otherwise return inconclusive.
+  const highConfidence = avgScore >= 0.5 && stddev <= 6;
+
+  if (!highConfidence) return { kind: "inconclusive", age: Math.round(avgAge), confidence: avgScore };
+
+  const rounded = Math.round(avgAge);
+  if (rounded <= UNDER_18_MAX) return { kind: "under_18", age: rounded, confidence: avgScore };
+  if (rounded >= ADULT_MIN) return { kind: "adult", age: rounded, confidence: avgScore };
+  return { kind: "inconclusive", age: rounded, confidence: avgScore };
+
   if (ages.length < Math.ceil(samples / 2)) return { kind: "no_face" };
 
   // median is steadier than a mean when one frame is blurry

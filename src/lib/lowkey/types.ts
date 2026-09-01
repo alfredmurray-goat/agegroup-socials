@@ -52,7 +52,7 @@ export type ThemePref = "system" | "light" | "dark";
 /** low-vision text sizing, applied to the root font size */
 export type TextScale = "normal" | "large" | "larger" | "largest";
 
-export type PostKind = "post" | "video";
+export type PostKind = "post" | "video" | "repost";
 
 /** mirrors the `posts` table; ageBand is stamped from the author */
 export interface Post {
@@ -63,6 +63,8 @@ export interface Post {
   caption: string;
   posterHue: number;
   mediaUrl: string | null;
+  /** if this is a repost, the original post id */
+  sourcePostId?: string | null;
   taggedHandle: string | null;
   topic: string | null;
   ageBand: AgeBand;
