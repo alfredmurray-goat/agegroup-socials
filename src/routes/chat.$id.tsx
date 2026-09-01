@@ -73,28 +73,42 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
           <ArrowLeft className="size-5" />
         </Link>
         <Avatar hue={other.avatarHue} label={other.displayName} size={34} />
-        <div className="min-w-0 flex-1">
+<div className="min-w-0 flex-1">
           <p className="lowkey truncate text-sm font-semibold">@{other.handle}</p>
           <StreakPill count={streak} />
         </div>
-        <button aria-label="video call" className="p-2 text-muted-foreground">
-          <Video className="size-5" />
-        </button>
       </header>
 
       <div className="flex flex-col gap-2 px-4 py-4">
-        {messages.map((m) => {
+{messages.map((m) => {
           const mine = m.authorId === me.id;
           return (
-            <div
-              key={m.id}
-              className={`lowkey max-w-[75%] rounded-3xl px-4 py-2.5 text-sm ${
-                mine
-                  ? "self-end bg-primary text-primary-foreground"
-                  : "self-start bg-muted text-foreground"
-              }`}
-            >
-              {m.body}
+            <div key={m.id} className={`lowkey max-w-[75%] ${mine ? "self-end" : "self-start"}`}>
+              <div
+                className={`relative flex flex-col gap-1.5 rounded-3xl px-4 py-2.5 text-sm ${
+                  mine
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground"
+                }`}
+              >
+                {m.mediaUrl && (
+                  <img
+                    src={m.mediaUrl}
+                    alt="photo in chat"
+                    className="max-h-72 w-full max-w-56 rounded-2xl object-cover"
+                  />
+                )}
+                {m.body && <p>{m.body}</p>}
+                {mine && (
+                  <button
+                    onClick={() => void deleteMessage(m.id)}
+                    aria-label="delete message"
+                    className="absolute -top-2.5 -right-2.5 flex size-7 items-center justify-center rounded-full border border-border bg-background text-muted-foreground"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
@@ -110,13 +124,21 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
         }}
         className="fixed inset-x-0 bottom-20 z-30 mx-auto flex w-full max-w-lg items-center gap-2 px-3"
       >
-        <button
+<button
           type="button"
-          aria-label="attach"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+          aria-label="send a photo"
+          onClick={() => fileRef.current?.click()}
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground active:scale-95"
         >
-          <Plus className="size-5" />
+          <ImagePlus className="size-5" />
         </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*,.heic,.heif"
+          className="hidden"
+          onChange={(e) => void onPhoto(e.target.files?.[0])}
+        />
         <input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
