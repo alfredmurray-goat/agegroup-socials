@@ -32,9 +32,17 @@ async function getApi(): Promise<FaceApi> {
   if (!apiPromise) {
     apiPromise = (async () => {
       const faceapi = await import("@vladmandic/face-api");
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL);
-      return faceapi;
+      let lastError: unknown = null;
+      for (const url of MODEL_URLS) {
+        try {
+          await faceapi.nets.tinyFaceDetector.loadFromUri(url);
+          await faceapi.nets.ageGenderNet.loadFromUri(url);
+          return faceapi;
+        } catch (err) {
+          lastError = err;
+        }
+      }
+      throw lastError ?? new Error("could not load the age model");
     })();
   }
   return apiPromise;
