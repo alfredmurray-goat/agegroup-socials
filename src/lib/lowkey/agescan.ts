@@ -36,7 +36,11 @@ async function getApi(): Promise<FaceApi> {
       // some devices/browsers block webgl (older phones, hardened privacy
       // settings). without a working backend the scan dies with a confusing
       // "backend undefined" error, so fall back to plain cpu maths.
-      const tf = faceapi.tf;
+      const tf = faceapi.tf as unknown as {
+        ready: () => Promise<void>;
+        getBackend: () => string | undefined;
+        setBackend: (name: string) => Promise<boolean>;
+      };
       try {
         await tf.ready();
       } catch {
