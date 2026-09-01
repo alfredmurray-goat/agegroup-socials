@@ -32,6 +32,25 @@ async function getApi(): Promise<FaceApi> {
   if (!apiPromise) {
     apiPromise = (async () => {
       const faceapi = await import("@vladmandic/face-api");
+
+      // some devices/browsers block webgl (older phones, hardened privacy
+      // settings). without a working backend the scan dies with a confusing
+      // "backend undefined" error, so fall back to plain cpu maths.
+      const tf = faceapi.tf;
+      try {
+        await tf.ready();
+      } catch {
+        /* handled below */
+      }
+      if (!tf.getBackend()) {
+        try {
+          await tf.setBackend("cpu");
+          await tf.ready();
+        } catch {
+          /* the model load below will surface a proper error */
+        }
+      }
+
       let lastError: unknown = null;
       for (const url of MODEL_URLS) {
         try {
