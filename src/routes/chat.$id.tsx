@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Plus, Send, Video } from "lucide-react";
+import { ArrowLeft, ImagePlus, Send, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { AppScreen, Avatar, StreakPill } from "@/components/lowkey/shell";
 import { useLowkey } from "@/lib/lowkey/store";
 
@@ -18,10 +19,24 @@ export const Route = createFileRoute("/chat/$id")({
 
 function ThreadPage() {
   const { id } = Route.useParams();
-  const { state, me, sendMessage, markRead } = useLowkey();
+const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey();
   const navigate = useNavigate();
   const [draft, setDraft] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
+
+  const onPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image") && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) {
+      toast.error("photos only");
+      return;
+    }
+    if (file.size > 20_000_000) {
+      toast.error("keep it under 20mb");
+      return;
+    }
+    await sendPhoto(id, file);
+  };
 
   const conversation = state.conversations.find((c) => c.id === id);
   const allowed = !!conversation && !!me && conversation.memberIds.includes(me.id) &&

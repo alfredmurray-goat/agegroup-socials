@@ -27,6 +27,7 @@ function CreatePage() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
 
+const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
   const [topic, setTopic] = useState<string | null>(null);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
@@ -79,8 +80,9 @@ function CreatePage() {
       return;
     }
     setPosting(true);
-    const id = await createPost({
+const id = await createPost({
       kind,
+      title: title.trim() || null,
       caption: caption.trim() || "no caption",
       mediaUrl: mediaPath,
       topic,
@@ -169,6 +171,15 @@ function CreatePage() {
           accept="image/*,video/*,.heic,.heif"
           className="hidden"
           onChange={(e) => void pick(e.target.files?.[0])}
+        />
+
+{/* title */}
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          maxLength={60}
+          placeholder="a little title (optional)"
+          className="lowkey rounded-3xl border border-border bg-card px-4 py-3.5 text-sm font-bold outline-none placeholder:font-normal"
         />
 
         {/* caption */}
