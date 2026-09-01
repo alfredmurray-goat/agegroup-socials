@@ -345,10 +345,13 @@ export function AppScreen({
   children,
   chrome = true,
   title,
+  overLimit = false,
 }: {
   children: ReactNode;
   chrome?: boolean;
   title?: string;
+  /** allow this screen to render even after the daily limit is hit (e.g. settings) */
+  overLimit?: boolean;
 }) {
   const { me, needsProfile, loading, addUsageMinute } = useLowkey();
   const usage = useTodayUsage();
@@ -383,7 +386,7 @@ export function AppScreen({
     return <div className="min-h-screen bg-background" />;
   }
 
-  if (usage.reached) return <DailyLimitReached />;
+if (usage.reached && !overLimit) return <DailyLimitReached />;
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-background">

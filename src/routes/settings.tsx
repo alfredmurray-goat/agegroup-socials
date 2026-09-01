@@ -238,7 +238,7 @@ function SettingsPage() {
     .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
   return (
-    <AppScreen title="settings">
+<AppScreen title="settings" overLimit>
       <div className="flex flex-col gap-5 px-4 py-5">
         <div className="flex items-center gap-2">
           <h1 className="lowkey text-xl font-bold">settings</h1>

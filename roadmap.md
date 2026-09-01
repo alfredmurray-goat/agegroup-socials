@@ -26,6 +26,7 @@
 - status updates on profiles ("what are you doing right now")
 - redo create screen + post titles shown on the home feed; remove verified badge on own profile
 - daily limit resets at midnight in the user's local timezone (was UTC)
+- [bug] "change my limit" from the limit screen does nothing — AppScreen re-blocks /settings
 
 ## open
 - own supabase project instead of managed backend (workspace-admin action, blocked)
