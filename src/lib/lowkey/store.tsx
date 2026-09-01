@@ -886,16 +886,16 @@ await refresh();
       if (!id) return;
       const post = state.posts.find((p) => p.id === postId);
       if (!post || post.authorId !== id) return;
-      const db: Record<string, string | null> = {};
+const db: { title?: string | null; caption?: string } = {};
       if (patch.title !== undefined)
-        db['title'] = patch.title.trim() ? patch.title.trim().toLowerCase() : null;
+        db.title = patch.title.trim() ? patch.title.trim().toLowerCase() : null;
       if (patch.caption !== undefined)
-        db['caption'] = patch.caption.trim() ? patch.caption.trim().toLowerCase() : "no caption";
+        db.caption = patch.caption.trim() ? patch.caption.trim().toLowerCase() : "no caption";
       if (Object.keys(db).length === 0) return;
       setState((s) => ({
         ...s,
         posts: s.posts.map((p) =>
-          p.id === postId ? { ...p, ...(db['title'] !== undefined ? { title: db['title'] } : {}), ...(db['caption'] !== undefined ? { caption: db['caption'] } : {}) } : p,
+          p.id === postId ? { ...p, ...(db.title !== undefined ? { title: db.title } : {}), ...(db.caption !== undefined ? { caption: db.caption } : {}) } : p,
         ),
       }));
       await supabase.from("posts").update(db).eq("id", postId);
@@ -906,11 +906,13 @@ await refresh();
   const deleteComment = useCallback(async (commentId: string) => {
     const id = meIdRef.current;
     if (!id) return;
-    const comment = state.comments.find((c) => c.id === commentId);
+const comment = state.comments.find((c) => c.id === commentId);
     if (!comment) return;
-    const author = state.profiles.find((p) => p.id === id);
-    // anyone can delete their own; admins can delete anything
-    const isAdmin = author ? await isAdminUser(id) : false;
+    // anyone can delete their own; admins can delete anything (via has_role rpc)
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: id,
+      _role: "admin",
+    });
     if (comment.authorId !== id && !isAdmin) return;
     setState((s) => ({ ...s, comments: s.comments.filter((c) => c.id !== commentId) }));
     await supabase.from("post_comments").delete().eq("id", commentId);
