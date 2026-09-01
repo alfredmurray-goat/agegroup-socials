@@ -20,13 +20,21 @@ Four additions in one pass: real content moderation and deletion, photos in DMs,
 
 - Web app manifest, proper app icons (192 + 512 from the logo, maskable), `display: standalone`, apple-touch icons, and matching head tags.
 - "Add to Home Screen" on phones, full-screen from an app icon, app-style launching.
-- Home-screen support only — no offline caching or service worker, so Lovable previews stay safe and nothing can go stale.
+- Home-screen support only — no offline caching or service worker, so Lovable previews stay safe and nothing can go stale. Make pwa auto update when downloaded.
 
 ## 4. Email notifications
 
 - When someone follows, likes, comments, or DMs you — and you're not currently active — an email is sent from the app's sending domain.
 - Sending domain: `rainz.net` (the only verified domain in the workspace). Can be swapped for the project's own domain later without code changes.
 - Per-user toggles in settings > notifications & wellbeing (follows, likes, comments, DMs) and quiet hours are respected. Email is off by default until the user enables it, to stay GDPR-friendly.
+
+5. status updates
+
+On the users profile they can type what they are doing right now.
+
+6. new posts
+
+redo the create post screen and that yoiu can now also titel the posts and make sure it shows on the homescreen and remove the verified badge on my profile.
 
 ---
 
