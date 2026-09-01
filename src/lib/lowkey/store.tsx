@@ -291,9 +291,10 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const profileRows = (profilesRes.data ?? []) as Row[];
+const profileRows = (profilesRes.data ?? []) as Row[];
     const postRows = (postsRes.data ?? []) as Row[];
-    const [avatarUrls, mediaUrls] = await Promise.all([
+    const messageRows = (messagesRes.data ?? []) as Row[];
+    const [avatarUrls, mediaUrls, dmUrls] = await Promise.all([
       signPaths(
         "avatars",
         profileRows.map((r) => (r['avatar_url'] as string | null) ?? null),
@@ -301,6 +302,11 @@ export function LowkeyProvider({ children }: { children: ReactNode }) {
       signPaths(
         "media",
         postRows.map((r) => (r['media_url'] as string | null) ?? null),
+      ),
+      // photos sent in chats live in the same private media bucket
+      signPaths(
+        "media",
+        messageRows.map((r) => (r['media_path'] as string | null) ?? null),
       ),
     ]);
 
