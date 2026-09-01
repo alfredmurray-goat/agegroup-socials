@@ -41,17 +41,14 @@ async function getApi(): Promise<FaceApi> {
         getBackend: () => string | undefined;
         setBackend: (name: string) => Promise<boolean>;
       };
-      try {
-        await tf.ready();
-      } catch {
-        /* handled below */
-      }
-      if (!tf.getBackend()) {
+      for (const backend of ["webgl", "cpu"]) {
         try {
-          await tf.setBackend("cpu");
+          const ok = await tf.setBackend(backend);
+          if (!ok) continue;
           await tf.ready();
+          if (tf.getBackend() === backend) break;
         } catch {
-          /* the model load below will surface a proper error */
+          /* try the next backend */
         }
       }
 
