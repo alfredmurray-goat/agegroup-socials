@@ -104,7 +104,10 @@ createPost: (input: {
   toggleBookmark: (postId: string) => Promise<void>;
   markNotificationsRead: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<Result>;
-  uploadMedia: (file: File) => Promise<{ path: string; url: string } | null>;
+  uploadMedia: (
+    file: File,
+    onProgress?: (pct: number) => void,
+  ) => Promise<{ path: string; url: string } | null>;
 startChat: (profileId: string) => Promise<string | null>;
   sendMessage: (conversationId: string, body: string) => Promise<void>;
   sendPhoto: (conversationId: string, file: File) => Promise<void>;
