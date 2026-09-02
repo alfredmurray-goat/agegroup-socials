@@ -99,8 +99,55 @@ export async function openCamera(deviceId?: string): Promise<MediaStream> {
   return navigator.mediaDevices.getUserMedia({ video, audio: false });
 }
 
-/** takes a handful of samples from a live video element and averages them */
+/**
+ * takes a batch of samples from a live video element and combines them.
+ *
+ * accuracy tricks: more samples, only decent-quality detections count, the
+ * best-scoring half of the samples decide the age, and a trimmed median is
+ * used instead of a mean so one bad frame can't move the band.
+ */
 export async function estimateAgeFromVideo(
+  video: HTMLVideoElement,
+  samples = 12,
+): Promise<ScanOutcome> {
+  const faceapi = await getApi();
+  const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 });
+  const picks: { age: number; score: number }[] = [];
+
+  for (let i = 0; i < samples; i += 1) {
+    const result = await faceapi.detectSingleFace(video, options).withAgeAndGender();
+    // ignore tiny/far-away faces: they are the main source of wild guesses
+    if (result && result.detection.box.width >= video.videoWidth * 0.15) {
+      picks.push({ age: result.age, score: result.detection.score });
+    }
+    await new Promise((r) => window.setTimeout(r, 110));
+  }
+
+  if (picks.length < Math.ceil(samples / 3)) return { kind: "no_face" };
+
+  // keep the best-scoring half of the samples
+  const best = [...picks].sort((a, b) => b.score - a.score).slice(0, Math.max(3, Math.ceil(picks.length / 2)));
+  const ages = best.map((p) => p.age).sort((a, b) => a - b);
+  const confidence = best.reduce((s, p) => s + p.score, 0) / best.length;
+
+  // trimmed median: drop the extremes when we have enough samples
+  const trimmed = ages.length >= 5 ? ages.slice(1, -1) : ages;
+  const median = trimmed[Math.floor(trimmed.length / 2)]!;
+  const spread = (ages[ages.length - 1]! - ages[0]!) / 2;
+
+  // unstable estimates or a weak detection are never good enough to decide
+  if (confidence < 0.55 || spread > 7) {
+    return { kind: "inconclusive", age: Math.round(median), confidence };
+  }
+
+  const age = Math.round(median);
+  if (age <= UNDER_18_MAX) return { kind: "under_18", age, confidence };
+  if (age >= ADULT_MIN) return { kind: "adult", age, confidence };
+  return { kind: "inconclusive", age, confidence };
+}
+
+/** legacy single-pass helper kept for reference */
+async function _rawSample(
   video: HTMLVideoElement,
   samples = 7,
 ): Promise<ScanOutcome> {
