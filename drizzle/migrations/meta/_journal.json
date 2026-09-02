@@ -64,6 +64,13 @@
       "when": 1788236107440,
       "tag": "0008_0008_lowkey_admin_moderation",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788325017169,
+      "tag": "0009_chat_rpc_and_admin_reads",
+      "breakpoints": true
     }
   ]
 }

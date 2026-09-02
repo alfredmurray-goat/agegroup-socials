@@ -629,6 +629,7 @@ export type Database = {
         Args: { _conversation_id: string }
         Returns: boolean
       }
+      start_conversation: { Args: { _other: string }; Returns: string }
     }
     Enums: {
       age_band: "under_18" | "adult"
