@@ -34,6 +34,7 @@ const [title, setTitle] = useState("");
   const [mediaPath, setMediaPath] = useState<string | null>(null);
   const [mediaKind, setMediaKind] = useState<PostKind | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [posting, setPosting] = useState(false);
 
   const kind: PostKind = mediaKind ?? "post";
@@ -55,7 +56,8 @@ const [title, setTitle] = useState("");
       return;
     }
     setUploading(true);
-    const uploaded = await uploadMedia(file);
+    setProgress(0);
+    const uploaded = await uploadMedia(file, setProgress);
     setUploading(false);
     if (!uploaded) {
       toast.error("upload failed, try again");
@@ -149,7 +151,13 @@ const id = await createPost({
             {uploading ? (
               <>
                 <Loader2 className="size-7 animate-spin text-muted-foreground" />
-                <span className="lowkey text-sm font-semibold">uploading...</span>
+                <span className="lowkey text-sm font-semibold">uploading {progress}%</span>
+                <span className="h-1.5 w-40 overflow-hidden rounded-full bg-muted">
+                  <span
+                    className="block h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.max(progress, 4)}%` }}
+                  />
+                </span>
               </>
             ) : (
               <>

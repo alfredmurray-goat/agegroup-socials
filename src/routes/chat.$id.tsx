@@ -39,8 +39,8 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
   };
 
   const conversation = state.conversations.find((c) => c.id === id);
-  const allowed = !!conversation && !!me && conversation.memberIds.includes(me.id) &&
-    conversation.ageBand === me.ageBand;
+  // membership is the rule: mutual-follow chats work even if a band differs
+  const allowed = !!conversation && !!me && conversation.memberIds.includes(me.id);
 
   useEffect(() => {
     if (me && !allowed) void navigate({ to: "/chats", replace: true });

@@ -99,52 +99,48 @@ export async function openCamera(deviceId?: string): Promise<MediaStream> {
   return navigator.mediaDevices.getUserMedia({ video, audio: false });
 }
 
-/** takes a handful of samples from a live video element and averages them */
+/**
+ * takes a batch of samples from a live video element and combines them.
+ *
+ * accuracy tricks: more samples, only decent-quality detections count, the
+ * best-scoring half of the samples decide the age, and a trimmed median is
+ * used instead of a mean so one bad frame can't move the band.
+ */
 export async function estimateAgeFromVideo(
   video: HTMLVideoElement,
-  samples = 7,
+  samples = 12,
 ): Promise<ScanOutcome> {
   const faceapi = await getApi();
   const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 });
-  const ages: number[] = [];
-  const scores: number[] = [];
+  const picks: { age: number; score: number }[] = [];
 
   for (let i = 0; i < samples; i += 1) {
     const result = await faceapi.detectSingleFace(video, options).withAgeAndGender();
-    if (result) {
-      ages.push(result.age);
-      scores.push(result.detection.score);
+    // ignore tiny/far-away faces: they are the main source of wild guesses
+    if (result && result.detection.box.width >= video.videoWidth * 0.15) {
+      picks.push({ age: result.age, score: result.detection.score });
     }
-    await new Promise((r) => window.setTimeout(r, 140));
+    await new Promise((r) => window.setTimeout(r, 110));
   }
 
-  // no detections
-  if (ages.length === 0) return { kind: "no_face" };
+  if (picks.length < Math.ceil(samples / 3)) return { kind: "no_face" };
 
-  // compute aggregated stats
-  const avgAge = ages.reduce((s, a) => s + a, 0) / ages.length;
-  const avgScore = scores.reduce((s, v) => s + v, 0) / scores.length;
-  const variance = ages.reduce((s, a) => s + Math.pow(a - avgAge, 2), 0) / ages.length;
-  const stddev = Math.sqrt(variance);
+  // keep the best-scoring half of the samples
+  const best = [...picks].sort((a, b) => b.score - a.score).slice(0, Math.max(3, Math.ceil(picks.length / 2)));
+  const ages = best.map((p) => p.age).sort((a, b) => a - b);
+  const confidence = best.reduce((s, p) => s + p.score, 0) / best.length;
 
-  // confidence heuristic: require reasonably high detection confidence and
-  // stable age estimates (low stddev). otherwise return inconclusive.
-  const highConfidence = avgScore >= 0.5 && stddev <= 6;
+  // trimmed median: drop the extremes when we have enough samples
+  const trimmed = ages.length >= 5 ? ages.slice(1, -1) : ages;
+  const median = trimmed[Math.floor(trimmed.length / 2)]!;
+  const spread = (ages[ages.length - 1]! - ages[0]!) / 2;
 
-  if (!highConfidence) return { kind: "inconclusive", age: Math.round(avgAge), confidence: avgScore };
+  // unstable estimates or a weak detection are never good enough to decide
+  if (confidence < 0.55 || spread > 7) {
+    return { kind: "inconclusive", age: Math.round(median), confidence };
+  }
 
-  const rounded = Math.round(avgAge);
-  if (rounded <= UNDER_18_MAX) return { kind: "under_18", age: rounded, confidence: avgScore };
-  if (rounded >= ADULT_MIN) return { kind: "adult", age: rounded, confidence: avgScore };
-  return { kind: "inconclusive", age: rounded, confidence: avgScore };
-
-  if (ages.length < Math.ceil(samples / 2)) return { kind: "no_face" };
-
-  // median is steadier than a mean when one frame is blurry
-  const sorted = [...ages].sort((a, b) => a - b);
-  const age = sorted[Math.floor(sorted.length / 2)]!;
-  const confidence = scores.reduce((a, b) => a + b, 0) / scores.length;
-
+  const age = Math.round(median);
   if (age <= UNDER_18_MAX) return { kind: "under_18", age, confidence };
   if (age >= ADULT_MIN) return { kind: "adult", age, confidence };
   return { kind: "inconclusive", age, confidence };

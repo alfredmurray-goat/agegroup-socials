@@ -364,12 +364,12 @@ function OnboardingPage() {
             </p>
           </div>
 
-          <label className="lowkey flex items-start gap-3 text-sm text-muted-foreground">
+          <label className="lowkey flex min-h-11 cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
             <input
               type="checkbox"
               checked={terms}
               onChange={(e) => setTerms(e.target.checked)}
-              className="mt-1 size-4"
+              className="mt-0.5 size-6 shrink-0 accent-[hsl(var(--primary))]"
             />
             <span>
               i&apos;m ok with the privacy notice: data stored in the eu, exportable and deletable

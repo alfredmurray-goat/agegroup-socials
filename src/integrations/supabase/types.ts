@@ -405,6 +405,7 @@ export type Database = {
           media_url: string | null
           poster_hue: number
           source: string
+          source_post_id: string | null
           tagged_handle: string | null
           title: string | null
           topic: string | null
@@ -419,6 +420,7 @@ export type Database = {
           media_url?: string | null
           poster_hue?: number
           source?: string
+          source_post_id?: string | null
           tagged_handle?: string | null
           title?: string | null
           topic?: string | null
@@ -433,6 +435,7 @@ export type Database = {
           media_url?: string | null
           poster_hue?: number
           source?: string
+          source_post_id?: string | null
           tagged_handle?: string | null
           title?: string | null
           topic?: string | null
@@ -443,6 +446,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_source_post_id_fkey"
+            columns: ["source_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
             referencedColumns: ["id"]
           },
         ]
@@ -629,6 +639,7 @@ export type Database = {
         Args: { _conversation_id: string }
         Returns: boolean
       }
+      start_conversation: { Args: { _other: string }; Returns: string }
     }
     Enums: {
       age_band: "under_18" | "adult"

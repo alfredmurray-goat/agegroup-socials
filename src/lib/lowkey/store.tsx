@@ -104,7 +104,10 @@ createPost: (input: {
   toggleBookmark: (postId: string) => Promise<void>;
   markNotificationsRead: () => Promise<void>;
   uploadAvatar: (file: File) => Promise<Result>;
-  uploadMedia: (file: File) => Promise<{ path: string; url: string } | null>;
+  uploadMedia: (
+    file: File,
+    onProgress?: (pct: number) => void,
+  ) => Promise<{ path: string; url: string } | null>;
 startChat: (profileId: string) => Promise<string | null>;
   sendMessage: (conversationId: string, body: string) => Promise<void>;
   sendPhoto: (conversationId: string, file: File) => Promise<void>;
@@ -764,42 +767,63 @@ title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
     [refresh],
   );
 
-  const uploadMedia = useCallback(async (raw: File) => {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) return null;
-    const file = raw.type.startsWith("video/") ? raw : await prepareImage(raw);
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
-    const path = `${auth.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const up = await supabase.storage
-      .from("media")
-      .upload(path, file, { upsert: false, contentType: file.type });
-    if (up.error) return null;
-    const signed = await supabase.storage.from("media").createSignedUrl(path, SIGNED_TTL);
-    return { path, url: signed.data?.signedUrl ?? "" };
-  }, []);
+  const uploadMedia = useCallback(
+    async (raw: File, onProgress?: (pct: number) => void) => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return null;
+      const isVideo = raw.type.startsWith("video/") || /\.(mp4|mov|m4v|webm)$/i.test(raw.name);
+      // videos go up untouched; photos get shrunk first
+      const file = isVideo ? raw : await prepareImage(raw);
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+      const path = `${auth.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
+      // a signed upload url lets us PUT straight to storage with a real
+      // progress bar, which is a lot quicker (and less blind) for big videos
+      const signedUpload = await supabase.storage.from("media").createSignedUploadUrl(path);
+      if (!signedUpload.error && signedUpload.data?.signedUrl) {
+        const ok = await new Promise<boolean>((done) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", signedUpload.data.signedUrl, true);
+          xhr.setRequestHeader("content-type", file.type || "application/octet-stream");
+          xhr.setRequestHeader("x-upsert", "false");
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) onProgress?.(Math.round((e.loaded / e.total) * 100));
+          };
+          xhr.onload = () => done(xhr.status >= 200 && xhr.status < 300);
+          xhr.onerror = () => done(false);
+          xhr.send(file);
+        });
+        if (!ok) return null;
+      } else {
+        const up = await supabase.storage
+          .from("media")
+          .upload(path, file, { upsert: false, contentType: file.type });
+        if (up.error) return null;
+      }
+      onProgress?.(100);
+      const signed = await supabase.storage.from("media").createSignedUrl(path, SIGNED_TTL);
+      return { path, url: signed.data?.signedUrl ?? "" };
+    },
+    [],
+  );
 
   const startChat = useCallback(
     async (profileId: string) => {
       const mine = me;
-      if (!mine?.ageBand || profileId === mine.id) return null;
+      if (!mine || profileId === mine.id) return null;
       const existing = state.conversations.find(
         (c) => c.memberIds.includes(mine.id) && c.memberIds.includes(profileId),
       );
       if (existing) return existing.id;
-      const { data, error } = await supabase
-        .from("conversations")
-        .insert({ age_band: mine.ageBand })
-        .select("id")
-        .maybeSingle();
-      if (error || !data) return null;
-      const conversationId = (data as Row)['id'] as string;
-      await supabase.from("conversation_members").insert([
-        { conversation_id: conversationId, profile_id: mine.id },
-        { conversation_id: conversationId, profile_id: profileId },
-      ]);
+      // a security-definer function creates the thread and both memberships in
+      // one go — inserting from the client raced its own rls read policy
+      const { data, error } = await supabase.rpc("start_conversation", { _other: profileId });
+      if (error || !data) {
+        toast.error("couldn't open that chat");
+        return null;
+      }
       await refresh();
-      return conversationId;
+      return data as string;
     },
     [me, refresh, state.conversations],
   );
