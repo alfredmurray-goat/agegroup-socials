@@ -158,6 +158,7 @@ const id = await createPost({
                     style={{ width: `${Math.max(progress, 4)}%` }}
                   />
                 </span>
+              </>
             ) : (
               <>
                 <div className="flex gap-2">
