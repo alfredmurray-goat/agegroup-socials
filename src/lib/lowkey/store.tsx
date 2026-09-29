@@ -949,7 +949,7 @@ await refresh();
       }));
       await supabase.from("posts").delete().eq("id", postId);
     },
-    [state.posts],
+    [state.posts, isAdmin],
   );
 
   const editPost = useCallback(
