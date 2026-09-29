@@ -3,7 +3,7 @@ import { Flag, Heart, MessageSquare, MoreHorizontal, Pencil, Send, Bookmark, Tra
 import { useState } from "react";
 import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
 import { CommentsSheet } from "@/components/lowkey/comments";
-import { useBandPosts, useLowkey } from "@/lib/lowkey/store";
+import { useBandPosts, useBandProfiles, useLowkey } from "@/lib/lowkey/store";
 import type { Post } from "@/lib/lowkey/types";
 
 const REPORT_REASONS = ["spam", "harassment", "nsfw", "underage", "hateful", "other"];
@@ -26,12 +26,12 @@ export const Route = createFileRoute("/app/")({
           "under 18 sees under 18, 18+ sees 18+. free on-device age check, friend streaks, daily limits.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: SITE },
+      { property: "og:url", content: `${SITE}/app` },
       { property: "og:image", content: `${SITE}/favicon.png` },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: `${SITE}/favicon.png` },
     ],
-    links: [{ rel: "canonical", href: SITE }],
+    links: [{ rel: "canonical", href: `${SITE}/app` }],
     scripts: [
       {
         type: "application/ld+json",
@@ -324,6 +324,7 @@ function FeedPage() {
   return (
     <AppScreen>
       <h1 className="sr-only">lowkey_social feed</h1>
+      <NearYou />
       {posts.length === 0 ? (
         <p className="lowkey p-8 text-center text-sm text-muted-foreground">
           nothing in your feed yet. make the first post.
@@ -332,5 +333,61 @@ function FeedPage() {
         posts.map((p) => <FeedCard key={p.id} post={p} />)
       )}
     </AppScreen>
+  );
+}
+
+/** people in your own age band and your city. city level only — never exact location */
+function NearYou() {
+  const { me, state } = useLowkey();
+  const band = useBandProfiles();
+  if (!me) return null;
+  const city = me.city?.trim().toLowerCase();
+  const people = city
+    ? band.filter(
+        (p) =>
+          p.id !== me.id &&
+          !p.isPrivate &&
+          !p.hideFromSearch &&
+          !p.bannedAt &&
+          !state.blocks.includes(p.id) &&
+          p.city?.trim().toLowerCase() === city,
+      )
+    : [];
+
+  return (
+    <section className="px-4 pt-4 pb-2">
+      <div className="flex items-baseline justify-between">
+        <h2 className="lowkey text-base font-bold">
+          {city ? `people your age in ${city}` : "find people your age near you"}
+        </h2>
+      </div>
+      {!city ? (
+        <Link
+          to="/app/settings"
+          className="lowkey mt-2 block rounded-3xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground"
+        >
+          add your city in settings to see people your age nearby. city only, never your exact spot.
+        </Link>
+      ) : people.length === 0 ? (
+        <p className="lowkey mt-2 rounded-3xl bg-card p-4 text-sm text-muted-foreground">
+          nobody else from {city} yet. invite your friends.
+        </p>
+      ) : (
+        <ul className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2">
+          {people.slice(0, 20).map((p) => (
+            <li key={p.id} className="shrink-0">
+              <Link
+                to="/app/u/$handle"
+                params={{ handle: p.handle }}
+                className="flex w-24 flex-col items-center gap-1.5 rounded-3xl bg-card p-3 text-center shadow-sm transition-transform hover:-translate-y-0.5"
+              >
+                <Avatar hue={p.avatarHue} label={p.displayName} src={p.avatarUrl} size={52} />
+                <span className="lowkey w-full truncate text-xs font-semibold">@{p.handle}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
