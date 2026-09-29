@@ -7,7 +7,7 @@ import { useLowkey } from "@/lib/lowkey/store";
 import type { PostKind } from "@/lib/lowkey/types";
 import { INTERESTS } from "@/lib/lowkey/types";
 
-export const Route = createFileRoute("/create")({
+export const Route = createFileRoute("/app/create")({
   head: () => ({
     meta: [
       { title: "create — lowkey social" },
@@ -95,7 +95,7 @@ const id = await createPost({
       return;
     }
     toast.success("posted");
-    void navigate({ to: kind === "video" ? "/videos" : "/" });
+    void navigate({ to: kind === "video" ? "/app/videos" : "/" });
   };
 
   return (

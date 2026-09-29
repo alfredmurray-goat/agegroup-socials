@@ -33,7 +33,7 @@ import {
   type TextScale,
 } from "@/lib/lowkey/types";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/app/settings")({
   head: () => ({
     meta: [
       { title: "settings — lowkey social" },

@@ -197,14 +197,14 @@ export function TopBar({ title = "lowkey social" }: { title?: string }) {
       </Link>
       <div className="flex items-center gap-1">
         <Link
-          to="/saved"
+          to="/app/saved"
           aria-label="saved posts"
           className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
         >
           <Bookmark className="size-5" />
         </Link>
         <Link
-          to="/notifications"
+          to="/app/notifications"
           aria-label="notifications"
           className="relative rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
         >
@@ -216,7 +216,7 @@ export function TopBar({ title = "lowkey social" }: { title?: string }) {
           )}
         </Link>
         <Link
-          to="/search"
+          to="/app/search"
           aria-label="search"
           className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
         >
@@ -275,10 +275,10 @@ export function CookieBanner() {
 
 const tabs = [
   { to: "/", label: "home", icon: House },
-  { to: "/chats", label: "chats", icon: MessageCircle },
-  { to: "/create", label: "create", icon: Plus },
-  { to: "/videos", label: "videos", icon: Play },
-  { to: "/profile", label: "profile", icon: User },
+  { to: "/app/chats", label: "chats", icon: MessageCircle },
+  { to: "/app/create", label: "create", icon: Plus },
+  { to: "/app/videos", label: "videos", icon: Play },
+  { to: "/app/profile", label: "profile", icon: User },
 ] as const;
 
 export function BottomNav() {
@@ -328,7 +328,7 @@ function DailyLimitReached() {
         you hit your {me?.dailyLimitMinutes} minute daily limit. lowkey is still here tomorrow.
       </p>
       <Link
-        to="/settings"
+        to="/app/settings"
         className="lowkey rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
       >
         change my limit

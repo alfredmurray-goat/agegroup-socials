@@ -74,8 +74,8 @@ export function CommentsSheet({ postId, onClose }: { postId: string; onClose: ()
                     {author ? (
                       <Link
                         {...(author.id === me?.id
-                          ? { to: "/profile" as const }
-                          : { to: "/u/$handle" as const, params: { handle: author.handle } })}
+                          ? { to: "/app/profile" as const }
+                          : { to: "/app/u/$handle" as const, params: { handle: author.handle } })}
                       >
                         @{author.handle}
                       </Link>

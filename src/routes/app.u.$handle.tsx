@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AppScreen, Avatar, Poster, bandLabel } from "@/components/lowkey/shell";
 import { useLowkey } from "@/lib/lowkey/store";
 
-export const Route = createFileRoute("/u/$handle")({
+export const Route = createFileRoute("/app/u/$handle")({
   head: ({ params }) => ({
     meta: [
       { title: `@${params.handle} — lowkey social` },
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/u/$handle")({
 });
 
 function UserProfilePage() {
-  const { handle } = useParams({ from: "/u/$handle" });
+  const { handle } = useParams({ from: "/app/u/$handle" });
   const { state, me, toggleFollow, startChat } = useLowkey();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"post" | "video">("post");
@@ -40,7 +40,7 @@ function UserProfilePage() {
   }
 
   if (person.id === me?.id) {
-    void navigate({ to: "/profile", replace: true });
+    void navigate({ to: "/app/profile", replace: true });
   }
 
   const posts = state.posts.filter((p) => p.authorId === person.id && p.kind === tab);
@@ -97,7 +97,7 @@ function UserProfilePage() {
           <button
             onClick={() => {
               void startChat(person.id).then((id) => {
-                if (id) void navigate({ to: "/chat/$id", params: { id } });
+                if (id) void navigate({ to: "/app/chat/$id", params: { id } });
               });
             }}
             className="lowkey flex items-center justify-center gap-1 rounded-full border border-input px-4 py-2.5 text-sm font-bold"

@@ -5,7 +5,7 @@ import { AppScreen, Avatar, Poster, bandLabel } from "@/components/lowkey/shell"
 import { toast } from "sonner";
 import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/app/profile")({
   head: () => ({
     meta: [
       { title: "profile — lowkey social" },
@@ -51,13 +51,13 @@ const { state, me, uploadAvatar, updateProfile } = useLowkey();
     <AppScreen>
       <div className="flex justify-end gap-2 px-4 pt-3">
         <Link
-          to="/saved"
+          to="/app/saved"
           className="lowkey flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold"
         >
           <Bookmark className="size-3.5" /> saved
         </Link>
         <Link
-          to="/settings"
+          to="/app/settings"
           aria-label="settings"
           className="lowkey flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold"
         >

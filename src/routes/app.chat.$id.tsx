@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { AppScreen, Avatar, StreakPill } from "@/components/lowkey/shell";
 import { useLowkey } from "@/lib/lowkey/store";
 
-export const Route = createFileRoute("/chat/$id")({
+export const Route = createFileRoute("/app/chat/$id")({
   head: () => ({
     meta: [
       { title: "chat — lowkey social" },
@@ -43,7 +43,7 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
   const allowed = !!conversation && !!me && conversation.memberIds.includes(me.id);
 
   useEffect(() => {
-    if (me && !allowed) void navigate({ to: "/chats", replace: true });
+    if (me && !allowed) void navigate({ to: "/app/chats", replace: true });
   }, [me, allowed, navigate]);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
   return (
     <AppScreen chrome={false}>
       <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/95 px-3 py-3 backdrop-blur">
-        <Link to="/chats" aria-label="back" className="p-1 text-muted-foreground">
+        <Link to="/app/chats" aria-label="back" className="p-1 text-muted-foreground">
           <ArrowLeft className="size-5" />
         </Link>
         <Avatar hue={other.avatarHue} label={other.displayName} size={34} />

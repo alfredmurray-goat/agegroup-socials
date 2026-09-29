@@ -3,7 +3,7 @@ import { Bookmark } from "lucide-react";
 import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
 import { useLowkey } from "@/lib/lowkey/store";
 
-export const Route = createFileRoute("/saved")({
+export const Route = createFileRoute("/app/saved")({
   head: () => ({
     meta: [
       { title: "saved — lowkey social" },
@@ -43,7 +43,7 @@ function SavedPage() {
                 <div className="min-w-0 flex-1">
                   {author && (
                     <Link
-                      to="/u/$handle"
+                      to="/app/u/$handle"
                       params={{ handle: author.handle }}
                       className="flex items-center gap-2"
                     >

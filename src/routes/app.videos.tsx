@@ -6,7 +6,7 @@ import { CommentsSheet } from "@/components/lowkey/comments";
 import { useBandPosts, useLowkey } from "@/lib/lowkey/store";
 import type { Post } from "@/lib/lowkey/types";
 
-export const Route = createFileRoute("/videos")({
+export const Route = createFileRoute("/app/videos")({
   head: () => ({
     meta: [
       { title: "videos — lowkey social" },
@@ -72,8 +72,8 @@ function VideoCard({
 
   const authorLink =
     author.id === me?.id
-      ? { to: "/profile" as const }
-      : { to: "/u/$handle" as const, params: { handle: author.handle } };
+      ? { to: "/app/profile" as const }
+      : { to: "/app/u/$handle" as const, params: { handle: author.handle } };
 
   return (
     <section className="relative h-[calc(100vh-9rem)] snap-start px-3 py-2">
@@ -139,7 +139,7 @@ function VideoCard({
             </span>
             <span className="text-xs font-bold">{comments}</span>
           </button>
-          <Link to="/chats" aria-label="share" className="text-foreground/80">
+          <Link to="/app/chats" aria-label="share" className="text-foreground/80">
             <span className="flex size-11 items-center justify-center rounded-full bg-background/70">
               <Send className="size-5" />
             </span>

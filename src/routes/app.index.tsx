@@ -10,7 +10,7 @@ const REPORT_REASONS = ["spam", "harassment", "nsfw", "underage", "hateful", "ot
 
 const SITE = "https://lowkeysocial.alfredmurray.com";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/app/")({
   head: () => ({
     meta: [
       { title: "lowkey social — age-verified feed, no caps, no pressure" },
@@ -119,8 +119,8 @@ function FeedCard({ post }: { post: Post }) {
   const mine = author.id === me?.id;
 
   const authorLink = mine
-    ? { to: "/profile" as const }
-    : { to: "/u/$handle" as const, params: { handle: author.handle } };
+    ? { to: "/app/profile" as const }
+    : { to: "/app/u/$handle" as const, params: { handle: author.handle } };
 
   return (
     <article className="border-b border-border px-4 py-4">
@@ -250,7 +250,7 @@ function FeedCard({ post }: { post: Post }) {
               <span className="text-xs font-semibold">{comments.length}</span>
             </button>
             <Link
-              to="/chats"
+              to="/app/chats"
               aria-label="share"
               className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground"
             >

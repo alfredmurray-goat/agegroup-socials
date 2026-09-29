@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { AppScreen, Avatar } from "@/components/lowkey/shell";
 import { useLowkey } from "@/lib/lowkey/store";
 
-export const Route = createFileRoute("/notifications")({
+export const Route = createFileRoute("/app/notifications")({
   head: () => ({
     meta: [
       { title: "notifications — lowkey social" },
@@ -60,7 +60,7 @@ function NotificationsPage() {
                   : "commented on your post";
             return (
               <li key={n.id} className="flex items-center gap-3 px-4 py-3">
-                <Link to="/u/$handle" params={{ handle: actor.handle }}>
+                <Link to="/app/u/$handle" params={{ handle: actor.handle }}>
                   <Avatar
                     hue={actor.avatarHue}
                     label={actor.displayName}
@@ -71,7 +71,7 @@ function NotificationsPage() {
                 <div className="min-w-0 flex-1">
                   <p className="lowkey truncate text-sm">
                     <Link
-                      to="/u/$handle"
+                      to="/app/u/$handle"
                       params={{ handle: actor.handle }}
                       className="font-semibold"
                     >

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AppScreen, Avatar } from "@/components/lowkey/shell";
 import { useBandPosts, useBandProfiles, useLowkey } from "@/lib/lowkey/store";
 
-export const Route = createFileRoute("/search")({
+export const Route = createFileRoute("/app/search")({
   head: () => ({
     meta: [
       { title: "search — lowkey social" },
@@ -53,10 +53,10 @@ function SearchPage() {
             );
             return (
               <li key={p.id} className="flex items-center gap-3">
-                <Link to="/u/$handle" params={{ handle: p.handle }}>
+                <Link to="/app/u/$handle" params={{ handle: p.handle }}>
                   <Avatar hue={p.avatarHue} label={p.displayName} src={p.avatarUrl} size={36} />
                 </Link>
-                <Link to="/u/$handle" params={{ handle: p.handle }} className="min-w-0 flex-1">
+                <Link to="/app/u/$handle" params={{ handle: p.handle }} className="min-w-0 flex-1">
                   <span className="lowkey block truncate text-sm font-semibold">@{p.handle}</span>
                   <span className="lowkey block truncate text-xs text-muted-foreground">
                     {p.bio || "no bio"}

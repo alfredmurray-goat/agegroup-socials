@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppScreen, Avatar, StreakPill } from "@/components/lowkey/shell";
 import { useMyConversations } from "@/lib/lowkey/store";
 
-export const Route = createFileRoute("/chats")({
+export const Route = createFileRoute("/app/chats")({
   head: () => ({
     meta: [
       { title: "chats — lowkey social" },
@@ -32,7 +32,7 @@ function ChatsPage() {
         {chats.map(({ conversation, other, lastMessage, unread, streak }) => (
           <li key={conversation.id}>
             <Link
-              to="/chat/$id"
+              to="/app/chat/$id"
               params={{ id: conversation.id }}
               className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted"
             >

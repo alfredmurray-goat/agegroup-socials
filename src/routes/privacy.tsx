@@ -110,7 +110,7 @@ function PrivacyPage() {
       </section>
 
       <Link
-        to="/settings"
+        to="/app/settings"
         className="lowkey rounded-full border border-border bg-card py-3 text-center text-sm font-semibold"
       >
         back to settings
