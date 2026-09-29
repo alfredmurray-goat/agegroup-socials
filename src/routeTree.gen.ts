@@ -10,11 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as CreateRouteImport } from './routes/create'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SavedRouteImport } from './routes/saved'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerifyRouteImport } from './routes/verify'
+import { Route as VideosRouteImport } from './routes/videos'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppChatsRouteImport } from './routes/app.chats'
 import { Route as AppCreateRouteImport } from './routes/app.create'
@@ -24,6 +32,8 @@ import { Route as AppSavedRouteImport } from './routes/app.saved'
 import { Route as AppSearchRouteImport } from './routes/app.search'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppVideosRouteImport } from './routes/app.videos'
+import { Route as ChatIdRouteImport } from './routes/chat.$id'
+import { Route as UHandleRouteImport } from './routes/u.$handle'
 import { Route as AppChatIdRouteImport } from './routes/app.chat.$id'
 import { Route as AppUHandleRouteImport } from './routes/app.u.$handle'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -35,9 +45,24 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatsRoute = ChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -50,6 +75,26 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavedRoute = SavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -58,6 +103,11 @@ const TermsRoute = TermsRouteImport.update({
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -105,6 +155,16 @@ const AppVideosRoute = AppVideosRouteImport.update({
   path: '/app/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatIdRoute = ChatIdRouteImport.update({
+  id: '/chat/$id',
+  path: '/chat/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UHandleRoute = UHandleRouteImport.update({
+  id: '/u/$handle',
+  path: '/u/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppChatIdRoute = AppChatIdRouteImport.update({
   id: '/app/chat/$id',
   path: '/app/chat/$id',
@@ -134,11 +194,19 @@ const LovableEmailTransactionalPreviewRoute =
 
 export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
+  '/chats': typeof ChatsRoute
   '/cookies': typeof CookiesRoute
+  '/create': typeof CreateRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/saved': typeof SavedRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/videos': typeof VideosRoute
   '/app/chats': typeof AppChatsRoute
   '/app/create': typeof AppCreateRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -147,6 +215,8 @@ export interface FileRoutesByFullPath {
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/videos': typeof AppVideosRoute
+  '/chat/$id': typeof ChatIdRoute
+  '/u/$handle': typeof UHandleRoute
   '/app/': typeof AppIndexRoute
   '/app/chat/$id': typeof AppChatIdRoute
   '/app/u/$handle': typeof AppUHandleRoute
@@ -156,11 +226,19 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/chats': typeof ChatsRoute
   '/cookies': typeof CookiesRoute
+  '/create': typeof CreateRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/saved': typeof SavedRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/videos': typeof VideosRoute
   '/app/chats': typeof AppChatsRoute
   '/app/create': typeof AppCreateRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -169,6 +247,8 @@ export interface FileRoutesByTo {
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/videos': typeof AppVideosRoute
+  '/chat/$id': typeof ChatIdRoute
+  '/u/$handle': typeof UHandleRoute
   '/app': typeof AppIndexRoute
   '/app/chat/$id': typeof AppChatIdRoute
   '/app/u/$handle': typeof AppUHandleRoute
@@ -179,11 +259,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/auth': typeof AuthRoute
+  '/chats': typeof ChatsRoute
   '/cookies': typeof CookiesRoute
+  '/create': typeof CreateRoute
+  '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/saved': typeof SavedRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
+  '/videos': typeof VideosRoute
   '/app/chats': typeof AppChatsRoute
   '/app/create': typeof AppCreateRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -192,6 +280,8 @@ export interface FileRoutesById {
   '/app/search': typeof AppSearchRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/videos': typeof AppVideosRoute
+  '/chat/$id': typeof ChatIdRoute
+  '/u/$handle': typeof UHandleRoute
   '/app/': typeof AppIndexRoute
   '/app/chat/$id': typeof AppChatIdRoute
   '/app/u/$handle': typeof AppUHandleRoute
@@ -203,11 +293,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/auth'
+    | '/chats'
     | '/cookies'
+    | '/create'
+    | '/notifications'
     | '/onboarding'
     | '/privacy'
+    | '/profile'
+    | '/saved'
+    | '/search'
+    | '/settings'
     | '/terms'
     | '/verify'
+    | '/videos'
     | '/app/chats'
     | '/app/create'
     | '/app/notifications'
@@ -216,6 +314,8 @@ export interface FileRouteTypes {
     | '/app/search'
     | '/app/settings'
     | '/app/videos'
+    | '/chat/$id'
+    | '/u/$handle'
     | '/app/'
     | '/app/chat/$id'
     | '/app/u/$handle'
@@ -225,11 +325,19 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/chats'
     | '/cookies'
+    | '/create'
+    | '/notifications'
     | '/onboarding'
     | '/privacy'
+    | '/profile'
+    | '/saved'
+    | '/search'
+    | '/settings'
     | '/terms'
     | '/verify'
+    | '/videos'
     | '/app/chats'
     | '/app/create'
     | '/app/notifications'
@@ -238,6 +346,8 @@ export interface FileRouteTypes {
     | '/app/search'
     | '/app/settings'
     | '/app/videos'
+    | '/chat/$id'
+    | '/u/$handle'
     | '/app'
     | '/app/chat/$id'
     | '/app/u/$handle'
@@ -247,11 +357,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/auth'
+    | '/chats'
     | '/cookies'
+    | '/create'
+    | '/notifications'
     | '/onboarding'
     | '/privacy'
+    | '/profile'
+    | '/saved'
+    | '/search'
+    | '/settings'
     | '/terms'
     | '/verify'
+    | '/videos'
     | '/app/chats'
     | '/app/create'
     | '/app/notifications'
@@ -260,6 +378,8 @@ export interface FileRouteTypes {
     | '/app/search'
     | '/app/settings'
     | '/app/videos'
+    | '/chat/$id'
+    | '/u/$handle'
     | '/app/'
     | '/app/chat/$id'
     | '/app/u/$handle'
@@ -270,11 +390,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
+  ChatsRoute: typeof ChatsRoute
   CookiesRoute: typeof CookiesRoute
+  CreateRoute: typeof CreateRoute
+  NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
+  SavedRoute: typeof SavedRoute
+  SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRoute
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
+  VideosRoute: typeof VideosRoute
   AppChatsRoute: typeof AppChatsRoute
   AppCreateRoute: typeof AppCreateRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -283,6 +411,8 @@ export interface RootRouteChildren {
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppVideosRoute: typeof AppVideosRoute
+  ChatIdRoute: typeof ChatIdRoute
+  UHandleRoute: typeof UHandleRoute
   AppIndexRoute: typeof AppIndexRoute
   AppChatIdRoute: typeof AppChatIdRoute
   AppUHandleRoute: typeof AppUHandleRoute
@@ -300,11 +430,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chats': {
+      id: '/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof ChatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cookies': {
       id: '/cookies'
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -321,6 +472,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/saved': {
+      id: '/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof SavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -333,6 +512,13 @@ declare module '@tanstack/react-router' {
       path: '/verify'
       fullPath: '/verify'
       preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -398,6 +584,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVideosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat/$id': {
+      id: '/chat/$id'
+      path: '/chat/$id'
+      fullPath: '/chat/$id'
+      preLoaderRoute: typeof ChatIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/$handle': {
+      id: '/u/$handle'
+      path: '/u/$handle'
+      fullPath: '/u/$handle'
+      preLoaderRoute: typeof UHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/chat/$id': {
       id: '/app/chat/$id'
       path: '/app/chat/$id'
@@ -438,11 +638,19 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
+  ChatsRoute: ChatsRoute,
   CookiesRoute: CookiesRoute,
+  CreateRoute: CreateRoute,
+  NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
+  SavedRoute: SavedRoute,
+  SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRoute,
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
+  VideosRoute: VideosRoute,
   AppChatsRoute: AppChatsRoute,
   AppCreateRoute: AppCreateRoute,
   AppNotificationsRoute: AppNotificationsRoute,
@@ -451,6 +659,8 @@ const rootRouteChildren: RootRouteChildren = {
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppVideosRoute: AppVideosRoute,
+  ChatIdRoute: ChatIdRoute,
+  UHandleRoute: UHandleRoute,
   AppIndexRoute: AppIndexRoute,
   AppChatIdRoute: AppChatIdRoute,
   AppUHandleRoute: AppUHandleRoute,
