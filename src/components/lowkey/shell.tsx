@@ -179,7 +179,7 @@ export function SiteFooter() {
     <footer className="flex flex-col items-center gap-2 border-t border-border px-4 py-6 text-center">
       <LegalLinks className="justify-center" />
       <p className="lowkey text-[11px] text-muted-foreground">
-        lowkey_social beta · eu hosted · feedback: <FeedbackLink className="text-[11px]" />
+        lowkey_social beta · eu hosted · find people your age · feedback: <FeedbackLink className="text-[11px]" />
       </p>
     </footer>
   );
