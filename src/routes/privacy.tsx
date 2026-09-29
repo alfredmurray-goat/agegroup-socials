@@ -4,13 +4,13 @@ import { BetaTag, FeedbackLink, LowkeyMark } from "@/components/lowkey/shell";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "privacy notice — lowkey social" },
+      { title: "privacy notice — lowkey_social" },
       {
         name: "description",
         content:
-          "how lowkey social handles your data: eu hosting, on-device age checks, export and delete any time, gdpr rights explained.",
+          "how lowkey_social handles your data: eu hosting, on-device age checks, export and delete any time, gdpr rights explained.",
       },
-      { property: "og:title", content: "privacy notice — lowkey social" },
+      { property: "og:title", content: "privacy notice — lowkey_social" },
       {
         property: "og:description",
         content: "eu hosting, on-device age checks, export and delete any time.",
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/privacy")({
 const sections: { h: string; p: string }[] = [
   {
     h: "who's behind it",
-    p: "lowkey social is an independent beta project run by alfred murray. i'm the data controller. questions, complaints or requests go straight to me.",
+    p: "lowkey_social is an independent beta project run by alfred murray. i'm the data controller. questions, complaints or requests go straight to me.",
   },
   {
     h: "what gets stored",
@@ -59,7 +59,7 @@ const sections: { h: string; p: string }[] = [
   },
   {
     h: "beta caveat",
-    p: "lowkey social is an early beta shown at demos. features, wording and data handling can change, and age estimates can be wrong. tell me anything that looks off.",
+    p: "lowkey_social is an early beta shown at demos. features, wording and data handling can change, and age estimates can be wrong. tell me anything that looks off.",
   },
 ];
 

@@ -8,12 +8,12 @@ import { useLowkey, useTodayUsage } from "@/lib/lowkey/store";
 export const Route = createFileRoute("/app/profile")({
   head: () => ({
     meta: [
-      { title: "profile — lowkey social" },
+      { title: "profile — lowkey_social" },
       {
         name: "description",
         content: "your lowkey profile: posts, videos, followers and your verified age band.",
       },
-      { property: "og:title", content: "profile — lowkey social" },
+      { property: "og:title", content: "profile — lowkey_social" },
       { property: "og:description", content: "your posts, videos and verified age band." },
     ],
   }),

@@ -7,21 +7,21 @@ import { BetaTag, FeedbackLink, LowkeyMark } from "@/components/lowkey/shell";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "sign in — lowkey social" },
+      { title: "sign in — lowkey_social" },
       {
         name: "description",
         content:
-          "sign in or make a lowkey social account, then set up your profile and verify your age band.",
+          "sign in or make a lowkey_social account, then set up your profile and verify your age band.",
       },
-      { property: "og:title", content: "sign in — lowkey social" },
-      { property: "og:description", content: "sign in or make a lowkey social account." },
+      { property: "og:title", content: "sign in — lowkey_social" },
+      { property: "og:description", content: "sign in or make a lowkey_social account." },
     ],
   }),
   component: AuthPage,
 });
 
 function AuthPage() {
-  const { me, needsProfile, signIn, signUp, signInWithGoogle, loading } = useLowkey();
+  const { me, needsProfile, signIn, signUp, loading } = useLowkey();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"in" | "up">("up");
   const [email, setEmail] = useState("");
@@ -61,18 +61,13 @@ function AuthPage() {
     void navigate({ to: "/onboarding", replace: true });
   };
 
-  const google = async () => {
-    const res = await signInWithGoogle();
-    if (!res.ok) toast.error(res.error ?? "google sign in failed");
-  };
-
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col justify-center gap-7 px-6 py-12">
       <div className="flex items-center gap-3">
         <LowkeyMark size={44} />
         <div>
           <h1 className="lowkey text-3xl leading-none font-extrabold tracking-tight">
-            lowkey social
+            lowkey_social
           </h1>
           <div className="mt-1 flex items-center gap-2">
             <BetaTag />
@@ -82,7 +77,7 @@ function AuthPage() {
       </div>
 
       <p className="lowkey text-sm text-muted-foreground">
-        no caps. chill. no grammar. under 18s and adults get completely separate feeds and chats.
+        find people your age near you. no caps, no pressure. under 18s and adults get completely separate feeds and chats.
       </p>
 
       <div className="flex gap-1 rounded-full bg-muted p-1">
@@ -135,13 +130,6 @@ function AuthPage() {
           {busy ? "one sec…" : mode === "up" ? "make my account" : "let me in"}
         </button>
       </form>
-
-      <button
-        onClick={google}
-        className="lowkey rounded-full border border-border bg-card py-3 text-sm font-semibold"
-      >
-        continue with google
-      </button>
 
       <div className="lowkey space-y-1 text-xs text-muted-foreground">
         <p>

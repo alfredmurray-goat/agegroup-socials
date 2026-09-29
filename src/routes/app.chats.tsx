@@ -5,12 +5,12 @@ import { useMyConversations } from "@/lib/lowkey/store";
 export const Route = createFileRoute("/app/chats")({
   head: () => ({
     meta: [
-      { title: "chats — lowkey social" },
+      { title: "chats — lowkey_social" },
       {
         name: "description",
         content: "chat with friends in your age band and keep your daily streaks alive.",
       },
-      { property: "og:title", content: "chats — lowkey social" },
+      { property: "og:title", content: "chats — lowkey_social" },
       { property: "og:description", content: "chat with friends and keep your streaks alive." },
     ],
   }),

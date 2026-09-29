@@ -7,12 +7,12 @@ import { useLowkey } from "@/lib/lowkey/store";
 export const Route = createFileRoute("/app/u/$handle")({
   head: ({ params }) => ({
     meta: [
-      { title: `@${params.handle} — lowkey social` },
+      { title: `@${params.handle} — lowkey_social` },
       {
         name: "description",
-        content: `@${params.handle} on lowkey social. see their posts and videos, follow them, or start a chat — same age band only.`,
+        content: `@${params.handle} on lowkey_social. see their posts and videos, follow them, or start a chat — same age band only.`,
       },
-      { property: "og:title", content: `@${params.handle} — lowkey social` },
+      { property: "og:title", content: `@${params.handle} — lowkey_social` },
       { property: "og:description", content: `posts and videos from @${params.handle}.` },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary" },

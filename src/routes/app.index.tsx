@@ -13,13 +13,13 @@ const SITE = "https://lowkeysocial.alfredmurray.com";
 export const Route = createFileRoute("/app/")({
   head: () => ({
     meta: [
-      { title: "lowkey social — age-verified feed, no caps, no pressure" },
+      { title: "lowkey_social — age-verified feed, no caps, no pressure" },
       {
         name: "description",
         content:
-          "lowkey social is a chill social app with a hard age split: under 18 only sees under 18, 18+ only sees 18+. free on-device age check, friend streaks and a daily time limit.",
+          "lowkey_social is a chill social app with a hard age split: under 18 only sees under 18, 18+ only sees 18+. free on-device age check, friend streaks and a daily time limit.",
       },
-      { property: "og:title", content: "lowkey social — age-verified feed, no caps, no pressure" },
+      { property: "og:title", content: "lowkey_social — age-verified feed, no caps, no pressure" },
       {
         property: "og:description",
         content:
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/app/")({
           "@graph": [
             {
               "@type": "WebApplication",
-              name: "lowkey social",
+              name: "lowkey_social",
               url: SITE,
               applicationCategory: "SocialNetworkingApplication",
               operatingSystem: "web",
@@ -60,7 +60,7 @@ export const Route = createFileRoute("/app/")({
               mainEntity: [
                 {
                   "@type": "Question",
-                  name: "how does lowkey social split under 18 and adults?",
+                  name: "how does lowkey_social split under 18 and adults?",
                   acceptedAnswer: {
                     "@type": "Answer",
                     text: "every account gets a verified age band. database security rules mean under-18 accounts can only read under-18 profiles, posts and chats, and 18+ accounts can only read 18+ ones.",
@@ -76,7 +76,7 @@ export const Route = createFileRoute("/app/")({
                 },
                 {
                   "@type": "Question",
-                  name: "is lowkey social gdpr compliant?",
+                  name: "is lowkey_social gdpr compliant?",
                   acceptedAnswer: {
                     "@type": "Answer",
                     text: "data is stored in the eu, no ad trackers run, consent is logged, and you can export all your data as json or delete your account and everything in it from settings.",
@@ -323,7 +323,7 @@ function FeedPage() {
 
   return (
     <AppScreen>
-      <h1 className="sr-only">lowkey social feed</h1>
+      <h1 className="sr-only">lowkey_social feed</h1>
       {posts.length === 0 ? (
         <p className="lowkey p-8 text-center text-sm text-muted-foreground">
           nothing in your feed yet. make the first post.

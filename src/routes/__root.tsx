@@ -80,13 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "lowkey social" },
+      { title: "lowkey_social" },
       {
         name: "description",
         content:
-          "lowkey social — a chill, no-caps social app with age-verified feeds: under 18 sees under 18, 18+ sees 18+.",
+          "lowkey_social — a chill, no-caps social app with age-verified feeds: under 18 sees under 18, 18+ sees 18+.",
       },
-      { property: "og:title", content: "lowkey social" },
+      { property: "og:title", content: "lowkey_social" },
       {
         property: "og:description",
         content: "a chill, no-caps social app with age-verified feeds and friend streaks.",

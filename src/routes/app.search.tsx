@@ -6,12 +6,12 @@ import { useBandPosts, useBandProfiles, useLowkey } from "@/lib/lowkey/store";
 export const Route = createFileRoute("/app/search")({
   head: () => ({
     meta: [
-      { title: "search — lowkey social" },
+      { title: "search — lowkey_social" },
       {
         name: "description",
-        content: "search people and posts inside your own age band on lowkey social.",
+        content: "search people and posts inside your own age band on lowkey_social.",
       },
-      { property: "og:title", content: "search — lowkey social" },
+      { property: "og:title", content: "search — lowkey_social" },
       { property: "og:description", content: "search people and posts in your age band." },
     ],
   }),

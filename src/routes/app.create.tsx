@@ -10,12 +10,12 @@ import { INTERESTS } from "@/lib/lowkey/types";
 export const Route = createFileRoute("/app/create")({
   head: () => ({
     meta: [
-      { title: "create — lowkey social" },
+      { title: "create — lowkey_social" },
       {
         name: "description",
-        content: "post a photo, a video or just text to your own age band on lowkey social.",
+        content: "post a photo, a video or just text to your own age band on lowkey_social.",
       },
-      { property: "og:title", content: "create — lowkey social" },
+      { property: "og:title", content: "create — lowkey_social" },
       { property: "og:description", content: "photo, video or plain text — post it to your band." },
     ],
   }),

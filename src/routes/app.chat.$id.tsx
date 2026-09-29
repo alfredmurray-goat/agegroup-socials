@@ -8,9 +8,9 @@ import { useLowkey } from "@/lib/lowkey/store";
 export const Route = createFileRoute("/app/chat/$id")({
   head: () => ({
     meta: [
-      { title: "chat — lowkey social" },
+      { title: "chat — lowkey_social" },
       { name: "description", content: "a lowkey chat thread with a friend in your age band." },
-      { property: "og:title", content: "chat — lowkey social" },
+      { property: "og:title", content: "chat — lowkey_social" },
       { property: "og:description", content: "a lowkey chat thread with a friend." },
     ],
   }),

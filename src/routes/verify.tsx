@@ -18,13 +18,13 @@ import type { AgeBand } from "@/lib/lowkey/types";
 export const Route = createFileRoute("/verify")({
   head: () => ({
     meta: [
-      { title: "verify your age — lowkey social" },
+      { title: "verify your age — lowkey_social" },
       {
         name: "description",
         content:
           "free on-device face age check with any camera: phone, laptop webcam or usb webcam. under 18 sees under 18, 18+ sees 18+.",
       },
-      { property: "og:title", content: "verify your age — lowkey social" },
+      { property: "og:title", content: "verify your age — lowkey_social" },
       {
         property: "og:description",
         content: "age-verified feeds: under 18 sees under 18, 18+ sees 18+.",
@@ -289,7 +289,7 @@ function VerifyPage() {
       <p className="lowkey text-xs leading-relaxed text-muted-foreground">
         the check uses a free open-source model in your browser. it only accepts a clear result (
         {UNDER_18_MAX} or under, or {ADULT_MIN} or over) — anything borderline has to be rescanned.
-        no biometric data is stored or sent anywhere. lowkey social is in beta, so wrong calls
+        no biometric data is stored or sent anywhere. lowkey_social is in beta, so wrong calls
         happen: tell me at <FeedbackLink />.
       </p>
     </div>

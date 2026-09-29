@@ -6,13 +6,13 @@ const SITE = "https://lowkeysocial.alfredmurray.com";
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
-      { title: "cookie and storage notice — lowkey social" },
+      { title: "cookie and storage notice — lowkey_social" },
       {
         name: "description",
         content:
-          "exactly what lowkey social stores in your browser: sign-in tokens, your consent choice and onboarding progress. no ad trackers, no third-party analytics.",
+          "exactly what lowkey_social stores in your browser: sign-in tokens, your consent choice and onboarding progress. no ad trackers, no third-party analytics.",
       },
-      { property: "og:title", content: "cookie and storage notice — lowkey social" },
+      { property: "og:title", content: "cookie and storage notice — lowkey_social" },
       {
         property: "og:description",
         content: "every cookie and storage key lowkey uses, and why. no ad trackers.",

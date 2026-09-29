@@ -36,13 +36,13 @@ import {
 export const Route = createFileRoute("/app/settings")({
   head: () => ({
     meta: [
-      { title: "settings — lowkey social" },
+      { title: "settings — lowkey_social" },
       {
         name: "description",
         content:
           "profile, privacy, notifications, security and instagram import. set your daily limit, export or delete all your data.",
       },
-      { property: "og:title", content: "settings — lowkey social" },
+      { property: "og:title", content: "settings — lowkey_social" },
       {
         property: "og:description",
         content: "profile, privacy, notifications, instagram import, gdpr export and delete.",
@@ -681,7 +681,7 @@ function SettingsPage() {
         </button>
 
         <p className="lowkey text-center text-xs text-muted-foreground">
-          lowkey social beta — feedback: <FeedbackLink />
+          lowkey_social beta — feedback: <FeedbackLink />
         </p>
       </div>
     </AppScreen>

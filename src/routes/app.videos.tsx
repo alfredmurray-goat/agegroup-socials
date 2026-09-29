@@ -9,12 +9,12 @@ import type { Post } from "@/lib/lowkey/types";
 export const Route = createFileRoute("/app/videos")({
   head: () => ({
     meta: [
-      { title: "videos — lowkey social" },
+      { title: "videos — lowkey_social" },
       {
         name: "description",
         content: "full-screen lowkey videos from creators in your own age band.",
       },
-      { property: "og:title", content: "videos — lowkey social" },
+      { property: "og:title", content: "videos — lowkey_social" },
       { property: "og:description", content: "full-screen videos from your age band." },
     ],
   }),

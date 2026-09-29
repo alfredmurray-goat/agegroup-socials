@@ -6,13 +6,13 @@ import { useLowkey } from "@/lib/lowkey/store";
 export const Route = createFileRoute("/app/notifications")({
   head: () => ({
     meta: [
-      { title: "notifications — lowkey social" },
+      { title: "notifications — lowkey_social" },
       {
         name: "description",
         content:
           "see who followed you, liked your posts or commented, and follow people back in one tap.",
       },
-      { property: "og:title", content: "notifications — lowkey social" },
+      { property: "og:title", content: "notifications — lowkey_social" },
       { property: "og:description", content: "follows, likes and comments on your stuff." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

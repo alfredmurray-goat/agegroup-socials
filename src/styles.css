@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * lowkey social design system.
+ * lowkey_social design system.
  * warm off-white / deep charcoal, one calm yellow accent, soft rounded cards.
  * all colors are oklch semantic tokens. never hardcode colors in components.
  */

@@ -6,12 +6,12 @@ import { useLowkey } from "@/lib/lowkey/store";
 export const Route = createFileRoute("/app/saved")({
   head: () => ({
     meta: [
-      { title: "saved — lowkey social" },
+      { title: "saved — lowkey_social" },
       {
         name: "description",
-        content: "everything you bookmarked on lowkey social, kept in one place just for you.",
+        content: "everything you bookmarked on lowkey_social, kept in one place just for you.",
       },
-      { property: "og:title", content: "saved — lowkey social" },
+      { property: "og:title", content: "saved — lowkey_social" },
       { property: "og:description", content: "the posts and videos you bookmarked." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
