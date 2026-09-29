@@ -937,7 +937,7 @@ await refresh();
       const id = meIdRef.current;
       if (!id) return;
       const post = state.posts.find((p) => p.id === postId);
-      if (!post || post.authorId !== id) return;
+      if (!post || (post.authorId !== id && !isAdmin)) return;
       // remove it everywhere locally so it disappears instantly
       setState((s) => ({
         ...s,

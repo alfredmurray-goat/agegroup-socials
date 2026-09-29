@@ -24,6 +24,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as VideosRouteImport } from './routes/videos'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppChatsRouteImport } from './routes/app.chats'
 import { Route as AppCreateRouteImport } from './routes/app.create'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
@@ -113,6 +114,11 @@ const VideosRoute = VideosRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/app/admin',
+  path: '/app/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppChatsRoute = AppChatsRouteImport.update({
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/chats': typeof AppChatsRoute
   '/app/create': typeof AppCreateRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/chats': typeof AppChatsRoute
   '/app/create': typeof AppCreateRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -272,6 +280,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/chats': typeof AppChatsRoute
   '/app/create': typeof AppCreateRoute
   '/app/notifications': typeof AppNotificationsRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/videos'
+    | '/app/admin'
     | '/app/chats'
     | '/app/create'
     | '/app/notifications'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/videos'
+    | '/app/admin'
     | '/app/chats'
     | '/app/create'
     | '/app/notifications'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/videos'
+    | '/app/admin'
     | '/app/chats'
     | '/app/create'
     | '/app/notifications'
@@ -403,6 +415,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
   VideosRoute: typeof VideosRoute
+  AppAdminRoute: typeof AppAdminRoute
   AppChatsRoute: typeof AppChatsRoute
   AppCreateRoute: typeof AppCreateRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -528,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/app/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/chats': {
       id: '/app/chats'
       path: '/app/chats'
@@ -651,6 +671,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
   VideosRoute: VideosRoute,
+  AppAdminRoute: AppAdminRoute,
   AppChatsRoute: AppChatsRoute,
   AppCreateRoute: AppCreateRoute,
   AppNotificationsRoute: AppNotificationsRoute,
