@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ImagePlus, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, ImagePlus, Send, Trash2, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AppScreen, Avatar, StreakPill } from "@/components/lowkey/shell";
@@ -62,8 +62,10 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
     return <AppScreen chrome={false}>{null}</AppScreen>;
   }
 
-  const otherId = conversation.memberIds.find((m) => m !== me.id)!;
-  const other = state.profiles.find((p) => p.id === otherId)!;
+  const otherId = conversation.memberIds.find((m) => m !== me.id) ?? me.id;
+  const other = state.profiles.find((p) => p.id === otherId) ?? me;
+  const isGroup = conversation.isGroup;
+  const byId = (pid: string) => state.profiles.find((p) => p.id === pid);
   const streak = state.streaks.find((s) => s.conversationId === id)?.count ?? 0;
 
   return (
@@ -72,18 +74,37 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
         <Link to="/app/chats" aria-label="back" className="p-1 text-muted-foreground">
           <ArrowLeft className="size-5" />
         </Link>
-        <Avatar hue={other.avatarHue} label={other.displayName} size={34} />
-<div className="min-w-0 flex-1">
-          <p className="lowkey truncate text-sm font-semibold">@{other.handle}</p>
-          <StreakPill count={streak} />
+        {isGroup ? (
+          <span className="flex size-[34px] items-center justify-center rounded-full bg-primary-soft">
+            <Users className="size-4" />
+          </span>
+        ) : (
+          <Avatar hue={other.avatarHue} label={other.displayName} size={34} src={other.avatarUrl} />
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="lowkey truncate text-sm font-semibold">
+            {isGroup ? conversation.title ?? "group" : `@${other.handle}`}
+          </p>
+          {isGroup ? (
+            <p className="lowkey text-xs text-muted-foreground">
+              {conversation.memberIds.length} people
+            </p>
+          ) : (
+            <StreakPill count={streak} />
+          )}
         </div>
       </header>
 
-      <div className="flex flex-col gap-2 px-4 py-4">
+      <div className="flex flex-col gap-2 px-4 pt-4 pb-40">
 {messages.map((m) => {
           const mine = m.authorId === me.id;
           return (
             <div key={m.id} className={`lowkey max-w-[75%] ${mine ? "self-end" : "self-start"}`}>
+              {isGroup && !mine && (
+                <p className="mb-0.5 px-3 text-[11px] font-semibold text-muted-foreground">
+                  @{byId(m.authorId)?.handle ?? "someone"}
+                </p>
+              )}
               <div
                 className={`relative flex flex-col gap-1.5 rounded-3xl px-4 py-2.5 text-sm ${
                   mine
@@ -144,7 +165,7 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
           onChange={(e) => setDraft(e.target.value)}
           maxLength={500}
           placeholder="hello"
-          className="lowkey flex-1 rounded-full border border-border bg-card px-4 py-3 text-sm outline-none"
+          className="lowkey flex-1 rounded-full border border-border bg-card min-w-0 px-4 py-3 text-base outline-none"
         />
         <button
           aria-label="send"
