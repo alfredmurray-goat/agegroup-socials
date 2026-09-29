@@ -79,7 +79,7 @@ function OnboardingPage() {
       return;
     }
     if (me && me.onboardedAt && me.verificationStatus === "verified" && me.ageBand) {
-      void navigate({ to: "/", replace: true });
+      void navigate({ to: "/app", replace: true });
     }
   }, [me, needsProfile, loading, navigate]);
 

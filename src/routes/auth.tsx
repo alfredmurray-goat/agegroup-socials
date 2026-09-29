@@ -39,7 +39,7 @@ function AuthPage() {
       void navigate({ to: "/onboarding", replace: true });
       return;
     }
-    void navigate({ to: "/", replace: true });
+    void navigate({ to: "/app", replace: true });
   }, [me, needsProfile, loading, navigate]);
 
   const submit = async (e: React.FormEvent) => {

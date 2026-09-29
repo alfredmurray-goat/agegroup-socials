@@ -190,7 +190,7 @@ export function TopBar({ title = "lowkey social" }: { title?: string }) {
   const unread = state.notifications.filter((n) => !n.readAt && n.recipientId === me?.id).length;
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
-      <Link to="/" className="flex items-center gap-2">
+      <Link to="/app" className="flex items-center gap-2">
         <LowkeyMark size={28} />
         <span className="lowkey text-lg leading-5 font-bold tracking-tight">{title}</span>
         <BetaTag />
@@ -274,7 +274,7 @@ export function CookieBanner() {
 }
 
 const tabs = [
-  { to: "/", label: "home", icon: House },
+  { to: "/app", label: "home", icon: House },
   { to: "/app/chats", label: "chats", icon: MessageCircle },
   { to: "/app/create", label: "create", icon: Plus },
   { to: "/app/videos", label: "videos", icon: Play },
@@ -287,7 +287,7 @@ export function BottomNav() {
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
       <ul className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
         {tabs.map(({ to, label, icon: Icon }) => {
-          const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+          const active = to === "/app" ? pathname === "/app" || pathname === "/app/" : pathname.startsWith(to);
           return (
             <li key={to}>
               <Link

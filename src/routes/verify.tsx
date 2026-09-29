@@ -61,7 +61,7 @@ function VerifyPage() {
       return;
     }
     if (me.verificationStatus === "verified" && me.ageBand) {
-      void navigate({ to: "/", replace: true });
+      void navigate({ to: "/app", replace: true });
     }
   }, [me, navigate]);
 
@@ -121,7 +121,7 @@ function VerifyPage() {
     await verifyAge(band, "face_scan");
     stop();
     setSaving(false);
-    void navigate({ to: "/", replace: true });
+    void navigate({ to: "/app", replace: true });
   };
 
   const decided = outcome?.kind === "under_18" || outcome?.kind === "adult";
