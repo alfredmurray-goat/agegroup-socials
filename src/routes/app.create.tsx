@@ -95,7 +95,7 @@ const id = await createPost({
       return;
     }
     toast.success("posted");
-    void navigate({ to: kind === "video" ? "/app/videos" : "/" });
+    void navigate({ to: kind === "video" ? "/app/videos" : "/app" });
   };
 
   return (
