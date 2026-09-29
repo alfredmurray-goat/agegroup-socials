@@ -9,3 +9,4 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 - App screens live under /app/* (landing at /); old top-level paths are redirect stubs — keeps shared links working.
+- The mobile app uses one full-width fixed bottom dock whose background includes the device safe area — prevents detached bars and content overlap.

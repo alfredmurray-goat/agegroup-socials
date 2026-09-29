@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { Film, ImagePlus, Loader2, Trash2, Type, X } from "lucide-react";
+import { ImagePlus, Loader2, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
+import { Button } from "@/components/ui/button";
 import { useLowkey } from "@/lib/lowkey/store";
 import type { PostKind } from "@/lib/lowkey/types";
 import { INTERESTS } from "@/lib/lowkey/types";
@@ -100,53 +101,44 @@ const id = await createPost({
 
   return (
     <AppScreen title="create">
-      <div className="flex flex-col gap-5 px-4 py-5">
-        <header>
-          <h1 className="lowkey text-2xl font-extrabold">create</h1>
-          <p className="lowkey mt-1 text-xs text-muted-foreground">
-            goes out to your band only ({me?.ageBand === "under_18" ? "under 18" : "18+"})
+      <div className="flex flex-col gap-5 px-4 py-5 sm:px-6">
+        <header className="border-b border-border pb-5">
+          <div className="flex items-center gap-2 text-primary-foreground">
+            <Sparkles className="size-4" />
+            <span className="lowkey text-xs font-bold">new post</span>
+          </div>
+          <h1 className="lowkey mt-2 font-display text-3xl font-bold">share something</h1>
+          <p className="lowkey mt-1 text-sm text-muted-foreground">
+            only people in your {me?.ageBand === "under_18" ? "under 18" : "18+"} space can see it
           </p>
         </header>
 
-        {/* what you're posting, decided by what you attach */}
-        <div className="flex items-center gap-2">
-          {[
-            { k: "text", label: "text", icon: Type, active: !mediaKind },
-            { k: "photo", label: "photo", icon: ImagePlus, active: mediaKind === "post" },
-            { k: "video", label: "video", icon: Film, active: mediaKind === "video" },
-          ].map(({ k, label, icon: Icon, active }) => (
-            <span
-              key={k}
-              className={`lowkey flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              }`}
-            >
-              <Icon className="size-3.5" /> {label}
-            </span>
-          ))}
-        </div>
-
         {/* media */}
         {mediaUrl ? (
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-card">
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             {mediaKind === "video" ? (
               <video src={mediaUrl} className="max-h-80 w-full object-contain" controls playsInline />
             ) : (
               <img src={mediaUrl} alt="your upload" className="max-h-80 w-full object-contain" />
             )}
-            <button
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
               onClick={clearMedia}
               aria-label="remove media"
-              className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-background/90 text-foreground"
+              className="absolute top-3 right-3 rounded-full"
             >
               <Trash2 className="size-4" />
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="flex w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-border bg-card px-6 py-12"
+            className="group h-auto w-full flex-col gap-3 rounded-2xl border-dashed bg-card px-6 py-10 shadow-none"
           >
             {uploading ? (
               <>
@@ -161,17 +153,16 @@ const id = await createPost({
               </>
             ) : (
               <>
-                <div className="flex gap-2">
-                  <ImagePlus className="size-7 text-muted-foreground" />
-                  <Film className="size-7 text-muted-foreground" />
+                <div className="flex size-12 items-center justify-center rounded-xl bg-secondary text-foreground transition-transform group-active:scale-95">
+                  <ImagePlus className="size-6" />
                 </div>
-                <span className="lowkey text-sm font-semibold">add a photo or video</span>
+                <span className="lowkey font-display text-base font-bold">add a photo or video</span>
                 <span className="lowkey text-xs text-muted-foreground">
-                  optional · stored privately in the eu, only your band can see it
+                  tap to choose from your device
                 </span>
               </>
             )}
-          </button>
+          </Button>
         )}
         <input
           ref={inputRef}
@@ -181,17 +172,16 @@ const id = await createPost({
           onChange={(e) => void pick(e.target.files?.[0])}
         />
 
-{/* title */}
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          maxLength={60}
-          placeholder="a little title (optional)"
-          className="lowkey rounded-3xl border border-border bg-card px-4 py-3.5 text-sm font-bold outline-none placeholder:font-normal"
-        />
-
-        {/* caption */}
-        <div className="rounded-3xl border border-border bg-card p-4">
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <label htmlFor="post-title" className="lowkey text-xs font-bold text-muted-foreground">title · optional</label>
+          <input
+            id="post-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={60}
+            placeholder="give it a little title"
+            className="lowkey mt-2 w-full border-b border-border bg-transparent pb-3 font-display text-lg font-bold outline-none placeholder:font-normal placeholder:text-muted-foreground"
+          />
           <div className="flex gap-3">
             <Avatar
               hue={me?.avatarHue ?? 60}
@@ -205,32 +195,31 @@ const id = await createPost({
               maxLength={280}
               rows={4}
               placeholder="say it lowkey. no caps, no grammar, no pressure"
-              className="lowkey min-w-0 flex-1 resize-none bg-transparent text-sm outline-none"
+              className="lowkey mt-3 min-w-0 flex-1 resize-none bg-transparent text-base leading-relaxed outline-none"
             />
           </div>
-          <p className="lowkey mt-2 text-right text-[11px] text-muted-foreground">
+          <p className="lowkey mt-2 text-right text-xs text-muted-foreground">
             {caption.length}/280
           </p>
         </div>
 
         {/* topic */}
         <div>
-          <p className="lowkey mb-2 text-xs font-semibold text-muted-foreground">
+          <p className="lowkey mb-2 text-xs font-bold text-muted-foreground">
             topic {topic && <span className="text-foreground">· {topic}</span>}
           </p>
           <div className="flex flex-wrap gap-2">
             {INTERESTS.slice(0, 12).map((t) => (
-              <button
+              <Button
+                type="button"
+                variant={topic === t ? "default" : "secondary"}
+                size="sm"
                 key={t}
                 onClick={() => setTopic(topic === t ? null : t)}
-                className={`lowkey rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  topic === t
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
+                className="lowkey rounded-full shadow-none"
               >
                 {t}
-              </button>
+              </Button>
             ))}
             {topic && (
               <button
@@ -252,13 +241,13 @@ const id = await createPost({
           </div>
         )}
 
-        <button
+        <Button
           onClick={() => void submit()}
           disabled={posting || uploading}
-          className="lowkey rounded-full bg-primary py-4 text-sm font-bold text-primary-foreground disabled:opacity-60"
+          className="lowkey h-12 w-full rounded-full font-display text-base font-bold shadow-none active:scale-[0.99]"
         >
           {posting ? "posting..." : kind === "video" ? "post video" : "post it"}
-        </button>
+        </Button>
       </div>
     </AppScreen>
   );

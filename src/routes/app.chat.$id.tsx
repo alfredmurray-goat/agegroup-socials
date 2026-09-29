@@ -70,7 +70,7 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
 
   return (
     <AppScreen chrome={false}>
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/95 px-3 py-3 backdrop-blur">
+      <header className="sticky top-0 z-20 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
         <Link to="/app/chats" aria-label="back" className="p-1 text-muted-foreground">
           <ArrowLeft className="size-5" />
         </Link>
@@ -95,7 +95,7 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
         </div>
       </header>
 
-      <div className="flex flex-col gap-2 px-4 pt-4 pb-40">
+      <div className="flex flex-col gap-3 px-4 pt-5 pb-[calc(9rem+env(safe-area-inset-bottom))]">
 {messages.map((m) => {
           const mine = m.authorId === me.id;
           return (
@@ -106,10 +106,10 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
                 </p>
               )}
               <div
-                className={`relative flex flex-col gap-1.5 rounded-3xl px-4 py-2.5 text-sm ${
+                className={`relative flex flex-col gap-1.5 rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
                   mine
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground"
+                    ? "rounded-br-sm bg-primary text-primary-foreground"
+                    : "rounded-bl-sm border border-border bg-card text-foreground"
                 }`}
               >
                 {m.mediaUrl && (
@@ -143,13 +143,13 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
           sendMessage(id, draft);
           setDraft("");
         }}
-        className="fixed inset-x-0 bottom-20 z-30 mx-auto flex w-full max-w-lg items-center gap-2 px-3"
+        className="fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 mx-auto grid w-full max-w-lg grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-t border-border bg-background px-4 py-3"
       >
 <button
           type="button"
           aria-label="send a photo"
           onClick={() => fileRef.current?.click()}
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground active:scale-95"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground active:scale-95"
         >
           <ImagePlus className="size-5" />
         </button>
@@ -165,11 +165,11 @@ const { state, me, sendMessage, sendPhoto, deleteMessage, markRead } = useLowkey
           onChange={(e) => setDraft(e.target.value)}
           maxLength={500}
           placeholder="hello"
-          className="lowkey flex-1 rounded-full border border-border bg-card min-w-0 px-4 py-3 text-base outline-none"
+          className="lowkey min-w-0 rounded-full border border-input bg-card px-4 py-3 text-base outline-none focus:border-ring"
         />
         <button
           aria-label="send"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-95"
         >
           <Send className="size-4" />
         </button>
