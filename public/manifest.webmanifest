@@ -2,7 +2,7 @@
   "name": "lowkey_social",
   "short_name": "lowkey",
   "description": "a chill, no-caps social app with age-verified feeds: under 18 sees under 18, 18+ sees 18+.",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
