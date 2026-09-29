@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { Film, ImagePlus, Loader2, Sparkles, Trash2, X } from "lucide-react";
+import { ImagePlus, Loader2, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
 import { Button } from "@/components/ui/button";

@@ -141,6 +141,7 @@
   body {
     overflow-x: clip;
     max-width: 100%;
+    overscroll-behavior-x: none;
   }
 
   /* ios zooms into any field under 16px — keep every field at 16px+ */

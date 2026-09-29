@@ -411,9 +411,7 @@ export function AppScreen({
       <main id="main" className="min-w-0 flex-1">
         {children}
       </main>
-      <div className="pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
-        <SiteFooter />
-      </div>
+      <div className="h-[calc(4.5rem+env(safe-area-inset-bottom))]" aria-hidden />
       <BottomNav />
       <ReadAloud />
     </div>
