@@ -54,17 +54,18 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", "Figtree", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --radius: 1.25rem;
-  --background: oklch(0.975 0.012 95);
-  --foreground: oklch(0.26 0.02 80);
+  --radius: 1rem;
+  --background: oklch(0.994 0.012 95);
+  --foreground: oklch(0.255 0.015 80);
   --card: oklch(0.995 0.006 95);
   --card-foreground: oklch(0.26 0.02 80);
   --popover: oklch(0.995 0.006 95);
   --popover-foreground: oklch(0.26 0.02 80);
-  --primary: oklch(0.855 0.155 92);
+  --primary: oklch(0.84 0.155 91);
   --primary-foreground: oklch(0.28 0.03 80);
   --primary-soft: oklch(0.945 0.075 96);
   --secondary: oklch(0.945 0.014 95);
@@ -75,8 +76,8 @@
   --accent-foreground: oklch(0.3 0.03 80);
   --destructive: oklch(0.6 0.19 25);
   --destructive-foreground: oklch(0.985 0.005 95);
-  --border: oklch(0.905 0.014 95);
-  --input: oklch(0.905 0.014 95);
+  --border: oklch(0.92 0.012 90);
+  --input: oklch(0.92 0.012 90);
   --ring: oklch(0.855 0.155 92);
   --streak: oklch(0.72 0.17 45);
   --chart-1: oklch(0.855 0.155 92);
@@ -159,7 +160,12 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
   }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
 }
 
 /* the whole app speaks lowercase */

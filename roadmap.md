@@ -32,6 +32,8 @@
 - admin dashboard /app/admin, group chats, birthday + face match, google sign-in removed
 - rename lowkey_social, near-you (city only), light default, landing at /, app at /app
 - mobile input zoom + sideways scroll fixed; push notifications dropped (user decision)
+- mobile navigation converted to a flush safe-area dock; chat composer aligned above it
+- create/upload experience refreshed with clearer hierarchy and calmer controls
 
 ## open
 - own supabase project instead of managed backend (workspace-admin action, blocked)

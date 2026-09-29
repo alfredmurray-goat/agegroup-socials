@@ -189,10 +189,10 @@ export function TopBar({ title = "lowkey_social" }: { title?: string }) {
   const { state, me } = useLowkey();
   const unread = state.notifications.filter((n) => !n.readAt && n.recipientId === me?.id).length;
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-lg">
+    <header className="sticky top-0 z-20 grid grid-cols-[minmax(0,1fr)_auto] items-center border-b border-border bg-background/95 px-4 py-3 backdrop-blur-lg">
       <Link to="/app" className="flex items-center gap-2">
         <LowkeyMark size={28} />
-        <span className="lowkey text-lg leading-5 font-bold tracking-tight">{title}</span>
+        <span className="lowkey truncate font-display text-lg leading-5 font-bold">{title}</span>
         <BetaTag />
       </Link>
       <div className="flex items-center gap-1">
@@ -284,29 +284,29 @@ const tabs = [
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
-      <ul className="mx-3 flex max-w-lg items-center justify-around rounded-full border border-border bg-card/95 px-1 py-1.5 shadow-lg backdrop-blur sm:mx-auto">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+      <ul className="mx-auto grid h-[4.5rem] w-full max-w-lg grid-cols-5 items-center px-2">
         {tabs.map(({ to, label, icon: Icon }) => {
           const active = to === "/app" ? pathname === "/app" || pathname === "/app/" : pathname.startsWith(to);
           return (
-            <li key={to}>
+            <li key={to} className="min-w-0">
               <Link
                 to={to}
                 aria-label={label}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 rounded-2xl px-2.5 py-1 transition-colors",
+                  "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 px-1 transition-colors active:scale-95",
                   active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <span
                   className={cn(
-                    "flex size-9 items-center justify-center rounded-full",
-                    active && "bg-primary text-primary-foreground",
+                    "flex size-7 items-center justify-center rounded-lg",
+                    active && "bg-secondary text-foreground",
                   )}
                 >
                   <Icon className="size-5" />
                 </span>
-                <span className="lowkey text-[11px]">{label}</span>
+                 <span className={cn("lowkey truncate text-[10px]", active && "font-bold")}>{label}</span>
               </Link>
             </li>
           );
@@ -400,7 +400,7 @@ export function AppScreen({
   if (usage.reached && !overLimit) return <DailyLimitReached />;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-lg min-w-0 flex-col overflow-x-clip bg-background">
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg min-w-0 flex-col overflow-x-clip bg-background">
       {chrome && <TopBar {...(title ? { title } : {})} />}
       <a
         href="#main"
@@ -408,10 +408,10 @@ export function AppScreen({
       >
         skip to content
       </a>
-      <main id="main" className="flex-1">
+      <main id="main" className="min-w-0 flex-1">
         {children}
       </main>
-      <div className="pb-24">
+      <div className="pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
         <SiteFooter />
       </div>
       <BottomNav />
