@@ -1,4 +1,4 @@
-# lowkey social roadmap
+# lowkey_social roadmap
 
 ## done
 - 6 screens + search/settings on a localStorage store mirroring the planned schema
@@ -27,6 +27,11 @@
 - redo create screen + post titles shown on the home feed; remove verified badge on own profile
 - daily limit resets at midnight in the user's local timezone (was UTC)
 - [bug] "change my limit" from the limit screen does nothing — AppScreen re-blocks /settings
+
+## done (plan 2026-09-29)
+- admin dashboard /app/admin, group chats, birthday + face match, google sign-in removed
+- rename lowkey_social, near-you (city only), light default, landing at /, app at /app
+- mobile input zoom + sideways scroll fixed; push notifications dropped (user decision)
 
 ## open
 - own supabase project instead of managed backend (workspace-admin action, blocked)

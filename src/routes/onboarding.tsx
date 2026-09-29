@@ -9,13 +9,13 @@ import { INTERESTS, VIBES } from "@/lib/lowkey/types";
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
-      { title: "set up your profile — lowkey social" },
+      { title: "set up your profile — lowkey_social" },
       {
         name: "description",
         content:
           "pick your handle, interests, vibe and daily limit, then get your age band checked before you see any content.",
       },
-      { property: "og:title", content: "set up your profile — lowkey social" },
+      { property: "og:title", content: "set up your profile — lowkey_social" },
       {
         property: "og:description",
         content: "handle, interests, vibe, daily limit and your age check.",
@@ -79,7 +79,7 @@ function OnboardingPage() {
       return;
     }
     if (me && me.onboardedAt && me.verificationStatus === "verified" && me.ageBand) {
-      void navigate({ to: "/", replace: true });
+      void navigate({ to: "/app", replace: true });
     }
   }, [me, needsProfile, loading, navigate]);
 

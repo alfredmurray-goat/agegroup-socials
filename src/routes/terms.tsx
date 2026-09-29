@@ -6,16 +6,16 @@ const SITE = "https://lowkeysocial.alfredmurray.com";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "terms of use — lowkey social" },
+      { title: "terms of use — lowkey_social" },
       {
         name: "description",
         content:
-          "the rules for using lowkey social: age bands, what you may post, moderation, eu consumer rights and how to close your account.",
+          "the rules for using lowkey_social: age bands, what you may post, moderation, eu consumer rights and how to close your account.",
       },
-      { property: "og:title", content: "terms of use — lowkey social" },
+      { property: "og:title", content: "terms of use — lowkey_social" },
       {
         property: "og:description",
-        content: "age bands, posting rules, moderation and your eu rights on lowkey social.",
+        content: "age bands, posting rules, moderation and your eu rights on lowkey_social.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `${SITE}/terms` },
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/terms")({
 const sections: { h: string; p: string }[] = [
   {
     h: "who runs lowkey",
-    p: "lowkey social is an independent beta project run by alfred murray as the service provider and data controller. contact for anything legal, privacy or safety related is the email at the bottom of this page.",
+    p: "lowkey_social is an independent beta project run by alfred murray as the service provider and data controller. contact for anything legal, privacy or safety related is the email at the bottom of this page.",
   },
   {
     h: "the deal",
@@ -95,7 +95,7 @@ function TermsPage() {
       <LegalLinks />
 
       <Link
-        to="/settings"
+        to="/app/settings"
         className="lowkey rounded-full border border-border bg-card py-3 text-center text-sm font-semibold"
       >
         back to settings

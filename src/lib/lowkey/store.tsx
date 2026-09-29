@@ -10,7 +10,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { parseInstagramExport } from "./instagram";
 import { prepareImage } from "./image";
 import {
@@ -83,7 +82,8 @@ interface LowkeyApi {
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<Result>;
   signUp: (email: string, password: string) => Promise<Result>;
-  signInWithGoogle: () => Promise<Result>;
+  setClaimedBirthday: (birthday: string) => Promise<Result>;
+  startGroup: (title: string, memberIds: string[]) => Promise<string | null>;
   signOut: () => Promise<void>;
   createProfile: (draft: ProfileDraft) => Promise<Result>;
   updateProfile: (prefs: OnboardingPrefs) => Promise<Result>;
@@ -205,7 +205,10 @@ function toProfile(r: Row): Profile {
     allowDms: (r['allow_dms'] as Audience) ?? "everyone",
     allowComments: (r['allow_comments'] as Audience) ?? "everyone",
     hideFromSearch: Boolean(r['hide_from_search']),
-    theme: (r['theme'] as ThemePref) ?? "system",
+    theme: (r['theme'] as ThemePref) ?? "light",
+    birthYear: (r['birth_year'] as number | null) ?? null,
+    claimedBand: (r['claimed_band'] as AgeBand | null) ?? null,
+    bannedAt: (r['banned_at'] as string | null) ?? null,
     reduceMotion: Boolean(r['reduce_motion']),
 textScale: (r['text_scale'] as TextScale) ?? "normal",
     highContrast: Boolean(r['high_contrast']),
@@ -377,6 +380,8 @@ posts: postRows.map((r) => ({
       conversations: ((convRes.data ?? []) as Row[]).map((r) => ({
         id: r['id'] as string,
         ageBand: r['age_band'] as AgeBand,
+        isGroup: Boolean(r['is_group']),
+        title: (r['title'] as string | null) ?? null,
         memberIds: members
           .filter((m) => m['conversation_id'] === r['id'])
           .map((m) => m['profile_id'] as string),
@@ -446,16 +451,6 @@ return {
         return { ok: true, needsEmailConfirm: true };
       }
     }
-    await refresh();
-    return { ok: true };
-  }, [refresh]);
-
-  const signInWithGoogle = useCallback(async (): Promise<Result> => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) return { ok: false, error: "google sign in failed" };
-    if (result.redirected) return { ok: true };
     await refresh();
     return { ok: true };
   }, [refresh]);
@@ -575,6 +570,47 @@ return {
       return { ok: true };
     },
     [refresh, state.profiles],
+  );
+
+  /** step 1 of the age check: store only birth year + claimed band, never the full date */
+  const setClaimedBirthday = useCallback(
+    async (birthday: string): Promise<Result> => {
+      const id = meIdRef.current;
+      if (!id) return { ok: false, error: "no profile yet" };
+      const d = new Date(birthday + "T00:00:00");
+      if (Number.isNaN(d.getTime())) return { ok: false, error: "that date doesn't look right" };
+      const now = new Date();
+      let age = now.getFullYear() - d.getFullYear();
+      const m = now.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+      if (age < 13) return { ok: false, error: "you need to be at least 13 to use lowkey_social" };
+      if (age > 110) return { ok: false, error: "that date doesn't look right" };
+      const band: AgeBand = age < 18 ? "under_18" : "adult";
+      const { error } = await supabase
+        .from("profiles")
+        .update({ birth_year: d.getFullYear(), claimed_band: band })
+        .eq("id", id);
+      if (error) return { ok: false, error: error.message.toLowerCase() };
+      await refresh();
+      return { ok: true };
+    },
+    [refresh],
+  );
+
+  const startGroup = useCallback(
+    async (title: string, memberIds: string[]) => {
+      const { data, error } = await supabase.rpc("start_group", {
+        _title: title,
+        _members: memberIds,
+      });
+      if (error || !data) {
+        toast.error(error?.message.toLowerCase() ?? "couldn't make that group");
+        return null;
+      }
+      await refresh();
+      return data as string;
+    },
+    [refresh],
   );
 
   /* ---------- content ---------- */
@@ -812,7 +848,7 @@ title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
       const mine = me;
       if (!mine || profileId === mine.id) return null;
       const existing = state.conversations.find(
-        (c) => c.memberIds.includes(mine.id) && c.memberIds.includes(profileId),
+        (c) => !c.isGroup && c.memberIds.includes(mine.id) && c.memberIds.includes(profileId),
       );
       if (existing) return existing.id;
       // a security-definer function creates the thread and both memberships in
@@ -901,7 +937,7 @@ await refresh();
       const id = meIdRef.current;
       if (!id) return;
       const post = state.posts.find((p) => p.id === postId);
-      if (!post || post.authorId !== id) return;
+      if (!post || (post.authorId !== id && !isAdmin)) return;
       // remove it everywhere locally so it disappears instantly
       setState((s) => ({
         ...s,
@@ -913,7 +949,7 @@ await refresh();
       }));
       await supabase.from("posts").delete().eq("id", postId);
     },
-    [state.posts],
+    [state.posts, isAdmin],
   );
 
   const editPost = useCallback(
@@ -1199,7 +1235,7 @@ const comment = state.comments.find((c) => c.id === commentId);
 
   useEffect(() => {
     const root = document.documentElement;
-    const pref = me?.theme ?? "system";
+    const pref = me?.theme ?? "light";
     const dark =
       pref === "dark" ||
       (pref === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -1285,7 +1321,8 @@ needsProfile: needsProfile && Boolean(authUserId),
       isAdmin,
       signIn,
       signUp,
-      signInWithGoogle,
+      setClaimedBirthday,
+      startGroup,
       signOut,
       createProfile,
       updateProfile,
@@ -1330,7 +1367,8 @@ needsProfile,
       authUserId,
       signIn,
       signUp,
-      signInWithGoogle,
+      setClaimedBirthday,
+      startGroup,
       signOut,
       createProfile,
       updateProfile,
@@ -1413,6 +1451,10 @@ export function useMyConversations() {
       .map((c) => {
         const otherId = c.memberIds.find((id) => id !== me.id) ?? me.id;
         const other = state.profiles.find((p) => p.id === otherId) ?? me;
+        const members = c.memberIds
+          .filter((id) => id !== me.id)
+          .map((id) => state.profiles.find((p) => p.id === id))
+          .filter((p): p is Profile => Boolean(p));
         const msgs = state.messages
           .filter((m) => m.conversationId === c.id)
           .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -1420,6 +1462,7 @@ export function useMyConversations() {
         return {
           conversation: c,
           other,
+          members,
           lastMessage: msgs[msgs.length - 1] ?? null,
           unread: msgs.some((m) => m.authorId !== me.id && !m.readByMe),
           streak: streak?.count ?? 0,

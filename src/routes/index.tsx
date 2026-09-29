@@ -1,336 +1,201 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flag, Heart, MessageSquare, MoreHorizontal, Pencil, Send, Bookmark, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
-import { CommentsSheet } from "@/components/lowkey/comments";
-import { useBandPosts, useLowkey } from "@/lib/lowkey/store";
-import type { Post } from "@/lib/lowkey/types";
-
-const REPORT_REASONS = ["spam", "harassment", "nsfw", "underage", "hateful", "other"];
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Flame, MapPin, MessageCircle, ScanFace, ShieldCheck, Timer } from "lucide-react";
+import { BetaTag, LowkeyMark, SiteFooter } from "@/components/lowkey/shell";
 
 const SITE = "https://lowkeysocial.alfredmurray.com";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "lowkey social — age-verified feed, no caps, no pressure" },
+      { title: "lowkey_social — find people your age near you" },
       {
         name: "description",
         content:
-          "lowkey social is a chill social app with a hard age split: under 18 only sees under 18, 18+ only sees 18+. free on-device age check, friend streaks and a daily time limit.",
+          "lowkey_social is a chill social app for finding people your age in your area. under 18 only sees under 18, 18+ only sees 18+. birthday plus on-device face check.",
       },
-      { property: "og:title", content: "lowkey social — age-verified feed, no caps, no pressure" },
+      { property: "og:title", content: "lowkey_social — find people your age near you" },
       {
         property: "og:description",
-        content:
-          "under 18 sees under 18, 18+ sees 18+. free on-device age check, friend streaks, daily limits.",
+        content: "meet people your age in your city. age-checked, split feeds, no caps, no pressure.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE },
-      { property: "og:image", content: `${SITE}/favicon.png` },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: `${SITE}/favicon.png` },
     ],
     links: [{ rel: "canonical", href: SITE }],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@graph": [
-            {
-              "@type": "WebApplication",
-              name: "lowkey social",
-              url: SITE,
-              applicationCategory: "SocialNetworkingApplication",
-              operatingSystem: "web",
-              description:
-                "a chill social app with an age-verified split feed: under 18 only sees under 18, adults only see adults.",
-              offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
-              featureList: [
-                "age-verified split feed",
-                "free on-device age estimate",
-                "friend streaks",
-                "daily time limit",
-                "gdpr data export and deletion",
-              ],
-            },
-            {
-              "@type": "FAQPage",
-              mainEntity: [
-                {
-                  "@type": "Question",
-                  name: "how does lowkey social split under 18 and adults?",
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "every account gets a verified age band. database security rules mean under-18 accounts can only read under-18 profiles, posts and chats, and 18+ accounts can only read 18+ ones.",
-                  },
-                },
-                {
-                  "@type": "Question",
-                  name: "how is age verified, and is it free?",
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "yes, free. a face age estimate runs entirely on your own device and uploads nothing. borderline results fall back to an eid check such as mitid, altid or the eu identity wallet.",
-                  },
-                },
-                {
-                  "@type": "Question",
-                  name: "is lowkey social gdpr compliant?",
-                  acceptedAnswer: {
-                    "@type": "Answer",
-                    text: "data is stored in the eu, no ad trackers run, consent is logged, and you can export all your data as json or delete your account and everything in it from settings.",
-                  },
-                },
-              ],
-            },
-          ],
-        }),
-      },
-    ],
   }),
-  component: FeedPage,
+  component: Landing,
 });
 
-function timeAgo(iso: string) {
-  const mins = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
-  if (mins < 60) return `${mins}m`;
-  if (mins < 1440) return `${Math.round(mins / 60)}h`;
-  return `${Math.round(mins / 1440)}d`;
-}
-
-function FeedCard({ post }: { post: Post }) {
-  const { state, me, toggleLike, addComment, toggleBookmark, deletePost, editPost, report } =
-    useLowkey();
-  const author = state.profiles.find((p) => p.id === post.authorId);
-  const likes = state.likes.filter((l) => l.postId === post.id);
-  const liked = likes.some((l) => l.profileId === me?.id);
-  const comments = state.comments.filter((c) => c.postId === post.id);
-  const saved = state.bookmarks.includes(post.id);
-  const [openComments, setOpenComments] = useState(false);
-  const [menu, setMenu] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [reporting, setReporting] = useState(false);
-  const [editTitle, setEditTitle] = useState(post.title ?? "");
-  const [editCaption, setEditCaption] = useState(post.caption);
-
-  if (!author) return null;
-
-  const mine = author.id === me?.id;
-
-  const authorLink = mine
-    ? { to: "/profile" as const }
-    : { to: "/u/$handle" as const, params: { handle: author.handle } };
-
+function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e?.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   return (
-    <article className="border-b border-border px-4 py-4">
-      <div className="flex items-center gap-2">
-        <Link {...authorLink}>
-          <Avatar hue={author.avatarHue} label={author.displayName} src={author.avatarUrl} size={36} />
-        </Link>
-        <div className="min-w-0 flex-1">
-          <Link {...authorLink} className="lowkey block truncate text-sm font-semibold">
-            @{author.handle}
-          </Link>
-          <p className="lowkey text-xs text-muted-foreground">
-            {post.taggedHandle ? `w/ @${post.taggedHandle} · ` : ""}
-            {timeAgo(post.createdAt)}
-          </p>
-        </div>
-
-        {/* overflow: edit / delete (own posts), report (anyone) */}
-        <div className="relative">
-          <button
-            onClick={() => setMenu((m) => !m)}
-            aria-label="post menu"
-            className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground"
-          >
-            <MoreHorizontal className="size-5" />
-          </button>
-          {menu && (
-            <>
-              <button
-                aria-label="close menu"
-                className="fixed inset-0 z-20 cursor-default"
-                onClick={() => setMenu(false)}
-              />
-              <div className="absolute right-0 z-30 mt-1 w-44 overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
-                {mine ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setEditing(true);
-                        setMenu(false);
-                      }}
-                      className="lowkey flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold hover:bg-muted"
-                    >
-                      <Pencil className="size-4" /> edit
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMenu(false);
-                        void deletePost(post.id);
-                      }}
-                      className="lowkey flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-destructive hover:bg-muted"
-                    >
-                      <Trash2 className="size-4" /> delete
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setReporting(true);
-                      setMenu(false);
-                    }}
-                    className="lowkey flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-destructive hover:bg-muted"
-                  >
-                    <Flag className="size-4" /> report
-                  </button>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {editing ? (
-        <div className="mt-3 flex flex-col gap-2 rounded-2xl border border-border bg-card p-3">
-          <input
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            maxLength={60}
-            placeholder="title"
-            aria-label="edit title"
-            className="lowkey rounded-xl border border-input bg-background px-3 py-2 text-sm font-bold outline-none"
-          />
-          <textarea
-            value={editCaption}
-            onChange={(e) => setEditCaption(e.target.value)}
-            maxLength={280}
-            rows={2}
-            placeholder="caption"
-            aria-label="edit caption"
-            className="lowkey resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                void editPost(post.id, { title: editTitle, caption: editCaption });
-                setEditing(false);
-              }}
-              className="lowkey flex-1 rounded-full bg-primary py-2 text-xs font-bold text-primary-foreground"
-            >
-              save
-            </button>
-            <button
-              onClick={() => setEditing(false)}
-              className="lowkey rounded-full border border-input px-4 py-2 text-xs font-semibold"
-            >
-              cancel
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-3 flex gap-3">
-          <div className="flex flex-col items-center gap-3 pt-1">
-            <button
-              onClick={() => void toggleLike(post.id)}
-              aria-label="like"
-              className="flex min-h-11 min-w-11 flex-col items-center justify-center text-muted-foreground"
-            >
-              <Heart className={liked ? "size-6 fill-primary text-primary" : "size-6"} />
-              <span className="text-xs font-semibold">{likes.length}</span>
-            </button>
-            <button
-              onClick={() => setOpenComments(true)}
-              aria-label="comments"
-              className="flex min-h-11 min-w-11 flex-col items-center justify-center text-muted-foreground"
-            >
-              <MessageSquare className="size-6" />
-              <span className="text-xs font-semibold">{comments.length}</span>
-            </button>
-            <Link
-              to="/chats"
-              aria-label="share"
-              className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground"
-            >
-              <Send className="size-6" />
-            </Link>
-            <button
-              onClick={() => void toggleBookmark(post.id)}
-              aria-label={saved ? "remove bookmark" : "save post"}
-              className="flex min-h-11 min-w-11 items-center justify-center text-muted-foreground"
-            >
-              <Bookmark className={saved ? "size-6 fill-primary text-primary" : "size-6"} />
-            </button>
-          </div>
-          <div className="min-w-0 flex-1">
-            {post.title && (
-              <h2 className="lowkey mb-1.5 text-base leading-snug font-extrabold break-words">
-                {post.title}
-              </h2>
-            )}
-            {post.mediaUrl ? (
-              <>
-                <Poster hue={post.posterHue} caption={post.caption} mediaUrl={post.mediaUrl} />
-                {/* text + image: the caption belongs under the picture, not swallowed by it */}
-                {post.caption && post.caption !== "no caption" && (
-                  <p className="lowkey mt-2 text-sm leading-snug break-words">{post.caption}</p>
-                )}
-              </>
-            ) : (
-              <Poster hue={post.posterHue} caption={post.caption} />
-            )}
-            <button
-              onClick={() => setOpenComments(true)}
-              className="lowkey mt-2 text-xs font-semibold text-muted-foreground"
-            >
-              {comments.length > 0
-                ? `view ${comments.length} comment${comments.length > 1 ? "s" : ""}`
-                : "add a comment"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {reporting && (
-        <div className="mt-3 flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-3">
-          <p className="lowkey w-full text-xs font-semibold text-muted-foreground">
-            why are you reporting this post?
-          </p>
-          {REPORT_REASONS.map((reason) => (
-            <button
-              key={reason}
-              onClick={() => {
-                void report("post", post.id, reason);
-                setReporting(false);
-              }}
-              className="lowkey rounded-full bg-muted px-3 py-1.5 text-xs font-semibold"
-            >
-              {reason}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {openComments && <CommentsSheet postId={post.id} onClose={() => setOpenComments(false)} />}
-    </article>
+    <div
+      ref={ref}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`transition-all duration-700 ease-out ${
+        shown ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+      }`}
+    >
+      {children}
+    </div>
   );
 }
 
-function FeedPage() {
-  const posts = useBandPosts('post');
+const features = [
+  { icon: MapPin, title: "people your age, near you", body: "see who's in your city and your age band. city only, never your exact spot." },
+  { icon: ShieldCheck, title: "a hard age split", body: "under 18 only ever sees under 18. 18+ only sees 18+. enforced in the database, not just the app." },
+  { icon: ScanFace, title: "birthday + face check", body: "type your birthday, then a face model on your own phone checks it matches. nothing uploaded." },
+  { icon: Flame, title: "friend streaks", body: "chat every day, keep the flame going. 1:1 or in group chats." },
+  { icon: Timer, title: "a daily limit", body: "45 minutes a day for under 18s by default. resets at your local midnight." },
+  { icon: MessageCircle, title: "no caps, no pressure", body: "no grammar police, no follower counts shoved in your face. just chill." },
+];
 
+function Landing() {
   return (
-    <AppScreen>
-      <h1 className="sr-only">lowkey social feed</h1>
-      {posts.length === 0 ? (
-        <p className="lowkey p-8 text-center text-sm text-muted-foreground">
-          nothing in your feed yet. make the first post.
+    <div className="min-h-screen overflow-x-clip bg-background">
+      <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-2">
+          <LowkeyMark size={34} />
+          <span className="lowkey text-lg font-extrabold tracking-tight">lowkey_social</span>
+          <BetaTag />
+        </div>
+        <Link
+          to="/auth"
+          className="lowkey min-h-11 content-center rounded-full border border-border bg-card px-5 text-sm font-bold transition-colors hover:bg-muted"
+        >
+          sign in
+        </Link>
+      </header>
+
+      <section className="relative mx-auto flex max-w-5xl flex-col items-center px-5 pt-12 pb-20 text-center md:pt-20">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-10 left-1/2 -z-0 size-[28rem] -translate-x-1/2 rounded-full bg-primary/30 blur-3xl motion-safe:animate-[lk-pulse_6s_ease-in-out_infinite]"
+        />
+        <div className="relative motion-safe:animate-[lk-drop_0.9s_cubic-bezier(.2,1.4,.4,1)_both]">
+          <LowkeyMark size={96} />
+        </div>
+        <h1 className="lowkey relative mt-6 max-w-3xl text-5xl leading-[1.02] font-extrabold tracking-tight md:text-7xl motion-safe:animate-[lk-up_0.8s_0.15s_ease-out_both]">
+          find people your age,{" "}
+          <span className="relative inline-block">
+            <span className="relative z-10">near you</span>
+            <span className="absolute inset-x-0 bottom-1 -z-0 h-4 rounded-full bg-primary md:h-6 motion-safe:animate-[lk-grow_0.7s_0.7s_ease-out_both] origin-left" />
+          </span>
+          .
+        </h1>
+        <p className="lowkey relative mt-5 max-w-xl text-lg text-muted-foreground motion-safe:animate-[lk-up_0.8s_0.3s_ease-out_both]">
+          a chill social app where under 18s and adults never mix. check your age once, then meet
+          people in your city and your age band.
         </p>
-      ) : (
-        posts.map((p) => <FeedCard key={p.id} post={p} />)
-      )}
-    </AppScreen>
+        <div className="relative mt-8 flex flex-col gap-3 sm:flex-row motion-safe:animate-[lk-up_0.8s_0.45s_ease-out_both]">
+          <Link
+            to="/auth"
+            className="lowkey min-h-13 content-center rounded-full bg-primary px-8 py-4 text-base font-extrabold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            join the beta, it&apos;s free
+          </Link>
+          <a
+            href="#how"
+            className="lowkey min-h-13 content-center rounded-full px-6 py-4 text-base font-bold text-muted-foreground hover:text-foreground"
+          >
+            how it works ↓
+          </a>
+        </div>
+
+        <div className="relative mt-16 grid w-full max-w-3xl grid-cols-3 gap-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{ animationDelay: `${600 + i * 140}ms` }}
+              className="motion-safe:animate-[lk-up_0.8s_ease-out_both]"
+            >
+              <div
+                style={{ animationDelay: `${i * 0.8}s` }}
+                className="aspect-[3/4] rounded-3xl border border-border bg-card p-3 shadow-md motion-safe:animate-[lk-float_5s_ease-in-out_infinite]"
+              >
+                <div
+                  className="h-2/3 w-full rounded-2xl"
+                  style={{
+                    background: `linear-gradient(150deg, oklch(0.92 0.1 ${60 + i * 70}), oklch(0.8 0.13 ${100 + i * 70}))`,
+                  }}
+                />
+                <div className="mt-3 h-2.5 w-3/4 rounded-full bg-muted" />
+                <div className="mt-2 h-2.5 w-1/2 rounded-full bg-muted" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="how" className="mx-auto max-w-5xl px-5 py-16">
+        <Reveal>
+          <h2 className="lowkey text-center text-3xl font-extrabold md:text-4xl">two worlds, zero overlap</h2>
+        </Reveal>
+        <div className="mt-10 grid gap-4 md:grid-cols-2">
+          {[
+            { band: "under 18", note: "only sees under 18 posts, profiles and chats" },
+            { band: "18+", note: "only sees 18+ posts, profiles and chats" },
+          ].map((b, i) => (
+            <Reveal key={b.band} delay={i * 150}>
+              <div className="rounded-[2rem] border border-border bg-card p-8 text-center shadow-sm">
+                <p className="text-6xl font-extrabold">{b.band}</p>
+                <p className="lowkey mt-3 text-muted-foreground">{b.note}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-5 pb-20">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((f, i) => (
+            <Reveal key={f.title} delay={(i % 3) * 120}>
+              <div className="h-full rounded-3xl bg-card p-6 shadow-sm transition-transform hover:-translate-y-1">
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-primary-soft">
+                  <f.icon className="size-5" />
+                </span>
+                <h3 className="lowkey mt-4 text-lg font-bold">{f.title}</h3>
+                <p className="lowkey mt-1 text-sm text-muted-foreground">{f.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-5 pb-24">
+        <Reveal>
+          <div className="rounded-[2.5rem] bg-primary px-6 py-14 text-center text-primary-foreground">
+            <h2 className="lowkey text-3xl font-extrabold md:text-5xl">ready to be lowkey?</h2>
+            <p className="lowkey mt-3 opacity-80">takes about two minutes. free, eu hosted, no ad trackers.</p>
+            <Link
+              to="/auth"
+              className="lowkey mt-7 inline-flex min-h-13 items-center rounded-full bg-foreground px-8 py-4 font-extrabold text-background transition-transform hover:scale-105"
+            >
+              make my account
+            </Link>
+          </div>
+        </Reveal>
+      </section>
+
+      <SiteFooter />
+    </div>
   );
 }

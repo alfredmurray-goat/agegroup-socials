@@ -24,8 +24,20 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as VideosRouteImport } from './routes/videos'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAdminRouteImport } from './routes/app.admin'
+import { Route as AppChatsRouteImport } from './routes/app.chats'
+import { Route as AppCreateRouteImport } from './routes/app.create'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppSavedRouteImport } from './routes/app.saved'
+import { Route as AppSearchRouteImport } from './routes/app.search'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppVideosRouteImport } from './routes/app.videos'
 import { Route as ChatIdRouteImport } from './routes/chat.$id'
 import { Route as UHandleRouteImport } from './routes/u.$handle'
+import { Route as AppChatIdRouteImport } from './routes/app.chat.$id'
+import { Route as AppUHandleRouteImport } from './routes/app.u.$handle'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -105,6 +117,56 @@ const VideosRoute = VideosRouteImport.update({
   path: '/videos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/app/admin',
+  path: '/app/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppChatsRoute = AppChatsRouteImport.update({
+  id: '/app/chats',
+  path: '/app/chats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppCreateRoute = AppCreateRouteImport.update({
+  id: '/app/create',
+  path: '/app/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/app/notifications',
+  path: '/app/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/app/profile',
+  path: '/app/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSavedRoute = AppSavedRouteImport.update({
+  id: '/app/saved',
+  path: '/app/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSearchRoute = AppSearchRouteImport.update({
+  id: '/app/search',
+  path: '/app/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/app/settings',
+  path: '/app/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppVideosRoute = AppVideosRouteImport.update({
+  id: '/app/videos',
+  path: '/app/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatIdRoute = ChatIdRouteImport.update({
   id: '/chat/$id',
   path: '/chat/$id',
@@ -113,6 +175,16 @@ const ChatIdRoute = ChatIdRouteImport.update({
 const UHandleRoute = UHandleRouteImport.update({
   id: '/u/$handle',
   path: '/u/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppChatIdRoute = AppChatIdRouteImport.update({
+  id: '/app/chat/$id',
+  path: '/app/chat/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppUHandleRoute = AppUHandleRouteImport.update({
+  id: '/app/u/$handle',
+  path: '/app/u/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
@@ -148,8 +220,20 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/chats': typeof AppChatsRoute
+  '/app/create': typeof AppCreateRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/saved': typeof AppSavedRoute
+  '/app/search': typeof AppSearchRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/videos': typeof AppVideosRoute
   '/chat/$id': typeof ChatIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/app/': typeof AppIndexRoute
+  '/app/chat/$id': typeof AppChatIdRoute
+  '/app/u/$handle': typeof AppUHandleRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -170,8 +254,20 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/chats': typeof AppChatsRoute
+  '/app/create': typeof AppCreateRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/saved': typeof AppSavedRoute
+  '/app/search': typeof AppSearchRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/videos': typeof AppVideosRoute
   '/chat/$id': typeof ChatIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/app': typeof AppIndexRoute
+  '/app/chat/$id': typeof AppChatIdRoute
+  '/app/u/$handle': typeof AppUHandleRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -193,8 +289,20 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify': typeof VerifyRoute
   '/videos': typeof VideosRoute
+  '/app/admin': typeof AppAdminRoute
+  '/app/chats': typeof AppChatsRoute
+  '/app/create': typeof AppCreateRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/saved': typeof AppSavedRoute
+  '/app/search': typeof AppSearchRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/videos': typeof AppVideosRoute
   '/chat/$id': typeof ChatIdRoute
   '/u/$handle': typeof UHandleRoute
+  '/app/': typeof AppIndexRoute
+  '/app/chat/$id': typeof AppChatIdRoute
+  '/app/u/$handle': typeof AppUHandleRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -217,8 +325,20 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/videos'
+    | '/app/admin'
+    | '/app/chats'
+    | '/app/create'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/saved'
+    | '/app/search'
+    | '/app/settings'
+    | '/app/videos'
     | '/chat/$id'
     | '/u/$handle'
+    | '/app/'
+    | '/app/chat/$id'
+    | '/app/u/$handle'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -239,8 +359,20 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/videos'
+    | '/app/admin'
+    | '/app/chats'
+    | '/app/create'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/saved'
+    | '/app/search'
+    | '/app/settings'
+    | '/app/videos'
     | '/chat/$id'
     | '/u/$handle'
+    | '/app'
+    | '/app/chat/$id'
+    | '/app/u/$handle'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -261,8 +393,20 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify'
     | '/videos'
+    | '/app/admin'
+    | '/app/chats'
+    | '/app/create'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/saved'
+    | '/app/search'
+    | '/app/settings'
+    | '/app/videos'
     | '/chat/$id'
     | '/u/$handle'
+    | '/app/'
+    | '/app/chat/$id'
+    | '/app/u/$handle'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -284,8 +428,20 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   VerifyRoute: typeof VerifyRoute
   VideosRoute: typeof VideosRoute
+  AppAdminRoute: typeof AppAdminRoute
+  AppChatsRoute: typeof AppChatsRoute
+  AppCreateRoute: typeof AppCreateRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppSavedRoute: typeof AppSavedRoute
+  AppSearchRoute: typeof AppSearchRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppVideosRoute: typeof AppVideosRoute
   ChatIdRoute: typeof ChatIdRoute
   UHandleRoute: typeof UHandleRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppChatIdRoute: typeof AppChatIdRoute
+  AppUHandleRoute: typeof AppUHandleRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -398,6 +554,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/app/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/chats': {
+      id: '/app/chats'
+      path: '/app/chats'
+      fullPath: '/app/chats'
+      preLoaderRoute: typeof AppChatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/create': {
+      id: '/app/create'
+      path: '/app/create'
+      fullPath: '/app/create'
+      preLoaderRoute: typeof AppCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/app/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/app/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/saved': {
+      id: '/app/saved'
+      path: '/app/saved'
+      fullPath: '/app/saved'
+      preLoaderRoute: typeof AppSavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/search': {
+      id: '/app/search'
+      path: '/app/search'
+      fullPath: '/app/search'
+      preLoaderRoute: typeof AppSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/app/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/videos': {
+      id: '/app/videos'
+      path: '/app/videos'
+      fullPath: '/app/videos'
+      preLoaderRoute: typeof AppVideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat/$id': {
       id: '/chat/$id'
       path: '/chat/$id'
@@ -410,6 +636,20 @@ declare module '@tanstack/react-router' {
       path: '/u/$handle'
       fullPath: '/u/$handle'
       preLoaderRoute: typeof UHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/chat/$id': {
+      id: '/app/chat/$id'
+      path: '/app/chat/$id'
+      fullPath: '/app/chat/$id'
+      preLoaderRoute: typeof AppChatIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/u/$handle': {
+      id: '/app/u/$handle'
+      path: '/app/u/$handle'
+      fullPath: '/app/u/$handle'
+      preLoaderRoute: typeof AppUHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/preview': {
@@ -452,8 +692,20 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   VerifyRoute: VerifyRoute,
   VideosRoute: VideosRoute,
+  AppAdminRoute: AppAdminRoute,
+  AppChatsRoute: AppChatsRoute,
+  AppCreateRoute: AppCreateRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppSavedRoute: AppSavedRoute,
+  AppSearchRoute: AppSearchRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppVideosRoute: AppVideosRoute,
   ChatIdRoute: ChatIdRoute,
   UHandleRoute: UHandleRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppChatIdRoute: AppChatIdRoute,
+  AppUHandleRoute: AppUHandleRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,

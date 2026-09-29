@@ -150,22 +150,28 @@ export type Database = {
           age_band: Database["public"]["Enums"]["age_band"]
           created_at: string
           id: string
+          is_group: boolean
           streak_count: number
           streak_last_day: string | null
+          title: string | null
         }
         Insert: {
           age_band: Database["public"]["Enums"]["age_band"]
           created_at?: string
           id?: string
+          is_group?: boolean
           streak_count?: number
           streak_last_day?: string | null
+          title?: string | null
         }
         Update: {
           age_band?: Database["public"]["Enums"]["age_band"]
           created_at?: string
           id?: string
+          is_group?: boolean
           streak_count?: number
           streak_last_day?: string | null
+          title?: string | null
         }
         Relationships: []
       }
@@ -464,9 +470,12 @@ export type Database = {
           allow_dms: string
           avatar_hue: number
           avatar_url: string | null
+          banned_at: string | null
           bio: string
+          birth_year: number | null
           bold_text: boolean
           city: string | null
+          claimed_band: Database["public"]["Enums"]["age_band"] | null
           content_pace: string
           created_at: string
           daily_limit_minutes: number
@@ -500,9 +509,12 @@ export type Database = {
           allow_dms?: string
           avatar_hue?: number
           avatar_url?: string | null
+          banned_at?: string | null
           bio?: string
+          birth_year?: number | null
           bold_text?: boolean
           city?: string | null
+          claimed_band?: Database["public"]["Enums"]["age_band"] | null
           content_pace?: string
           created_at?: string
           daily_limit_minutes?: number
@@ -536,9 +548,12 @@ export type Database = {
           allow_dms?: string
           avatar_hue?: number
           avatar_url?: string | null
+          banned_at?: string | null
           bio?: string
+          birth_year?: number | null
           bold_text?: boolean
           city?: string | null
+          claimed_band?: Database["public"]["Enums"]["age_band"] | null
           content_pace?: string
           created_at?: string
           daily_limit_minutes?: number
@@ -640,6 +655,10 @@ export type Database = {
         Returns: boolean
       }
       start_conversation: { Args: { _other: string }; Returns: string }
+      start_group: {
+        Args: { _members: string[]; _title: string }
+        Returns: string
+      }
     }
     Enums: {
       age_band: "under_18" | "adult"

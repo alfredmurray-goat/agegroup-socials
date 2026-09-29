@@ -114,7 +114,7 @@ export function LowkeyMark({ size = 32 }: { size?: number }) {
   return (
     <img
       src={logoAsset.url}
-      alt="lowkey social logo"
+      alt="lowkey_social logo"
       width={size}
       height={size}
       className="rounded-xl"
@@ -141,7 +141,7 @@ export const FEEDBACK_EMAIL = "alfredcasper1010@gmail.com";
 export function FeedbackLink({ className }: { className?: string }) {
   return (
     <a
-      href={`mailto:${FEEDBACK_EMAIL}?subject=lowkey social beta feedback`}
+      href={`mailto:${FEEDBACK_EMAIL}?subject=lowkey_social beta feedback`}
       className={cn("lowkey font-semibold underline underline-offset-2", className)}
     >
       {FEEDBACK_EMAIL}
@@ -179,32 +179,32 @@ export function SiteFooter() {
     <footer className="flex flex-col items-center gap-2 border-t border-border px-4 py-6 text-center">
       <LegalLinks className="justify-center" />
       <p className="lowkey text-[11px] text-muted-foreground">
-        lowkey social beta · eu hosted · feedback: <FeedbackLink className="text-[11px]" />
+        lowkey_social beta · eu hosted · find people your age · feedback: <FeedbackLink className="text-[11px]" />
       </p>
     </footer>
   );
 }
 
-export function TopBar({ title = "lowkey social" }: { title?: string }) {
+export function TopBar({ title = "lowkey_social" }: { title?: string }) {
   const { state, me } = useLowkey();
   const unread = state.notifications.filter((n) => !n.readAt && n.recipientId === me?.id).length;
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
-      <Link to="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-lg">
+      <Link to="/app" className="flex items-center gap-2">
         <LowkeyMark size={28} />
         <span className="lowkey text-lg leading-5 font-bold tracking-tight">{title}</span>
         <BetaTag />
       </Link>
       <div className="flex items-center gap-1">
         <Link
-          to="/saved"
+          to="/app/saved"
           aria-label="saved posts"
           className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
         >
           <Bookmark className="size-5" />
         </Link>
         <Link
-          to="/notifications"
+          to="/app/notifications"
           aria-label="notifications"
           className="relative rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
         >
@@ -216,7 +216,7 @@ export function TopBar({ title = "lowkey social" }: { title?: string }) {
           )}
         </Link>
         <Link
-          to="/search"
+          to="/app/search"
           aria-label="search"
           className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted"
         >
@@ -274,27 +274,27 @@ export function CookieBanner() {
 }
 
 const tabs = [
-  { to: "/", label: "home", icon: House },
-  { to: "/chats", label: "chats", icon: MessageCircle },
-  { to: "/create", label: "create", icon: Plus },
-  { to: "/videos", label: "videos", icon: Play },
-  { to: "/profile", label: "profile", icon: User },
+  { to: "/app", label: "home", icon: House },
+  { to: "/app/chats", label: "chats", icon: MessageCircle },
+  { to: "/app/create", label: "create", icon: Plus },
+  { to: "/app/videos", label: "videos", icon: Play },
+  { to: "/app/profile", label: "profile", icon: User },
 ] as const;
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-      <ul className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
+    <nav className="fixed inset-x-0 bottom-0 z-30 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+      <ul className="mx-3 flex max-w-lg items-center justify-around rounded-full border border-border bg-card/95 px-1 py-1.5 shadow-lg backdrop-blur sm:mx-auto">
         {tabs.map(({ to, label, icon: Icon }) => {
-          const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
+          const active = to === "/app" ? pathname === "/app" || pathname === "/app/" : pathname.startsWith(to);
           return (
             <li key={to}>
               <Link
                 to={to}
                 aria-label={label}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 rounded-2xl px-3 py-1.5 transition-colors",
+                  "flex flex-col items-center gap-0.5 rounded-2xl px-2.5 py-1 transition-colors",
                   active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -328,7 +328,7 @@ function DailyLimitReached() {
         you hit your {me?.dailyLimitMinutes} minute daily limit. lowkey is still here tomorrow.
       </p>
       <Link
-        to="/settings"
+        to="/app/settings"
         className="lowkey rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
       >
         change my limit
@@ -386,10 +386,21 @@ export function AppScreen({
     return <div className="min-h-screen bg-background" />;
   }
 
-if (usage.reached && !overLimit) return <DailyLimitReached />;
+  if (me.bannedAt) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-8 text-center">
+        <h1 className="lowkey text-2xl font-bold">your account is paused</h1>
+        <p className="lowkey text-sm text-muted-foreground">
+          a moderator paused this account. think that&apos;s wrong? email <FeedbackLink />.
+        </p>
+      </div>
+    );
+  }
+
+  if (usage.reached && !overLimit) return <DailyLimitReached />;
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-background">
+    <div className="mx-auto flex min-h-screen w-full max-w-lg min-w-0 flex-col overflow-x-clip bg-background">
       {chrome && <TopBar {...(title ? { title } : {})} />}
       <a
         href="#main"

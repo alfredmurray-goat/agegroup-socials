@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, ScanFace, CameraOff, RefreshCcw, Camera } from "lucide-react";
 import { BetaTag, FeedbackLink, LowkeyMark } from "@/components/lowkey/shell";
 import { useLowkey } from "@/lib/lowkey/store";
+import { toast } from "sonner";
 import {
   ADULT_MIN,
   UNDER_18_MAX,
@@ -18,13 +19,13 @@ import type { AgeBand } from "@/lib/lowkey/types";
 export const Route = createFileRoute("/verify")({
   head: () => ({
     meta: [
-      { title: "verify your age — lowkey social" },
+      { title: "verify your age — lowkey_social" },
       {
         name: "description",
         content:
           "free on-device face age check with any camera: phone, laptop webcam or usb webcam. under 18 sees under 18, 18+ sees 18+.",
       },
-      { property: "og:title", content: "verify your age — lowkey social" },
+      { property: "og:title", content: "verify your age — lowkey_social" },
       {
         property: "og:description",
         content: "age-verified feeds: under 18 sees under 18, 18+ sees 18+.",
@@ -35,7 +36,9 @@ export const Route = createFileRoute("/verify")({
 });
 
 function VerifyPage() {
-  const { me, verifyAge, recordConsent } = useLowkey();
+  const { me, verifyAge, recordConsent, setClaimedBirthday } = useLowkey();
+  const [birthday, setBirthday] = useState("");
+  const [bdBusy, setBdBusy] = useState(false);
   const navigate = useNavigate();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -61,7 +64,7 @@ function VerifyPage() {
       return;
     }
     if (me.verificationStatus === "verified" && me.ageBand) {
-      void navigate({ to: "/", replace: true });
+      void navigate({ to: "/app", replace: true });
     }
   }, [me, navigate]);
 
@@ -121,10 +124,62 @@ function VerifyPage() {
     await verifyAge(band, "face_scan");
     stop();
     setSaving(false);
-    void navigate({ to: "/", replace: true });
+    void navigate({ to: "/app", replace: true });
   };
 
-  const decided = outcome?.kind === "under_18" || outcome?.kind === "adult";
+  const claimed = me?.claimedBand ?? null;
+  const scanned = outcome?.kind === "under_18" || outcome?.kind === "adult";
+  const decided = scanned && outcome?.kind === claimed;
+  const mismatch = scanned && outcome?.kind !== claimed;
+
+  const saveBirthday = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBdBusy(true);
+    const res = await setClaimedBirthday(birthday);
+    setBdBusy(false);
+    if (!res.ok) toast.error(res.error ?? "that didn't work");
+  };
+
+  if (me && !claimed) {
+    return (
+      <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-6 px-6 py-10">
+        <div className="flex items-center gap-3">
+          <LowkeyMark size={48} />
+          <BetaTag />
+          <span className="lowkey ml-auto text-xs font-semibold text-muted-foreground">step 1 of 2</span>
+        </div>
+        <div>
+          <h1 className="lowkey text-3xl leading-tight font-extrabold">when&apos;s your birthday?</h1>
+          <p className="lowkey mt-3 text-sm text-muted-foreground">
+            next we scan your face to check it matches. we only keep your birth year and age band,
+            never the full date.
+          </p>
+        </div>
+        <form onSubmit={saveBirthday} className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-5">
+          <label htmlFor="bday" className="lowkey text-xs font-semibold text-muted-foreground">birthday</label>
+          <input
+            id="bday"
+            type="date"
+            required
+            value={birthday}
+            max={new Date().toISOString().slice(0, 10)}
+            onChange={(e) => setBirthday(e.target.value)}
+            className="rounded-2xl border border-input bg-background px-4 py-3 text-base"
+          />
+          <button
+            type="submit"
+            disabled={bdBusy || !birthday}
+            className="lowkey min-h-12 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground disabled:opacity-60"
+          >
+            {bdBusy ? "saving..." : "next: face scan"}
+          </button>
+        </form>
+        <p className="lowkey text-xs text-muted-foreground">
+          you can&apos;t change this later. typed the wrong year? tell us at <FeedbackLink />.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-6 px-6 py-10">
@@ -134,7 +189,8 @@ function VerifyPage() {
       </div>
 
       <div>
-        <h1 className="lowkey text-3xl leading-tight font-extrabold">get your age checked</h1>
+        <p className="lowkey text-xs font-semibold text-muted-foreground">step 2 of 2</p>
+        <h1 className="lowkey text-3xl leading-tight font-extrabold">does your face match?</h1>
         <p className="lowkey mt-3 text-sm text-muted-foreground">
           nobody gets in on trust — no typing a birthday. a face model runs on your own device and
           decides your band. under 18 can only see under 18, 18+ can only see 18+, and you
@@ -213,6 +269,13 @@ function VerifyPage() {
                   on borderline ages — scan again, ideally in brighter light.
                 </p>
               )}
+              {mismatch && (
+                <p className="lowkey text-sm text-destructive">
+                  your birthday says {claimed === "under_18" ? "under 18" : "18+"} but the scan
+                  put you at about {Math.round(outcome.age)}. those don&apos;t match — try again in
+                  better light.
+                </p>
+              )}
               {decided && (
                 <>
                   <p className="lowkey text-sm">
@@ -238,7 +301,7 @@ function VerifyPage() {
               >
                 <RefreshCcw className="size-4" /> scan again
               </button>
-              {!decided && attempts >= 3 && (
+              {!decided && attempts >= 3 && claimed !== "under_18" && (
                 <button
                   onClick={() => void finish("under_18")}
                   disabled={saving}
@@ -289,7 +352,7 @@ function VerifyPage() {
       <p className="lowkey text-xs leading-relaxed text-muted-foreground">
         the check uses a free open-source model in your browser. it only accepts a clear result (
         {UNDER_18_MAX} or under, or {ADULT_MIN} or over) — anything borderline has to be rescanned.
-        no biometric data is stored or sent anywhere. lowkey social is in beta, so wrong calls
+        no biometric data is stored or sent anywhere. lowkey_social is in beta, so wrong calls
         happen: tell me at <FeedbackLink />.
       </p>
     </div>

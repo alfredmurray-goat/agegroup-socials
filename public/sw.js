@@ -1,4 +1,4 @@
-/* lowkey social — minimal offline-first service worker (prod only) */
+/* lowkey_social — minimal offline-first service worker (prod only) */
 const CACHE = "lowkey-v1";
 const PRECACHE = ["/", "/manifest.webmanifest", "/icons/icon-192.png", "/icons/icon-512.png"];
 

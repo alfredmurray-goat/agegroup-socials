@@ -44,6 +44,10 @@ textScale: TextScale;
   emailLikes: boolean;
   emailComments: boolean;
   emailDms: boolean;
+  birthYear: number | null;
+  /** band from the birthday the user typed; the face scan has to agree */
+  claimedBand: AgeBand | null;
+  bannedAt: string | null;
 }
 
 export type Audience = "everyone" | "followers" | "nobody";
@@ -83,6 +87,8 @@ export interface Conversation {
   id: string;
   memberIds: string[];
   ageBand: AgeBand;
+  isGroup: boolean;
+  title: string | null;
 }
 
 export interface Message {
