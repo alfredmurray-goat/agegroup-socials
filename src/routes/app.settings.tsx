@@ -165,6 +165,7 @@ function SettingsPage() {
     changePassword,
     signOutEverywhere,
     importFromInstagram,
+    isAdmin,
   } = useLowkey();
   const [readAloud, setReadAloudState] = useState(() => readAloudEnabled());
   const [speechRate, setSpeechRate] = useState<SpeechRate>(() => readAloudRate());
@@ -669,6 +670,15 @@ function SettingsPage() {
             </button>
           )}
         </Section>
+
+        {isAdmin && (
+          <Link
+            to="/app/admin"
+            className="lowkey flex min-h-12 items-center justify-center rounded-full bg-foreground text-sm font-bold text-background"
+          >
+            open admin dashboard
+          </Link>
+        )}
 
         <button
           onClick={() => {
