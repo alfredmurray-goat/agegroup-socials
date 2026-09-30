@@ -10,6 +10,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { parseInstagramExport } from "./instagram";
 import { prepareImage } from "./image";
 import {
@@ -653,7 +654,7 @@ title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
           song_title: input.songTitle ?? null,
           song_artist: input.songArtist ?? null,
           audio_path: input.audioPath ?? null,
-          edit_manifest: input.editManifest ?? {},
+          edit_manifest: (input.editManifest ?? {}) as Json,
           // band is stamped from the author, and rls checks it again
           age_band: author.ageBand,
         })
