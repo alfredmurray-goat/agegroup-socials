@@ -35,6 +35,13 @@
 - mobile navigation converted to a flush safe-area dock; chat composer aligned above it
 - create/upload experience refreshed with clearer hierarchy and calmer controls
 
+## in progress (approved plan 2026-09-30)
+- replace create page with full-screen multi-step media studio
+- advanced photo editing and multi-clip video editing
+- built-in and user-uploaded music with song attribution
+- account-synced private upload drafts
+- full-screen photo viewer from the home feed
+
 ## open
 - own supabase project instead of managed backend (workspace-admin action, blocked)
 
