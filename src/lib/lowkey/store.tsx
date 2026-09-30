@@ -315,7 +315,7 @@ if (!mineRow) {
 const profileRows = (profilesRes.data ?? []) as Row[];
     const postRows = (postsRes.data ?? []) as Row[];
     const messageRows = (messagesRes.data ?? []) as Row[];
-    const [avatarUrls, mediaUrls, dmUrls] = await Promise.all([
+    const [avatarUrls, mediaUrls, audioUrls, dmUrls] = await Promise.all([
       signPaths(
         "avatars",
         profileRows.map((r) => (r['avatar_url'] as string | null) ?? null),
@@ -323,6 +323,10 @@ const profileRows = (profilesRes.data ?? []) as Row[];
       signPaths(
         "media",
         postRows.map((r) => (r['media_url'] as string | null) ?? null),
+      ),
+      signPaths(
+        "media",
+        postRows.map((r) => (r['audio_path'] as string | null) ?? null),
       ),
       // photos sent in chats live in the same private media bucket
       signPaths(
@@ -360,7 +364,7 @@ posts: postRows.map((r) => ({
         caption: (r['caption'] as string) ?? "",
         posterHue: (r['poster_hue'] as number) ?? 60,
         mediaUrl: resolve(mediaUrls, (r['media_url'] as string | null) ?? null),
-        audioUrl: null,
+        audioUrl: resolve(audioUrls, (r['audio_path'] as string | null) ?? null),
         songTitle: (r['song_title'] as string | null) ?? null,
         songArtist: (r['song_artist'] as string | null) ?? null,
         sourcePostId: (r['source_post_id'] as string | null) ?? null,
