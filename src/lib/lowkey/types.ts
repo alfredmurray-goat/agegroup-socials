@@ -67,12 +67,28 @@ export interface Post {
   caption: string;
   posterHue: number;
   mediaUrl: string | null;
+  audioUrl: string | null;
+  songTitle: string | null;
+  songArtist: string | null;
   /** if this is a repost, the original post id */
   sourcePostId?: string | null;
   taggedHandle: string | null;
   topic: string | null;
   ageBand: AgeBand;
   createdAt: string;
+}
+
+export interface PostDraft {
+  id: string;
+  title: string;
+  caption: string;
+  topic: string | null;
+  kind: "post" | "video";
+  editDocument: Record<string, unknown>;
+  previewUrl: string | null;
+  previewPath: string | null;
+  sourcePaths: string[];
+  updatedAt: string;
 }
 
 export interface Comment {
