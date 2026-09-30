@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BadgeCheck, Bookmark, Heart, MessageSquare, Play, Send, Volume2, VolumeX } from "lucide-react";
+import { BadgeCheck, Bookmark, Heart, MessageSquare, Music2, Play, Send, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AppScreen, Poster } from "@/components/lowkey/shell";
 import { CommentsSheet } from "@/components/lowkey/comments";
@@ -179,6 +179,12 @@ function VideoCard({
             )}
           </div>
           {post.caption && <p className="lowkey mt-1 text-xs">{post.caption}</p>}
+          {post.songTitle && (
+            <div className="lowkey mt-2 text-xs">
+              <p className="flex items-center gap-1.5"><Music2 className="size-3.5" />song playing is: <strong>{post.songTitle} — {post.songArtist}</strong></p>
+              {post.audioUrl && <audio src={post.audioUrl} controls loop className="mt-2 h-8 w-full" />}
+            </div>
+          )}
         </div>
       </div>
     </section>

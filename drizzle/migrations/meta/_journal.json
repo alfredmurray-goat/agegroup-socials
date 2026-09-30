@@ -92,6 +92,13 @@
       "when": 1790691776361,
       "tag": "0012_banned_users_lose_band",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790744091670,
+      "tag": "0013_media_studio_foundation",
+      "breakpoints": true
     }
   ]
 }

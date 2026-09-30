@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flag, Heart, MessageSquare, MoreHorizontal, Pencil, Send, Bookmark, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Flag, Heart, MessageSquare, MoreHorizontal, Pencil, Send, Bookmark, Trash2, X, Music2, Maximize2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { AppScreen, Avatar, Poster } from "@/components/lowkey/shell";
 import { CommentsSheet } from "@/components/lowkey/comments";
 import { useBandPosts, useBandProfiles, useLowkey } from "@/lib/lowkey/store";
 import type { Post } from "@/lib/lowkey/types";
+import { Button } from "@/components/ui/button";
 
 const REPORT_REASONS = ["spam", "harassment", "nsfw", "underage", "hateful", "other"];
 
@@ -113,6 +114,7 @@ function FeedCard({ post }: { post: Post }) {
   const [reporting, setReporting] = useState(false);
   const [editTitle, setEditTitle] = useState(post.title ?? "");
   const [editCaption, setEditCaption] = useState(post.caption);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   if (!author) return null;
 
@@ -272,7 +274,24 @@ function FeedCard({ post }: { post: Post }) {
             )}
             {post.mediaUrl ? (
               <>
-                <Poster hue={post.posterHue} caption={post.caption} mediaUrl={post.mediaUrl} />
+                <button
+                  type="button"
+                  onClick={() => setPhotoOpen(true)}
+                  className="group relative block w-full overflow-hidden rounded-2xl"
+                  aria-label="open photo full screen"
+                >
+                  <Poster hue={post.posterHue} caption={post.caption} mediaUrl={post.mediaUrl} />
+                  <span className="absolute right-3 bottom-3 flex size-9 items-center justify-center rounded-full bg-background/85 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                    <Maximize2 className="size-4" />
+                  </span>
+                </button>
+                {post.songTitle && (
+                  <div className="lowkey mt-2 flex items-center gap-2 rounded-lg bg-primary-soft px-3 py-2 text-xs">
+                    <Music2 className="size-3.5 shrink-0" />
+                    <span className="truncate">song playing is: <strong>{post.songTitle} — {post.songArtist}</strong></span>
+                    {post.audioUrl && <audio src={post.audioUrl} controls className="ml-auto h-8 max-w-32" />}
+                  </div>
+                )}
                 {/* text + image: the caption belongs under the picture, not swallowed by it */}
                 {post.caption && post.caption !== "no caption" && (
                   <p className="lowkey mt-2 text-sm leading-snug break-words">{post.caption}</p>
@@ -314,7 +333,62 @@ function FeedCard({ post }: { post: Post }) {
       )}
 
       {openComments && <CommentsSheet postId={post.id} onClose={() => setOpenComments(false)} />}
+      {photoOpen && post.mediaUrl && (
+        <FullscreenPhoto
+          post={post}
+          authorHandle={author.handle}
+          liked={liked}
+          saved={saved}
+          likeCount={likes.length}
+          onClose={() => setPhotoOpen(false)}
+          onLike={() => void toggleLike(post.id)}
+          onSave={() => void toggleBookmark(post.id)}
+          onComments={() => { setPhotoOpen(false); setOpenComments(true); }}
+        />
+      )}
     </article>
+  );
+}
+
+function FullscreenPhoto({ post, authorHandle, liked, saved, likeCount, onClose, onLike, onSave, onComments }: { post: Post; authorHandle: string; liked: boolean; saved: boolean; likeCount: number; onClose: () => void; onLike: () => void; onSave: () => void; onComments: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const startY = useRef<number | null>(null);
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panelRef.current?.focus();
+    const key = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", key);
+    return () => { document.body.style.overflow = previous; window.removeEventListener("keydown", key); };
+  }, [onClose]);
+  return (
+    <div
+      className="fixed inset-0 z-[80] flex flex-col bg-foreground text-background"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`photo by ${authorHandle}`}
+      tabIndex={-1}
+      ref={panelRef}
+      onTouchStart={(event) => { startY.current = event.touches[0]?.clientY ?? null; }}
+      onTouchEnd={(event) => { const end = event.changedTouches[0]?.clientY; if (startY.current !== null && end && end - startY.current > 90) onClose(); }}
+    >
+      <div className="flex h-14 shrink-0 items-center justify-between px-3">
+        <p className="lowkey text-sm font-bold">@{authorHandle}</p>
+        <Button size="icon" variant="secondary" onClick={onClose} aria-label="close full-screen photo"><X /></Button>
+      </div>
+      <button type="button" className="min-h-0 flex-1" onClick={onClose} aria-label="close photo">
+        <img src={post.mediaUrl ?? ""} alt={post.caption} className="size-full object-contain" />
+      </button>
+      <div className="shrink-0 border-t border-background/20 bg-foreground px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        {post.caption && post.caption !== "no caption" && <p className="lowkey mb-3 text-sm">{post.caption}</p>}
+        {post.songTitle && <div className="lowkey mb-3 text-xs"><p className="flex items-center gap-2"><Music2 className="size-4"/>song playing is: <strong>{post.songTitle} — {post.songArtist}</strong></p>{post.audioUrl && <audio src={post.audioUrl} controls className="mt-2 h-8 w-full" />}</div>}
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" onClick={onLike}><Heart className={liked ? "fill-primary text-primary" : ""}/>{likeCount}</Button>
+          <Button variant="secondary" onClick={onComments}><MessageSquare/>comments</Button>
+          <Button variant="secondary" size="icon" onClick={onSave} aria-label={saved ? "remove bookmark" : "save photo"}><Bookmark className={saved ? "fill-primary text-primary" : ""}/></Button>
+        </div>
+      </div>
+    </div>
   );
 }
 

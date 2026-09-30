@@ -10,6 +10,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { parseInstagramExport } from "./instagram";
 import { prepareImage } from "./image";
 import {
@@ -96,6 +97,10 @@ createPost: (input: {
     caption: string;
     mediaUrl: string | null;
     topic?: string | null;
+    songTitle?: string | null;
+    songArtist?: string | null;
+    audioPath?: string | null;
+    editManifest?: Record<string, unknown>;
   }) => Promise<string | null>;
   toggleRepost: (postId: string) => Promise<void>;
   toggleLike: (postId: string) => Promise<void>;
@@ -311,7 +316,7 @@ if (!mineRow) {
 const profileRows = (profilesRes.data ?? []) as Row[];
     const postRows = (postsRes.data ?? []) as Row[];
     const messageRows = (messagesRes.data ?? []) as Row[];
-    const [avatarUrls, mediaUrls, dmUrls] = await Promise.all([
+    const [avatarUrls, mediaUrls, audioUrls, dmUrls] = await Promise.all([
       signPaths(
         "avatars",
         profileRows.map((r) => (r['avatar_url'] as string | null) ?? null),
@@ -319,6 +324,10 @@ const profileRows = (profilesRes.data ?? []) as Row[];
       signPaths(
         "media",
         postRows.map((r) => (r['media_url'] as string | null) ?? null),
+      ),
+      signPaths(
+        "media",
+        postRows.map((r) => (r['audio_path'] as string | null) ?? null),
       ),
       // photos sent in chats live in the same private media bucket
       signPaths(
@@ -356,6 +365,9 @@ posts: postRows.map((r) => ({
         caption: (r['caption'] as string) ?? "",
         posterHue: (r['poster_hue'] as number) ?? 60,
         mediaUrl: resolve(mediaUrls, (r['media_url'] as string | null) ?? null),
+        audioUrl: resolve(audioUrls, (r['audio_path'] as string | null) ?? null),
+        songTitle: (r['song_title'] as string | null) ?? null,
+        songArtist: (r['song_artist'] as string | null) ?? null,
         sourcePostId: (r['source_post_id'] as string | null) ?? null,
         taggedHandle: (r['tagged_handle'] as string | null) ?? null,
         topic: (r['topic'] as string | null) ?? null,
@@ -622,6 +634,10 @@ async (input: {
       caption: string;
       mediaUrl: string | null;
       topic?: string | null;
+      songTitle?: string | null;
+      songArtist?: string | null;
+      audioPath?: string | null;
+      editManifest?: Record<string, unknown>;
     }) => {
       const author = me;
       if (!author?.ageBand || author.verificationStatus !== "verified") return null;
@@ -635,6 +651,10 @@ title: input.title?.trim() ? input.title.trim().toLowerCase() : null,
           media_url: input.mediaUrl,
           poster_hue: Math.floor(Math.random() * 360),
           topic: input.topic ?? null,
+          song_title: input.songTitle ?? null,
+          song_artist: input.songArtist ?? null,
+          audio_path: input.audioPath ?? null,
+          edit_manifest: (input.editManifest ?? {}) as Json,
           // band is stamped from the author, and rls checks it again
           age_band: author.ageBand,
         })

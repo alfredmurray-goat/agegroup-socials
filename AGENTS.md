@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 - App screens live under /app/* (landing at /); old top-level paths are redirect stubs — keeps shared links working.
 - The mobile app uses one full-width fixed bottom dock whose background includes the device safe area — prevents detached bars and content overlap.
+- Browser media edits render client-side through Canvas/WebCodecs-compatible APIs; private drafts store source paths plus non-destructive edit documents — keeps originals private and server runtime portable.

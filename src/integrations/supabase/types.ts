@@ -276,6 +276,56 @@ export type Database = {
           },
         ]
       }
+      music_tracks: {
+        Row: {
+          artist: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          is_catalog: boolean
+          license_name: string
+          license_url: string | null
+          owner_id: string | null
+          public_url: string | null
+          storage_path: string | null
+          title: string
+        }
+        Insert: {
+          artist: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_catalog?: boolean
+          license_name: string
+          license_url?: string | null
+          owner_id?: string | null
+          public_url?: string | null
+          storage_path?: string | null
+          title: string
+        }
+        Update: {
+          artist?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_catalog?: boolean
+          license_name?: string
+          license_url?: string | null
+          owner_id?: string | null
+          public_url?: string | null
+          storage_path?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "music_tracks_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string
@@ -367,6 +417,56 @@ export type Database = {
           },
         ]
       }
+      post_drafts: {
+        Row: {
+          author_id: string
+          caption: string
+          created_at: string
+          edit_document: Json
+          id: string
+          kind: string
+          preview_path: string | null
+          source_paths: string[]
+          title: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          caption?: string
+          created_at?: string
+          edit_document?: Json
+          id?: string
+          kind?: string
+          preview_path?: string | null
+          source_paths?: string[]
+          title?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          caption?: string
+          created_at?: string
+          edit_document?: Json
+          id?: string
+          kind?: string
+          preview_path?: string | null
+          source_paths?: string[]
+          title?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_drafts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_likes: {
         Row: {
           created_at: string
@@ -400,16 +500,69 @@ export type Database = {
           },
         ]
       }
+      post_media: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          edit_manifest: Json
+          height: number | null
+          id: string
+          media_kind: string
+          post_id: string
+          sort_order: number
+          storage_path: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          edit_manifest?: Json
+          height?: number | null
+          id?: string
+          media_kind: string
+          post_id: string
+          sort_order?: number
+          storage_path: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          edit_manifest?: Json
+          height?: number | null
+          id?: string
+          media_kind?: string
+          post_id?: string
+          sort_order?: number
+          storage_path?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_media_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           age_band: Database["public"]["Enums"]["age_band"]
+          audio_path: string | null
           author_id: string
           caption: string
+          cover_path: string | null
           created_at: string
+          edit_manifest: Json
           id: string
           kind: string
           media_url: string | null
+          music_track_id: string | null
           poster_hue: number
+          song_artist: string | null
+          song_title: string | null
           source: string
           source_post_id: string | null
           tagged_handle: string | null
@@ -418,13 +571,19 @@ export type Database = {
         }
         Insert: {
           age_band: Database["public"]["Enums"]["age_band"]
+          audio_path?: string | null
           author_id: string
           caption?: string
+          cover_path?: string | null
           created_at?: string
+          edit_manifest?: Json
           id?: string
           kind?: string
           media_url?: string | null
+          music_track_id?: string | null
           poster_hue?: number
+          song_artist?: string | null
+          song_title?: string | null
           source?: string
           source_post_id?: string | null
           tagged_handle?: string | null
@@ -433,13 +592,19 @@ export type Database = {
         }
         Update: {
           age_band?: Database["public"]["Enums"]["age_band"]
+          audio_path?: string | null
           author_id?: string
           caption?: string
+          cover_path?: string | null
           created_at?: string
+          edit_manifest?: Json
           id?: string
           kind?: string
           media_url?: string | null
+          music_track_id?: string | null
           poster_hue?: number
+          song_artist?: string | null
+          song_title?: string | null
           source?: string
           source_post_id?: string | null
           tagged_handle?: string | null
@@ -452,6 +617,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_music_track_id_fkey"
+            columns: ["music_track_id"]
+            isOneToOne: false
+            referencedRelation: "music_tracks"
             referencedColumns: ["id"]
           },
           {
