@@ -381,7 +381,7 @@ function FullscreenPhoto({ post, authorHandle, liked, saved, likeCount, onClose,
       </button>
       <div className="shrink-0 border-t border-background/20 bg-foreground px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {post.caption && post.caption !== "no caption" && <p className="lowkey mb-3 text-sm">{post.caption}</p>}
-        {post.songTitle && <p className="lowkey mb-3 flex items-center gap-2 text-xs"><Music2 className="size-4"/>song playing is: <strong>{post.songTitle} — {post.songArtist}</strong></p>}
+        {post.songTitle && <div className="lowkey mb-3 text-xs"><p className="flex items-center gap-2"><Music2 className="size-4"/>song playing is: <strong>{post.songTitle} — {post.songArtist}</strong></p>{post.audioUrl && <audio src={post.audioUrl} controls className="mt-2 h-8 w-full" />}</div>}
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={onLike}><Heart className={liked ? "fill-primary text-primary" : ""}/>{likeCount}</Button>
           <Button variant="secondary" onClick={onComments}><MessageSquare/>comments</Button>

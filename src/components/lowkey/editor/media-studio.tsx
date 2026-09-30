@@ -97,10 +97,28 @@ export function MediaStudio() {
   const deleteDraft = async (id: string) => { await supabase.from("post_drafts").delete().eq("id", id); await loadDrafts(); };
   const resumeDraft = async (draft: DraftRow) => {
     setDraftId(draft.id); setTitle(draft.title); setCaption(draft.caption);
-    const doc = draft.edit_document as { adjustments?: MediaAdjustments };
+    const doc = draft.edit_document as { adjustments?: MediaAdjustments; clips?: Array<Pick<StudioClip, "name" | "kind" | "duration" | "trimStart" | "trimEnd">>; song?: Omit<StudioSong, "id" | "file"> | null };
     if (doc.adjustments) setAdjustments(doc.adjustments);
-    toast("draft details restored — choose the source files to keep editing");
-    setStep("start");
+    const { data } = await supabase.storage.from("media").createSignedUrls(draft.source_paths, 60 * 60);
+    const restored = await Promise.all((data ?? []).map(async (item, index): Promise<StudioClip | null> => {
+      if (!item.signedUrl) return null;
+      const saved = doc.clips?.[index];
+      const response = await fetch(item.signedUrl);
+      if (!response.ok) return null;
+      const blob = await response.blob();
+      const file = new File([blob], saved?.name ?? `draft-${index + 1}`, { type: blob.type });
+      return {
+        id: crypto.randomUUID(), file, url: URL.createObjectURL(file),
+        kind: saved?.kind ?? (isVideoFile(file) ? "video" : "image"),
+        name: file.name, duration: saved?.duration ?? 0,
+        trimStart: saved?.trimStart ?? 0, trimEnd: saved?.trimEnd ?? saved?.duration ?? 1,
+      };
+    }));
+    const ready = restored.filter((item): item is StudioClip => item !== null);
+    setClips(ready); setActive(0);
+    if (doc.song) setSong({ ...doc.song, id: crypto.randomUUID() });
+    toast.success("draft restored");
+    setStep(ready.length ? "edit" : "details");
   };
 
   const uploadSong = async (file: File | undefined) => {
@@ -127,7 +145,7 @@ export function MediaStudio() {
         if (!uploaded) throw new Error("upload failed");
         mediaPath = uploaded.path;
       }
-      const id = await createPost({ kind, title: title || null, caption: caption.trim() || "no caption", mediaUrl: mediaPath, topic, songTitle: song?.title ?? null, songArtist: song?.artist ?? null, audioPath: kind === "post" ? song?.storagePath ?? null : null, editManifest: adjustments });
+      const id = await createPost({ kind, title: title || null, caption: caption.trim() || "no caption", mediaUrl: mediaPath, topic, songTitle: song?.title ?? null, songArtist: song?.artist ?? null, audioPath: song?.storagePath ?? song?.url ?? null, editManifest: adjustments });
       if (!id) throw new Error("verify your age before posting");
       if (draftId) await supabase.from("post_drafts").delete().eq("id", draftId);
       toast.success("posted");

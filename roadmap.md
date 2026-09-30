@@ -35,7 +35,7 @@
 - mobile navigation converted to a flush safe-area dock; chat composer aligned above it
 - create/upload experience refreshed with clearer hierarchy and calmer controls
 
-## in progress (approved plan 2026-09-30)
+## done (plan 2026-09-30)
 - replace create page with full-screen multi-step media studio
 - advanced photo editing and multi-clip video editing
 - built-in and user-uploaded music with song attribution
