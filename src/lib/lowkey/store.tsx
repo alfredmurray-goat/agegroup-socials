@@ -85,6 +85,9 @@ interface LowkeyApi {
   signUp: (email: string, password: string) => Promise<Result>;
   setClaimedBirthday: (birthday: string) => Promise<Result>;
   startGroup: (title: string, memberIds: string[]) => Promise<string | null>;
+  addGroupMembers: (conversationId: string, memberIds: string[]) => Promise<boolean>;
+  updateGroup: (conversationId: string, title: string, emoji: string | null) => Promise<boolean>;
+  removeGroupMember: (conversationId: string, profileId: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   createProfile: (draft: ProfileDraft) => Promise<Result>;
   updateProfile: (prefs: OnboardingPrefs) => Promise<Result>;
@@ -362,6 +365,8 @@ posts: postRows.map((r) => ({
         authorId: r['author_id'] as string,
         kind: (r['kind'] as PostKind) ?? "post",
         title: (r['title'] as string | null) ?? null,
+        createdBy: (r['created_by'] as string | null) ?? null,
+        emoji: (r['emoji'] as string | null) ?? null,
         caption: (r['caption'] as string) ?? "",
         posterHue: (r['poster_hue'] as number) ?? 60,
         mediaUrl: resolve(mediaUrls, (r['media_url'] as string | null) ?? null),
@@ -624,6 +629,19 @@ return {
     },
     [refresh],
   );
+
+  const groupRpc = useCallback(
+    async (fn: "add_group_members" | "update_group" | "remove_group_member", args: Record<string, unknown>) => {
+      const { error } = await supabase.rpc(fn as never, args as never);
+      if (error) { toast.error(error.message.toLowerCase()); return false; }
+      await refresh();
+      return true;
+    },
+    [refresh],
+  );
+  const addGroupMembers = useCallback((c: string, m: string[]) => groupRpc("add_group_members", { _conv: c, _members: m }), [groupRpc]);
+  const updateGroup = useCallback((c: string, t: string, e: string | null) => groupRpc("update_group", { _conv: c, _title: t, _emoji: e ?? "" }), [groupRpc]);
+  const removeGroupMember = useCallback((c: string, p: string) => groupRpc("remove_group_member", { _conv: c, _member: p }), [groupRpc]);
 
   /* ---------- content ---------- */
 
@@ -1343,6 +1361,9 @@ needsProfile: needsProfile && Boolean(authUserId),
       signUp,
       setClaimedBirthday,
       startGroup,
+      addGroupMembers,
+      updateGroup,
+      removeGroupMember,
       signOut,
       createProfile,
       updateProfile,
@@ -1389,6 +1410,9 @@ needsProfile,
       signUp,
       setClaimedBirthday,
       startGroup,
+      addGroupMembers,
+      updateGroup,
+      removeGroupMember,
       signOut,
       createProfile,
       updateProfile,
