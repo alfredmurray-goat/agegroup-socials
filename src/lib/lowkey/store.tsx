@@ -169,7 +169,7 @@ async function signPaths(bucket: string, paths: (string | null)[]) {
   const uniq = [
     ...new Set(
       paths.filter(
-        (p): p is string => Boolean(p) && !p!.startsWith("http") && !p!.startsWith("blob"),
+        (p): p is string => Boolean(p) && !p!.startsWith("http") && !p!.startsWith("blob") && !p!.startsWith("/"),
       ),
     ),
   ];
