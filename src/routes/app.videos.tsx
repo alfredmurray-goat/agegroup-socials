@@ -196,7 +196,7 @@ function VideoCard({
           {post.songTitle && (
             <div className="lowkey mt-2 text-xs">
               <p className="flex items-center gap-1.5"><Music2 className="size-3.5" />song playing is: <strong>{post.songTitle} — {post.songArtist}</strong></p>
-              {post.audioUrl && <audio ref={songRef} src={post.audioUrl} loop preload="auto" playsInline />}
+              {post.audioUrl && <audio ref={songRef} src={post.audioUrl} loop preload="auto" />}
             </div>
           )}
         </div>
