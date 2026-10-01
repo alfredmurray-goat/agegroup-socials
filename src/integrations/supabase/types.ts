@@ -149,6 +149,8 @@ export type Database = {
         Row: {
           age_band: Database["public"]["Enums"]["age_band"]
           created_at: string
+          created_by: string | null
+          emoji: string | null
           id: string
           is_group: boolean
           streak_count: number
@@ -158,6 +160,8 @@ export type Database = {
         Insert: {
           age_band: Database["public"]["Enums"]["age_band"]
           created_at?: string
+          created_by?: string | null
+          emoji?: string | null
           id?: string
           is_group?: boolean
           streak_count?: number
@@ -167,13 +171,23 @@ export type Database = {
         Update: {
           age_band?: Database["public"]["Enums"]["age_band"]
           created_at?: string
+          created_by?: string | null
+          emoji?: string | null
           id?: string
           is_group?: boolean
           streak_count?: number
           streak_last_day?: string | null
           title?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conversations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       daily_usage: {
         Row: {
@@ -816,6 +830,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_group_members: {
+        Args: { _conv: string; _members: string[] }
+        Returns: undefined
+      }
       current_band: {
         Args: never
         Returns: Database["public"]["Enums"]["age_band"]
@@ -826,10 +844,18 @@ export type Database = {
         Args: { _conversation_id: string }
         Returns: boolean
       }
+      remove_group_member: {
+        Args: { _conv: string; _member: string }
+        Returns: undefined
+      }
       start_conversation: { Args: { _other: string }; Returns: string }
       start_group: {
         Args: { _members: string[]; _title: string }
         Returns: string
+      }
+      update_group: {
+        Args: { _conv: string; _emoji: string; _title: string }
+        Returns: undefined
       }
     }
     Enums: {

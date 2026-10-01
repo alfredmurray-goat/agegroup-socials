@@ -105,6 +105,8 @@ export interface Conversation {
   ageBand: AgeBand;
   isGroup: boolean;
   title: string | null;
+  createdBy: string | null;
+  emoji: string | null;
 }
 
 export interface Message {
