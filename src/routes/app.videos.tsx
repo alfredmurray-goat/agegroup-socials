@@ -42,6 +42,16 @@ function VideoCard({
   const { state, me, toggleLike, toggleFollow, toggleBookmark } = useLowkey();
   const ref = useRef<HTMLVideoElement | null>(null);
   const [playing, setPlaying] = useState(false);
+  const songRef = useRef<HTMLAudioElement | null>(null);
+
+  // keep the song in step with the video: plays/pauses together, follows mute
+  useEffect(() => {
+    const a = songRef.current;
+    if (!a) return;
+    a.muted = muted;
+    if (playing) void a.play().catch(() => undefined);
+    else a.pause();
+  }, [playing, muted]);
 
   const author = state.profiles.find((p) => p.id === post.authorId);
   const likes = state.likes.filter((l) => l.postId === post.id);
@@ -107,7 +117,11 @@ function VideoCard({
               )}
             </button>
             <button
-              onClick={onToggleMute}
+              onClick={() => {
+                onToggleMute();
+                // a tap is a user gesture, so browsers allow sound to start here
+                if (muted && playing) void songRef.current?.play().catch(() => undefined);
+              }}
               aria-label={muted ? "unmute" : "mute"}
               className="absolute top-4 left-4 flex size-10 items-center justify-center rounded-full bg-background/80"
             >
@@ -182,7 +196,7 @@ function VideoCard({
           {post.songTitle && (
             <div className="lowkey mt-2 text-xs">
               <p className="flex items-center gap-1.5"><Music2 className="size-3.5" />song playing is: <strong>{post.songTitle} — {post.songArtist}</strong></p>
-              {post.audioUrl && <audio src={post.audioUrl} controls loop className="mt-2 h-8 w-full" />}
+              {post.audioUrl && <audio ref={songRef} src={post.audioUrl} loop preload="auto" />}
             </div>
           )}
         </div>
