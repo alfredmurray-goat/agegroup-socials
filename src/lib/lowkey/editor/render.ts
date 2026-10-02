@@ -35,8 +35,10 @@ function drawFrame(
     ctx.lineWidth = Math.max(3, a.textSize / 10);
     ctx.strokeStyle = "rgba(0,0,0,.72)";
     ctx.fillStyle = "white";
-    const x = a.textAlign === "left" ? 42 : a.textAlign === "right" ? width - 42 : width / 2;
-    const y = height - 56;
+    const safeX = Math.min(0.92, Math.max(0.08, a.textX));
+    const safeY = Math.min(0.86, Math.max(0.08, a.textY));
+    const x = safeX * width;
+    const y = safeY * height;
     ctx.strokeText(a.text, x, y, width - 84);
     ctx.fillText(a.text, x, y, width - 84);
     ctx.restore();
@@ -74,6 +76,10 @@ export async function renderVideo(
     throw new Error("video editing isn't supported in this browser yet");
   }
   const stream = canvas.captureStream(30);
+  const AudioContextClass = window.AudioContext;
+  const audioContext = new AudioContextClass();
+  const audioDestination = audioContext.createMediaStreamDestination();
+  audioDestination.stream.getAudioTracks().forEach((track) => stream.addTrack(track));
   const preferred = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find((m) => MediaRecorder.isTypeSupported(m));
   if (!preferred) throw new Error("this browser can't export edited video yet");
   const recorder = new MediaRecorder(stream, { mimeType: preferred, videoBitsPerSecond: 5_000_000 });
@@ -89,7 +95,6 @@ export async function renderVideo(
   for (const clip of clips) {
     const video = document.createElement("video");
     video.src = clip.url;
-    video.muted = true;
     video.playsInline = true;
     video.playbackRate = a.speed;
     await new Promise<void>((resolve, reject) => {
@@ -98,6 +103,11 @@ export async function renderVideo(
     });
     video.currentTime = clip.trimStart;
     await new Promise<void>((resolve) => { video.onseeked = () => resolve(); });
+    const source = audioContext.createMediaElementSource(video);
+    const gain = audioContext.createGain();
+    gain.gain.value = a.originalVolume / 100;
+    source.connect(gain).connect(audioDestination);
+    await audioContext.resume();
     await video.play();
     await new Promise<void>((resolve) => {
       const frame = () => {
@@ -114,9 +124,12 @@ export async function renderVideo(
       requestAnimationFrame(frame);
     });
     complete += Math.max(0.1, clip.trimEnd - clip.trimStart);
+    source.disconnect();
+    gain.disconnect();
   }
   recorder.stop();
   const blob = await done;
+  await audioContext.close();
   onProgress(100);
   return new File([blob], `lowkey-${Date.now()}.webm`, { type: "video/webm" });
 }

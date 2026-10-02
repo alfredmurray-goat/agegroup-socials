@@ -10,6 +10,8 @@ export type MediaAdjustments = {
   text: string;
   textSize: number;
   textAlign: "left" | "center" | "right";
+  textX: number;
+  textY: number;
   speed: number;
   originalVolume: number;
   songVolume: number;
@@ -28,6 +30,8 @@ export const defaultAdjustments: MediaAdjustments = {
   text: "",
   textSize: 42,
   textAlign: "center",
+  textX: 0.5,
+  textY: 0.34,
   speed: 1,
   originalVolume: 100,
   songVolume: 60,

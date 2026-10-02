@@ -43,6 +43,9 @@
 - full-screen photo viewer from the home feed
 
 ## open
+- finish movable editor text, preserve original video sound, expand the song catalog
+- keep short-video captions from covering edited text
+- redesign the profile page in the established sunny visual system
 - own supabase project instead of managed backend (workspace-admin action, blocked)
 
 ## backend ownership (open decision)
