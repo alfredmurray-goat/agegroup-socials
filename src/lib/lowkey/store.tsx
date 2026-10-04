@@ -399,6 +399,8 @@ posts: postRows.map((r) => ({
         ageBand: r['age_band'] as AgeBand,
         isGroup: Boolean(r['is_group']),
         title: (r['title'] as string | null) ?? null,
+        createdBy: (r['created_by'] as string | null) ?? null,
+        emoji: (r['emoji'] as string | null) ?? null,
         memberIds: members
           .filter((m) => m['conversation_id'] === r['id'])
           .map((m) => m['profile_id'] as string),
